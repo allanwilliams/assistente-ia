@@ -76,7 +76,8 @@ LOCAL_APPS = [
     'apps.django_sso_app',
     'apps.contrib',
     'apps.certidao_localizacao',
-    'apps.lembrete'
+    'apps.lembrete',
+    'apps.documento'
 ]
 
 INSTALLED_APPS = THIRD_PARTY_APPS + DJANGO_APPS + LOCAL_APPS

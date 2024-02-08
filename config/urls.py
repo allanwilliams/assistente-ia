@@ -66,6 +66,7 @@ urlpatterns = [
     path('ajax_select/', include(ajax_select_urls)),
     path("certidao_localizacao/", include("apps.certidao_localizacao.urls", namespace="certidao_localizacao")),
     path("lembrete/", include("apps.lembrete.urls", namespace="lembrete")),
+    path("documento/", include("apps.documento.urls", namespace="documento")),
 ]
 
 

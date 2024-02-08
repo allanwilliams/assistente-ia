@@ -1,0 +1,79 @@
+{% extends 'admin/base.html' %}
+{% load static %}
+
+{% block extrastyle %}
+
+<style>
+    main {
+        padding: 10px;
+    }
+
+    main #toolbar {
+        width: 100%;
+        border: 1px solid aqua;
+        padding: 10px;
+        border: 1px solid brown;
+    }
+    main #document {
+        overflow: hidden;
+        padding-top: 10px;
+        gap: 10px;
+        display: flex;
+        height: 960px;
+        justify-content: space-between;
+       
+    }
+    main #document #pdf {
+        flex: 65 1 0px;
+        overflow: hidden;
+        border: 1px solid blueviolet;
+        padding: 10px;
+    }
+    main #document #chat {
+        flex: 35 1 0px;
+        overflow: hidden;
+        border: 1px solid red;
+        padding: 10px;
+    }
+</style>
+
+{% endblock %}
+
+
+{% block page_content %}
+
+<main>
+    <section id="toolbar">
+        <h1>Documento</h1>
+        <input type="file" id="document-file">
+    </section>
+    <section id="document">
+        <div id="pdf">
+            <div id="pdf-obj-container"></div>
+        </div>
+        <div id="chat">
+            <h3>Chat</h3>
+            
+        </div>
+    </section>
+   
+</main>
+
+{% endblock %}
+
+
+{% block extrajs %}
+<script>
+
+$('#document-file').change(async (event) => {
+    const target = event.target;
+    const file = target.files[0]
+
+    $('#pdf-obj-container').html(`
+        <h3>${file.name}</h3> <br>
+        <embed src='${URL.createObjectURL(file)}' width="100%" height="800">
+    `)
+   
+})
+</script>
+{% endblock %}
