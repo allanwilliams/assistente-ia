@@ -1,0 +1,48 @@
+stages:
+  - test
+  - sonarqube
+
+UnitTest:
+  image: python:3.8.10
+  stage: test
+  before_script:
+    - pip install -r requirements.txt
+    - python manage.py makemigrations
+  script:
+    - coverage run --omit="*/venv/*,config/*,static/*,staticfiles/*,adminlteui/*" manage.py test apps --settings config.cicd_settings
+    - COVERAGE_PERCENTAGE=$(coverage report --skip-covered | awk '/TOTAL/ {print $NF}' | tr -d '%')
+    - if [ "$COVERAGE_PERCENTAGE" -lt 75 ]; then
+        echo "A cobertura de código é menor do que o mínimo exigido (75%)";
+        exit 1;
+      fi
+    - coverage report -m
+    - coverage xml -i
+  artifacts:
+    expire_in: 1 hour
+    paths:
+      - $CI_PROJECT_DIR/coverage.xml
+
+SonarQubeCheck:
+  image: 
+    name: sonarsource/sonar-scanner-cli:latest
+    entrypoint: [""]
+  stage: sonarqube
+  dependencies:
+    - UnitTest
+  variables:
+    SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"
+  cache:
+    key: "${CI_JOB_NAME}"
+    paths:
+      - .sonar/cache
+  script: 
+    - sonar-scanner
+        -Dsonar.projectKey=dev-dpge_template-django-admin_AYtdpS9X7Q6IbM8YFewV
+        -Dsonar.qualitygate.wait=true
+        -Dsonar.python.coverage.reportPaths=coverage.xml
+        -Dsonar.login=$SONARQUBE_TOKEN
+        -Dsonar.exclusions=apps/session/*,apps/core/*,apps/core/api/*,apps/django_sso_app/*
+        -Dsonar.sources=apps
+  allow_failure: true
+  only:
+    - main

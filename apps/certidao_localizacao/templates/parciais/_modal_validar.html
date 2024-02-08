@@ -1,0 +1,24 @@
+<form action="/certidao_localizacao/assinar-salvar" method="POST">
+  <div class="modal fade" id="modal-validar-user" style="display: none;">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">×</span></button>
+            <h4 class="modal-title">Validação de usuário</h4>
+          </div>
+          <div class="modal-body">
+            <input type="hidden" value={% now 'U' %} name="data_hora" />
+            <input type="password" name="usuario_senha" placeholder="Dígite sua senha" class="vTextField" required>
+          </div>
+          <div class="modal-footer">
+            {% csrf_token %}
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+            <input type="submit" name="_assinar" class="btn btn-primary" id="btn-validar-assinatura" value="Validar">
+          </div>
+        </div>
+        <!-- /.modal-content -->
+      </div>
+      <!-- /.modal-dialog -->
+  </div>
+</form>

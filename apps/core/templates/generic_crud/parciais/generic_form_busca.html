@@ -1,0 +1,54 @@
+{% load core_fieldset %}
+<style>
+    .container-busca-terceirizado-form {
+        padding: 20px 0;
+    }
+    .container-busca-terceirizado-form form div {
+        display: flex;
+        gap: 1em;
+        margin: auto;
+        align-items: center;
+    }
+</style>
+
+<div class="container-busca-terceirizado-form">
+    <form action="{% url 'terceirizados:buscar_terceirizados' %}" method="GET" id="form_buscar_terceirizados" enctype="multipart/form-data" class="assistido-processo-form col-md-10">
+        <div class="form-group">
+            <label class="form-label" for="termo"> Nome</label>
+            <input type="search" name="termo" class="vTextField" id="termo" value="{{termo}}" placeholder="Digite um nome para pesquisar assistidos" >
+            <label class="form-label" for="empresa">Empresa</label>
+            <select class="form-select" id="empresa" name="empresa">
+                {% for empresa in empresas %}
+                    <option  {% if request.GET.empresa|stringformat:"s" == empresa.id|stringformat:"s" %} selected {% endif %} value="{{empresa.id}}">{{empresa.nome}}</option>
+                {% endfor %}
+            </select>
+            <label class="form-label" for="setor">Setor</label>
+            <select class="form-select" id="setor" name="setor">
+                {% for setor in setores %}
+                    <option {% if request.GET.setor|stringformat:"s" == setor.id|stringformat:"s" %} selected {% endif %} value="{{setor.id}}">{{setor.nome}}</option>
+                {% endfor %}
+            </select>
+            <label class="form-label" for="nucleo">Núcleo</label>   
+            <select class="form-select" id="nucleo" name="nucleo">
+                {% for nucleo in nucleos %}
+                    <option  {% if request.GET.nucleo|stringformat:"s" == nucleo.id|stringformat:"s" %} selected {% endif %} value="{{nucleo.id}}">{{nucleo.nome}}</option>
+                {% endfor %}
+            </select>
+            <label class="form-label" for="cargo">Cargo</label>
+            <select class="form-select" id="cargo" name="cargo">
+                {% for cargo in cargos %}
+                    <option  {% if request.GET.cargo|stringformat:"s" == cargo.id|stringformat:"s" %} selected {% endif %} value="{{cargo.id}}">{{cargo.nome}}</option>
+                {% endfor %}
+            </select>
+
+        </div>
+    </form>
+    <div class="d-flex">
+        {% if perms.users.view_user %}
+        <button type="submit" form="form_buscar_terceirizados" class="btn btn-default" style="width: 40px; margin-right: 4%"><i class="fa fa-search"></i></button>
+        {% endif %}
+        {% if perms.users.add_user %}
+        <a data-toggle="modal" data-target="#modalTerceirizado" class="btn btn-default"><i class="fa fa-plus"></i> Novo Terceirizado</a>
+        {% endif %}
+    </div>
+</div>

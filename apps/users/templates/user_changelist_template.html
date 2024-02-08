@@ -1,0 +1,13 @@
+{% extends "reversion/change_list.html" %}
+{% block btn-functions %}
+<div>
+    <div>
+        <a id="link-importar-usuarios" href="{% url 'users:importar_usuarios' %}" 
+           class="btn btn-success">
+          <i class="fa fa-upload"></i> 
+          Importar CSV
+        </a>
+    </div>
+</div>
+
+{% endblock %}

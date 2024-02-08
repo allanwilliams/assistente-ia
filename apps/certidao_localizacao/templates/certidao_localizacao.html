@@ -1,0 +1,43 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE|default:"en-us" }}" {% if LANGUAGE_BIDI %}dir="rtl"{% endif %}>
+   <head>
+      <title>Certidão</title>
+      <meta charset="UTF-8">
+      <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet"/>
+      <link rel="stylesheet" href={% static "css/certidao_localizacao/base_certidao.css" %}>
+  </head>
+  <body>
+      <div class="documento-cabecalho">
+         <img alt="" src="{% static 'logo-vertical.png' %}" >
+         <hr>
+      </div>
+      <div class="certidao">
+         CERTIDÃO
+      </div>
+      <div class="documento">
+         <div class="documento-conteudo">
+            {% autoescape off %}
+               <p>
+                  <strong>CERTIFICO</strong> para os fins de direito, que às <strong>{{ data_hora|date:"H:i:s" }}</strong> do dia <strong>{{ data_hora|date:"d/m/Y" }}</strong>
+                  <strong>{{ usuario }}</strong>, matrícula nº <strong>{{ matricula }}</strong> registrou presença no órgão da Defensoria Pública do Estado do Ceará situado na Cidade de <strong>{{ municipio }}</strong> nas coordenadas geográficas (Latitude: {{certidao.latitude}}, Longitude: {{certidao.longitude}}) através do Sistema Nossa Defensoria (IP nº {{ ip }}).
+               </p>
+            {% endautoescape %}
+         </div>
+         <div class="cidade">
+            {{ municipio }}/{{certidao.estado.sigla}}, {{ data_hora | date:"d \d\e F \d\e Y" }}
+         </div>
+         {% if assinatura %}
+         <div class="documento-assinatura">
+            <div class="token">
+                  <img alt="" src="{{ url_img_token|safe }}">
+            </div>
+            <div class="text-token">
+               <span>Documento assinado por: <strong>Sistema Nossa Defensoria</strong></span><br>
+               <span>Confira a autenticidade através do qrcode ao lado ou confira no endereço <strong>{{ url_verificador }}</strong> <span>informando o código verificador: <strong>{{ assinatura.token }}</strong></span>
+            </div>
+         </div>
+         {% endif %}
+      </div>
+   </body>
+</html>

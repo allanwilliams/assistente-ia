@@ -1,0 +1,55 @@
+<!DOCTYPE>
+<html lang="pt-br">
+   <head>
+      <!-- Current language: pt-br -->
+      <meta charset="utf-8">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <title>{% block title %}{% endblock %}</title>
+      <!-- Tell the browser to be responsive to screen width -->
+      <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+      <!-- Bootstrap 3.3.6 -->
+      <link rel="stylesheet" href="//stackpath.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+      <!-- Font Awesome -->
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.5.0/css/font-awesome.min.css">
+      <!-- Ionicons -->
+      <link rel="stylesheet" href="//cdn.bootcss.com/ionicons/2.0.1/css/ionicons.min.css">
+      <!-- Theme style -->
+      <link rel="stylesheet" href="/static/admin/adminlte-dist/css/AdminLTE.min.css">
+      <!-- iCheck -->
+      <link rel="stylesheet" href="/static/admin/plugins/iCheck/square/blue.css">
+      <script src="chrome-extension://mooikfkahbdckldjjndioackbalphokd/assets/prompt.js"></script>
+      <style>
+         .box-login-center {
+            display: flex;
+            width: 100vw;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+         }
+
+         .box-center{
+            padding: 1.5em;
+            background-color: #fff;
+            display: flex;
+            align-items: center;
+            flex-direction: column;
+            justify-content: center;
+            max-width: 400px;
+            max-height: 420px;
+         }
+      </style>
+   </head>
+   <body class="hold-transition login-page" style="background-color: #133622;">
+      <div class="login-box box-login-center">
+         <div class="login-box-body box-center">
+         {% block content %}{% endblock content %}
+
+            <a href="/">
+               <span class="btn btn-primary btn-block btn-flat">Acessar novamente</span>
+            </a>
+            <div class="row">
+            </div>
+         </div>
+      </div>
+   </body>
+</html>

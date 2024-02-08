@@ -1,0 +1,11 @@
+[run]
+# Diretório onde o .coverage será gerado
+data_file = .coverage
+
+[report]
+# Formato de saída do relatório
+show_missing = True
+
+[xml]
+# Diretório onde o relatório XML será gerado
+output = coverage.xml

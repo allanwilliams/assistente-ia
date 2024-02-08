@@ -1,0 +1,18 @@
+{% extends 'admin/base.html' %}
+{% block page_content %}
+    {% if messages %}
+    <div class='row' style='margin:30px 5px 0 0'>
+        <div class='col-md-4'>
+        {% for message in messages %}
+        {% if message.tags == 'error' %}
+            
+            <div {% if message.tags %} class="alert alert-{{ message.tags }}" {% endif %}>
+                {{ message }}
+            </div>
+        {% endif %}
+        {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+    <object style='height:100vh;width:100%' data='https://www.defensoria.ce.def.br/blog/' />
+{% endblock %}

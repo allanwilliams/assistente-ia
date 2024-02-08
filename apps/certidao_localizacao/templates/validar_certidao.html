@@ -1,0 +1,21 @@
+{% extends 'validar_assinatura_base.html' %}
+
+{% block conteudo %}
+
+<div id="wrapper-form">
+  <div class="container">
+    <h4><strong>Validar Assinatura</strong></h4> 
+    <form action="/certidao_localizacao/assinar-salvar" method="POST">
+      <div class="modal-body">
+        <input type="hidden" value={% now 'U' %} name="data_hora" />
+        <input type="password" name="usuario_senha" placeholder="Dígite sua senha" class="vTextField" required>
+      </div>
+      <div class="modal-footer">
+        {% csrf_token %}
+        <input type="submit" name="_assinar" class="btn btn-primary" id="btn-validar-assinatura" value="Validar">
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}

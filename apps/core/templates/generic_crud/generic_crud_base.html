@@ -1,0 +1,318 @@
+{% extends 'admin/base.html' %}
+{% load static %}
+
+{% block extrastyle %}
+<link rel="stylesheet" href="{% static 'ajax_select/css/ajax_select.css' %}">
+<link rel="stylesheet" href="{% static 'admin/adminlte-dist/css/app.css' %}">
+<link rel="stylesheet" href="//code.jquery.com/ui/1.13.1/themes/base/jquery-ui.css">
+<script src="{% static 'sweetalert2_v11/sweetalert2.all.min.js' %}" ></script>
+
+<style>
+    .box-body {
+        background: #fff;
+    }
+    .content form .box-footer {
+        background-color: #f5f5f5;
+    }
+    .content form .box-body input[type=text],
+    .content form .box-body input[type=email],
+    .content form .box-body textarea, 
+    .content form .box-body .input-group-btn, 
+    .content form .box-body .select2-container {
+        border-radius: 5px;
+        box-shadow: 0px 1px 2px 0px #999;
+    }
+    .content-visualizar{
+        font-size:1.5em;
+    }
+    .card-perfil {
+        box-shadow:  0px 0px 5px 0px rgba(0,0,0,0.3) !important;
+        margin: 10px auto;
+        padding: 15px 10px;
+        border-radius: 15px;
+        font-size: 13px;
+        z-index: 0;
+        background-color: #fff;
+    }
+    .card-perfil:hover {
+        box-shadow:  0px 0px 5px 0px var(--multi-primary) !important;
+    }    
+    .link-destaque {
+        font-size: 1.2em;
+        color: #16a085;
+    }
+    .link-destaque:hover{
+        color: #16a085;
+        text-decoration: underline;
+    }
+    .paragrafo-g {
+        font-size: 1.2em;
+    }
+    .overflow-processos {
+        height: 50rem;
+        max-height: 50rem;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+    .flex-processo {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    .flex-terceirizado {
+        display: flex;
+        justify-content: center;   
+        gap: 30px;
+    }
+    .descricao-terceirizado {
+        flex: 5;
+    }
+    .btn-label .label {
+        position: absolute;
+        top: 103px;
+        right: 244px;
+        text-align: center;
+        font-size: 9px;
+        padding: 1px 2px;
+        line-height: .9;  
+    }
+    .link-disable {
+        color: currentColor;
+        cursor: not-allowed;
+        opacity: 0.3;
+        text-decoration: none;
+    }
+    .card-perfil-dados {
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+    .d-flex {
+        display: flex;
+    }
+    .card-perfil-dados .bloco-dados .btn {
+        min-width: 34px;
+        margin-bottom: 2px;
+    }
+    .text-dark {
+        color: #000;
+    }
+    .bg-yellow-custom {
+        background-color: #f1c40f;
+        color: #000;
+    }
+    .borda-informativos {
+        box-shadow:  0px 0px 5px 0px rgba(0,0,0,0.3);
+        border-radius: 5px;
+    }
+    .info-fix{
+        padding-left: 3px;
+    }
+    .mt-1 {
+        margin-top: 1rem;
+    }
+    .mr-1 {
+        margin-right: 1rem;
+    }
+    .ml-1 {
+        margin-left: 1rem;
+    }
+    .botoes-acao-terceirizado{ 
+        display: flex;
+        flex-direction: column;
+        flex-wrap: wrap;
+        align-content: flex-end;
+        align-items: center;
+    }
+
+    .lista .botoes-acao-terceirizado a,
+    .lista .botoes-acao-terceirizado button {
+        width: 200px;
+    }
+
+    .img-terceirizado {
+        height: 120px;
+        width: 120px;
+        display: block;
+        background-position: center; 
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-color: #cccccc;
+    }
+
+    .img-processo {
+        height: 100px;
+        width: 100px;
+        display: block;
+        background-position: center; 
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-color: #cccccc;
+        margin-right: 26rem;
+    }
+    .circle {
+        border-radius: 50%;
+        border: 2px solid lightgray;
+    }
+
+    .circle:hover {
+        border: 2px solid #27ae60;
+    }
+
+    #assistido-processo-busca .card-perfil-dados .bloco-imagem {
+        flex: 1;
+        margin-left: 1rem;
+    }
+    #assistido-processo-busca .card-perfil-dados .bloco-dados {
+        min-width: 0;
+        flex: 5;
+    }
+    .text-truncate {
+        position: relative;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        width: 100%;
+    }
+    #assistido-processo-busca .card-perfil-processos ul {
+        list-style: none;
+        height: 80px;
+        overflow-y: scroll;
+        padding: 0;
+    }
+    #assistido-processo-resumo {
+        min-height: 1000px;
+    }
+    #assistido-processo-resumo .nav-tabs-custom .tab-content {
+        padding-top: 10px;
+    }
+    #assistido-processo-resumo .nav-tabs-custom .tab-content .tab-pane-header {
+        display: flex;
+        justify-content: flex-end;
+        margin-bottom: 15px;
+    }
+    #assistido-processo-resumo .nav-tabs-custom>.nav-tabs {
+        padding-bottom: 10px;
+    }
+
+    #assistido-processo-resumo .nav-tabs-custom #links-tabs li a {
+        padding: 10px 13px;
+    }
+
+    #assistido-processo-resumo .card-perfil-dados {
+        font-size: 1.2em;
+    }
+
+    #assistido-processo-resumo .card-perfil-dados .img-terceirizado {
+        height: 120px;
+        min-width: 120px;
+    }
+
+    .img-terceirizado .img-terceirizado {
+        height: 100px;
+        width: 100px;
+    }
+
+    #assistido-processo-resumo .card-perfil-dados .popover,
+    #assistido-processo-busca .card-perfil-dados .bloco-dados .popover {
+        max-width: 400px;
+        min-width: 400px;
+    }
+
+    .content-header {
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .content-header .header-complemento { 
+        font-size: 13px;
+        display: flex;
+        align-items: center;
+        text-transform: uppercase;
+    }
+    .content-header .header-complemento div:last-child { 
+        margin-left: 20px;
+        display: flex;
+        align-items: center;
+    }
+    .content-header .header-complemento .tag {
+        margin-left: 5px;
+        padding: 2px 5px; 
+        border-radius:5px; 
+        font-size: 0.75em; 
+        font-weight: bold;
+    }
+    .tag {
+        padding: 2px;
+    }
+    .link-processo {
+        font-size: 1.4rem;
+        color: rgba(199,166,0,1);
+        padding: 5px 0;
+    }
+
+    @media (max-width: 992px) {
+        #assistido-processo-busca .card-perfil-dados .bloco-dados .text-truncate {
+            white-space: initial;
+        }
+        #assistido-processo-busca .card-perfil-dados {
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        #assistido-processo-busca .card-perfil-processos {
+            text-align: center;
+        }
+    }
+
+    td{
+        font-weight: 700;
+        font-size: 1.1em;
+    }
+    .icon-lgbt{
+        background-image: url('{% static 'images/lgbtq.png' %}');
+        background-size: cover;
+        background-position: center center;
+        height: 1.5rem;
+        width: 1.7rem;
+        display: block;
+    }
+</style>
+{% endblock %}
+
+{% block page_content %}
+<div style="padding-top:1em">
+    <div style="display:none" id="preloader">
+        <div class="wrapper-loader">
+            <div class="spinner-loader"></div>
+            <span>Aguarde...</span>
+        </div>
+    </div>
+    <section class="content-header">
+        <h1>{% block titulo %}{% endblock %}</h1>
+    </section>
+
+
+    {% block conteudo %}{% endblock %}
+</div>
+{% endblock %}
+
+{% block extrajs %}
+<script type="text/javascript" src="/admin/jsi18n/"></script>
+<script type="text/javascript" src="{% static 'admin/js/core.js' %}"></script>
+<script type="text/javascript" src="{% static 'admin/js/calendar.js' %}"></script>
+<script type="text/javascript" src="{% static 'admin/js/admin/DateTimeShortcuts.js' %}"></script>
+<script type="text/javascript" src="{% static 'ajax_select/js/ajax_select.js' %}"></script>
+<script type="text/javascript" src="{% static 'ajax_select/js/bootstrap.js' %}"></script>
+<script type="text/javascript" src="{% static 'terceirizados/terceirizado-form.js' %}"></script>
+<script>
+    $(document).ready(() => {
+        $('[data-toggle="popover"]').popover()
+    })
+</script>
+{% endblock %}

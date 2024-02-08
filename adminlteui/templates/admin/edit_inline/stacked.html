@@ -1,0 +1,34 @@
+{% load i18n admin_urls static %}
+
+<div class="col-md-12">
+  <div class="box box-default">
+    <div class="box-header with-border alert-success">    
+      <h2 class="box-title">
+        {{ inline_admin_formset.opts.verbose_name_plural|capfirst }}
+      </h2>
+    </div>
+  </div>
+
+  {{ inline_admin_formset.formset.management_form }}
+  {{ inline_admin_formset.formset.non_form_errors }}
+
+  {% for inline_admin_form in inline_admin_formset %}
+
+    {% if inline_admin_form.form.non_field_errors %}
+      {{ inline_admin_form.form.non_field_errors }}
+    {% endif %}
+    {% for fieldset in inline_admin_form %}
+      {% if not forloop.parentloop.last %}
+        {% include "admin/includes/fieldset_stacked.html" %}
+      {% endif %}
+    {% endfor %}
+    {% if inline_admin_form.needs_explicit_pk_field %}
+      {{ inline_admin_form.pk_field.field }}
+    {% endif %}
+    {% if inline_admin_form.fk_field %}
+      {{ inline_admin_form.fk_field.field }}
+    {% endif %}
+
+  {% endfor %}
+
+</div>

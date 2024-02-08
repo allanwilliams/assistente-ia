@@ -1,0 +1,229 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE|default:"en-us" }}" {% if LANGUAGE_BIDI %}dir="rtl"{% endif %}>
+   <head>
+      <title>Certidão</title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <style>
+         body{
+            padding: 1em;
+            background: radial-gradient(circle, rgb(0, 94, 60) 0%, rgb(1, 54, 34) 75%, rgb(0, 54, 34) 100%);
+            color: #fff;
+            font-family: Roboto, Helvetica Neue, Helvetica, Arial, sans-serif;
+         }
+
+         button {
+            font-family: Roboto, Helvetica Neue, Helvetica, Arial, sans-serif;
+            border: none
+         }
+
+         .btnAssinar {
+            width: 100%;
+            padding: 1em;
+            background-color: #f7ab67;
+            color: #fff;
+            cursor: pointer;
+            border-radius: 5px;
+            font-weight: 600;
+            margin-top: 1em
+         }
+
+         .inputPassword {
+            padding: 1em;
+            border-radius: 5px;
+            border: none;
+         }
+
+         .conteudo {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+         }
+
+         .container {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            gap: 2em;
+         }
+
+         img {
+            width: 20em;
+            height: 6em
+         }
+
+         form {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #000
+         }
+
+         .box {
+            background-color: #fff;
+            padding: 2em;
+            border-radius: 5px;
+         }
+
+         div.input-block {
+            position: relative;
+         }
+
+         div.input-block input {
+            font-weight: 500;
+            font-size: 1.6rem;
+            color: #495055;
+            padding: 15px 15px;
+            border-radius: 5px;
+            border: 2px solid  #D9D9D9;
+            outline:none;
+         }
+
+         div.input-block span.placeholder {
+            position: absolute;
+            margin: 17px 0;
+            padding: 0 4px;
+            font-family: Roboto, sans-serif;
+
+            color:  #6c757d;
+
+            display: flex;
+            align-items: center;
+
+            font-size: 1.6rem;
+
+            top: 0;
+            left: 17px;
+
+            transition: all 0.2s;
+            transform-origin: 0% 0%;
+            background: none;
+            pointer-events: none;
+         }
+
+         div.input-block input:valid + span.placeholder,
+         div.input-block input:focus + span.placeholder {
+            transform: scale(0.8) translateY(-30px);
+            background: #fff;
+         }
+
+         div.input-block input:focus{
+            color: #284B63;
+            border-color: #284B63;
+         }
+
+         div.input-block input:focus + span.placeholder {
+            color: #284B63;
+         }
+
+         .error {
+            display: flex;
+            justify-content: space-between;
+            color:red;
+            background-color: #f8d7da;
+            padding: 0.5em;
+            border-radius: 5px;
+            margin-bottom: 1em;
+         }
+
+         .success {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.2em;
+            text-align: center;
+         }
+
+         .row {
+            min-width: 325px
+         }
+
+         .label {
+            margin-bottom: 1em;
+            font-weight: 800;
+         }
+
+         @media only screen and (max-width: 600px) {
+            div.input-block input{
+               max-width: 10em
+            }
+         }
+      </style>
+  </head>
+  <body>
+      <div class='conteudo'>
+         {% if sucesso %}
+            <div>
+               <p class='row'>Documento assinado com sucesso.</p>
+               <p class='row'>A certidão encontra-se disponível diretamente no Nossa Defensoria</p>
+            </div>
+            <div class="col-md-12">
+               <object data="/certidao_localizacao/render-pdf?pk={{ certidao_id }}"
+                       type="application/pdf"
+                       width="100%"
+                       height="460px">
+               </object>
+           </div>
+         {% elif assinado%}
+            <div class="success">
+               <p class='row'>Este documento já foi assinado</p>
+            </div>
+         {% else %}
+            <div class="container">
+               <img alt="" src="{% static 'imagens/defensoria_logo_branca.png' %}">
+               <div class="box">
+                  <form method='post' action="/certidao_localizacao/assinar-salvar">
+                     {% for message in messages %}
+                        <div class='error'>{{ message }}</div>
+                     {% endfor %}
+                     <div class='label'>
+                        Entre com sua senha do Nossa Defensoria
+                     </div>
+                     <div class="input-block">
+                        <input id='password' class='inputPassword' type='password' name='usuario_senha' required="" spellcheck="false" />
+                        <span class="placeholder">
+                        Senha
+                        </span>
+                     </div>
+                     <div style='display: flex; width: 100%; padding-top: 1em'>
+                        <input id='mostrar-senha' name='mostrar-senha' type='checkbox' />
+                        <label for='mostrar-senha'>Mostrar senha</label>
+                     </div>
+                     {% csrf_token %}
+                     <input type='hidden' name='certidao' value={{ request.GET.certidao }} />
+                     <input type='hidden' id='lat' name='lat' />
+                     <input type='hidden' id='long' name='long' />
+                     <button class="btnAssinar">ASSINAR </button>
+                  </form>
+               </div>
+            </div>
+         {% endif %}
+      </div>
+      <script>
+         window.onload = function(){
+            navigator.geolocation.getCurrentPosition((position) => {
+               document.getElementById('lat').value = position.coords.latitude
+               document.getElementById('long').value = position.coords.longitude
+            })
+
+            const mostra = document.getElementById('mostrar-senha')
+            mostra.addEventListener('change', function() {
+               const password = document.getElementById('password')
+               if (this.checked) {
+                  password.type = 'text'
+               } else {
+                  password.type = 'password'
+               }
+            });
+         }
+      </script>
+   </body>
+</html>

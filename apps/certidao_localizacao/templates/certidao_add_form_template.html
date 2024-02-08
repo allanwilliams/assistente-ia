@@ -1,0 +1,41 @@
+{% extends "certidao_change_form.html" %}
+
+{% block after_buttons %}
+    {% if error %}
+        <div class="wrapper-invalido">
+            <div class="alert alert-danger" role="alert">Senha invalida. Documento não assinado!</div>
+        </div>
+    {% endif %}
+    {% if request.META.HTTP_X_REAL_IP %}
+        <div class="col-md-2">
+            <div class="form-group">
+                <a href="#" 
+                class="btn btn-success form-control" 
+                data-toggle='modal' 
+                data-target='#modal-validar-user'>
+                    Salvar e Assinar
+                </a>
+            </div>
+        </div>
+        <div class="col-md-12">
+            <div class="box box-primary">
+                <h2 class="center">Pré-visualização</h2>
+                <object style="pointer-events: none;" data="/certidao_localizacao/render-pdf?data_hora={% now 'U' %}#toolbar=0"
+                        type="application/pdf"
+                        width="100%"
+                        height="800px">
+                </object>
+            </div>
+        </div>
+    {% else %}
+        <div class="col-md-12">
+            <h2 class="center">Não foi possivel determinar sua localização. Por favor entre em contato com o suporte técnico!</h2>
+        </div>
+    {% endif %}
+
+
+
+
+    {% include 'parciais/_modal_validar.html' %}
+
+{% endblock %}

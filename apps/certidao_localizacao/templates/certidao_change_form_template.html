@@ -1,0 +1,11 @@
+{% extends "certidao_change_form.html" %}
+{% load static templatetags_fieldset %}
+{% block after_buttons %}
+    <div class="col-md-12">
+        <object data="/certidao_localizacao/render-pdf?pk={{ original.get_encrypt_id }}"
+                type="application/pdf"
+                width="100%"
+                height="800px">
+        </object>
+    </div>
+{% endblock %}

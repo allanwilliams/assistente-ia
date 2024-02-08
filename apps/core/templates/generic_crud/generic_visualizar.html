@@ -1,0 +1,28 @@
+{% extends 'generic_crud/generic_crud_base.html' %}
+{% load core_fieldset %}
+{% block titulo %}{{crud.label}}{% endblock %}
+
+{% block conteudo %}
+{% include 'generic_crud/parciais/generic_django_messages.html' %}
+{% include 'generic_crud/parciais/generic_form_errors.html' %}
+<section class="content content-visualizar">
+    {% if instance_object %}
+    <div class="box box-primary">
+        <div class="box-body">
+            <div class="row">
+                {% for field in crud.view_fields %}
+                <div class="col-md-4">
+                    <p><b>{{field}}</b> {{instance_object|get_field_from_instance:field}} </p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% if parent_id %}
+        <div class="box-footer">
+            <a class="btn bg-blue" href=""><i class="fa-solid fa-arrow-left"></i> Voltar</a>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,20 @@
+{% if messages %}
+{% for message in messages %}
+    {% if message.tags == 'success' %}
+        <script>
+            setTimeout(() => {
+                Swal.fire({
+                    title: '{{ message }}',
+                    icon: 'success',
+                    confirmButtonColor: '#00a65a',
+                })
+            }, 500);
+        </script>
+    {% else %}
+        <div  {% if message.tags %} class="alert alert-{{ message.tags }} alert-dismissible"  {% endif %} >
+            {{ message }} 
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+        </div>
+    {% endif %}
+{% endfor %}
+{% endif %}

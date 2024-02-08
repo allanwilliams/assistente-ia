@@ -1,0 +1,21 @@
+.navbar-nossa {
+    background: radial-gradient(circle, rgba(0, 94, 60, 1) 0%, rgba(1, 54, 34, 1) 74%, rgba(0, 54, 34, 1) 100%);
+}
+
+#jazzy-sidebar .brand-link {
+    background-color: #013622;
+    height: 60px;
+}
+
+#jazzy-sidebar .brand-link > .font-weight-light {
+    font-weight: 700 !important;
+}
+
+#jazzy-sidebar .brand-link:hover {
+    background-color: #005e32;
+}
+
+.sidebar {
+    background-color: #222d32;
+    font-weight: 700;
+}

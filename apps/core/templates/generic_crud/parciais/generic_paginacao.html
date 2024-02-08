@@ -1,0 +1,36 @@
+{% if lista.paginator and lista.paginator.num_pages > 1 %}
+<div class="pagination">
+    <ul class="pagination">
+        {% if lista.has_previous %}
+        <li class="page-item">
+            <a class="page-link" href="?page=1&termo={{termo}}">&laquo;</a>
+        </li>
+        <li class="page-item">
+            <a class="page-link" href="?page={{ lista.previous_page_number }}&termo={{termo}}">&lsaquo;</a>
+        </li>
+        {% endif %}
+
+        {% for num in lista.paginator.page_range %}
+
+        {% if lista.number == num %}
+        <li class="page-item active">
+            <a class="page-link" href="?page={{ num }}&termo={{termo}}">{{ num }}</a>
+        </li>
+        {% elif num > lista.number|add:'-3' and num < lista.number|add:'3' %} <li class="page-item">
+            <a class="page-link" href="?page={{ num }}&termo={{termo}}">{{ num }}</a>
+            </li>
+            {% endif %}
+
+            {% endfor %}
+
+            {% if lista.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ lista.next_page_number }}&termo={{termo}}">&rsaquo;</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ lista.paginator.num_pages }}&termo={{termo}}">&raquo;</a>
+            </li>
+            {% endif %}
+    </ul>
+</div>
+{% endif %}

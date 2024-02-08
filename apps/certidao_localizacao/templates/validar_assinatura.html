@@ -1,0 +1,35 @@
+{% extends 'validar_assinatura_base.html' %}
+{% load static core_fieldset %}
+{% block conteudo %}
+
+<div id="wrapper-form">
+  <div class="container">
+    <h4><strong>Validar Assinatura</strong></h4> 
+    <form action="/contrib/verificar-assinatura" method="POST" autocomplete="off" id="form-token" class="form-inline">
+      {% csrf_token %}
+      <div class="form-core">
+        <div class="form-group">
+          <input type="text" name="token" id="input-token" class="form-control" placeholder="Digite o código verificador do documento" required>
+        </div>  
+        <input type="submit" value="Validar" class="btn" id="btn-submit">
+      </div>
+    </form>
+
+    {% if doc_invalido %}
+    <div class="wrapper-invalido">
+      <div class="alert alert-danger" role="alert">Código verificador inválido</div>
+    </div>
+    {% endif %}
+
+    {% if doc_valido %}
+    <div class="wrapper-pdf">
+      <div class="alert alert-success" role="alert">
+        <span>Código verificador válido</span>
+      </div>
+      <p>Documento assinado por: <strong>{{assinatura.criado_por}}</strong> em <strong>{{assinatura.criado_em}}</strong></p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+{% endblock %}

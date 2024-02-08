@@ -1,0 +1,90 @@
+{% extends "admin/change_form.html" %}
+
+{% block after_buttons %}
+
+{% if original.id %}
+    {% if original.status == 1 or original.status == 2 %}
+    {% if original.destinatario.id == request.user.id %}
+    <div class="col-md-2">
+        <div class="form-group">
+            <button type="button" class="btn btn-info form-control" onclick="alterarStatus(STATUS_FINALIZADO)">Finalizar lembrete</button>
+        </div>
+    </div>
+    {% endif %}
+    {% if original.criado_por.id == request.user.id %}
+    <div class="col-md-2">
+        <div class="form-group">
+            <button type="button" class="btn btn-warning form-control" onclick="alterarStatus(STATUS_CANCELADO)">Cancelar lembrete</button>
+        </div>
+    </div>
+    {% endif %}
+    {% endif %}
+{% endif %}
+
+<input type="hidden" value="{{original.id}}" id="input-lembrete-id">
+<input type="hidden" value="{{original.status}}" id="input-lembrete-status">
+
+<input type="hidden" value="{{request.user.id}}" id="input-lembrete-user">
+<input type="hidden" value="{{original.destinatario.id}}" id="input-lembrete-destino">
+
+
+
+{% endblock %}
+
+{% block extrajs %}
+<script>
+    const STATUS_PENDENTE = 1
+    const STATUS_VISUALIZADO = 2
+    const STATUS_CANCELADO = 3
+    const STATUS_FINALIZADO = 4
+    
+    const id = $('#input-lembrete-id').val()
+    const status = $('#input-lembrete-status').val()
+    const user = $('#input-lembrete-user').val()
+    const destino = $('#input-lembrete-destino').val()
+    const processoId = $('#id_processo').val()
+    const preferenciaProcAntigo = $('#input-user-preferencia-processo-antigo').val() == 'true'
+    const urlProcesso = $('#input-user-processo-url').val()
+    const processoWrapper = $('#id_processo_wrapper')
+
+
+    function alterarStatus(status) {
+        $.ajax({
+            url: `/lembrete/api/lembretes/${id}/`,
+            type: 'PATCH',
+            data: {'status': status},
+            success: (response) => {
+                if(status !== STATUS_VISUALIZADO) {
+                    Swal.fire({ title: 'Alterado com sucesso', icon: 'success' })
+                    .then((result) => window.location.reload())
+                }
+            },
+            error: (error) => {
+                if(status !== STATUS_VISUALIZADO) {
+                    Swal.fire({ title: 'Erro ao alterar', icon: 'error' })
+                }
+            }
+        });
+    }
+
+    $(document).ready(() => {
+        if(id !==null && parseInt(status) === STATUS_PENDENTE && user === destino) {
+            alterarStatus(STATUS_VISUALIZADO)
+        }
+
+        if(processoId && urlProcesso && processoWrapper) {
+            const url = preferenciaProcAntigo ? `${urlProcesso}/${processoId}` : `${urlProcesso}/${processoId}/0`;
+            $(`
+                <div class="wd-flex">
+                    <a href="${url}">
+                        <i class="fa-solid fa-link"></i>
+                        Acessar processo
+                    </a>
+                </div>
+            `).insertAfter(processoWrapper)
+        }
+    })
+</script>
+   
+
+{% endblock %}

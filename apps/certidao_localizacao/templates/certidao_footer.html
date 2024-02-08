@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE|default:"en-us" }}" {% if LANGUAGE_BIDI %}dir="rtl"{% endif %}>
+  <head>
+    <title>Certidão</title>
+    <meta charset="UTF-8">
+    <style>
+      .documento-rodape {
+        text-align: center;
+        font-family:'Times New Roman', Times, serif;
+      }
+      .documento-rodape p {
+        margin: 0;
+        font-size: 12px;
+      }
+      .documento-rodape hr {
+          border: none;
+          padding: 0;
+          margin: 5px 2px 5px 2px;
+          border-top: medium double #333;
+      }
+    </style>
+  </head>
+  <div class="documento-rodape">
+      <hr style="margin-left: auto; margin-right: auto; width:80%">
+      <hr style="margin-left: auto; margin-right: auto;width:60%" >
+      <p style='padding-bottom: 200px;'>Av. Pinto Bandeira, nº 1.111, Luciano Cavalcante, Fortaleza-CE. CEP 60.811-170</p>
+  </div>
+</html>

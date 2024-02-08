@@ -1,0 +1,67 @@
+{% load templatetags_fieldset %}
+<div class="col-md-12">
+  <div class="box box-default{% if 'collapse' in fieldset.classes %} collapsed-box{% endif %}">
+    {% if fieldset.name %}
+    <div class="box-header with-border">
+      <h3 class="box-title">
+        {{ fieldset.name }}
+      </h3>
+      {% if fieldset.description %}
+      <span class="description">
+        {{ fieldset.description|safe }}
+      </span>
+      {% endif %}
+      {% if 'collapse' in fieldset.classes %}
+      <div class="box-tools pull-right">
+        <button type="button" class="btn btn-box-tool" data-widget="collapse">
+          <i class="fa fa-plus"></i> Mostrar/Ocultar
+        </button>
+      </div>
+      {% endif %}
+    </div>
+    {% endif %}
+    <!-- /.box-header -->
+    <div class="box-body {{ fieldset.classes }}">
+      <div class="row">
+        {% for line in fieldset %}
+        {% for field in line %}
+
+          
+          <div class="col-md-{{ field|div_cols }}">
+              <div class="form-group">
+                <label class="control-label text-right">
+                  {{ field.field.label }}
+                </label>
+                <div {% if not line.fields|length_is:'1' %}
+                  class="fieldBox{% if field.field.name %} field-{{ field.field.name }}{% endif %}{% if not field.is_readonly and field.errors %} errors{% endif %}{% if field.field.is_hidden %} hidden{% endif %}"
+                  {% elif field.is_checkbox %} class="checkbox-row" {% endif %}>
+                  {% if field.is_readonly %}
+                  <div class="readonly" style="margin-top: 7px;">{{ field.contents }}</div>
+                  {% else %}
+                  {{ field.field }}
+                  {% endif %}
+                  <div class="help-block red">
+                    {% if not line.fields|length_is:'1' and not field.is_readonly %}{{ field.errors }}{% endif %}
+                  </div>
+                  {% if field.field.help_text %}
+                  <div class="help-block">{{ field.field.help_text|safe }}</div>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+            {% if line.errors %}
+            <div class="col-sm-12">
+              <div class="alert alert-danger alert-dismissible">
+                {% if line.fields|length_is:'1' %}{{ line.errors }}{% endif %}
+              </div>
+            </div>
+            {% endif %}
+            {% endfor %}
+
+            <!-- /.col -->
+          </div>
+          <!-- /.row -->
+        </div>
+      </div>
+    </div>

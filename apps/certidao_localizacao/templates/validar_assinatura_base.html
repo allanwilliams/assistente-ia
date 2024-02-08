@@ -1,0 +1,96 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE|default:"en-us" }}" {% if LANGUAGE_BIDI %}dir="rtl"{% endif %}>
+	<head>
+		<title>Certidão</title>
+		<meta charset="UTF-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+		<link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+		<style>
+			body {
+				background-color: #f1f1f1;
+				margin: 0;
+			}
+			.validar-header {
+				background-color: #00A65A;
+				padding: 15px;
+				text-align: center;
+			}
+			.validar-header .header-logo {
+				width: 300px;
+			}
+			#form-token .form-group #input-token {
+				width: 100%;
+			}
+			#wrapper-form {
+				padding-top: 25px;
+				padding-bottom: 20px;
+			}
+			#wrapper-form h4 {
+				text-align: center;
+			}
+			#wrapper-form #form-token {
+				padding-top: 10px;
+				padding-bottom: 10px;
+			}
+			#wrapper-form #form-token .form-core {
+				width: 100%;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+			}
+			#wrapper-form #form-token .form-core #btn-submit {
+				background-color: #F39C12;
+				color: #FFF;
+				margin: 0px 10px;
+			}
+			.wrapper-invalido {
+				display: flex;
+				justify-content: center;
+				align-items: center;
+			}
+			.wrapper-resultado {
+				padding-top: 25px;
+			}
+			.alert {
+				text-align: center;
+			}
+			.form-control:focus {
+			border: 1px solid #ccc;
+			box-shadow: none;
+			}
+			@media only screen and (min-width: 992px) {
+				#wrapper-form #form-token .form-core #input-token {
+					min-width: 400px;
+				}
+			}
+			@media only screen and (max-width: 762px) {
+				#wrapper-form #form-token .form-core {
+					flex-direction: column;
+				}
+				#wrapper-form #form-token .form-core .form-group {
+					width: 100%;
+				}
+				#btn-submit {
+						display: block;
+						width: 100%;
+				}
+				.wrapper-pdf object {
+					display: none;
+				}
+				.validar-header .header-logo {
+					width: 200px;
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<header class="validar-header">
+			<img class="header-logo" src="{% static 'imagens/logo-ged.png' %}" alt="">
+		</header>
+
+		{% block conteudo %} {% endblock %}
+	</body>
+</html>

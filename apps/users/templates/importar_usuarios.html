@@ -1,0 +1,140 @@
+{% extends 'admin/base.html' %}
+{% block page_content %}
+
+<script>
+    function checkSubmit(){
+        document.getElementById("upload_arquivo").value = '...Enviando Dados...';
+        document.getElementById("upload_arquivo").disabled = true;
+        return true;
+    }
+</script>
+
+<section class="content-header">
+    <h1>Usuários </h1>
+    <ol class="breadcrumb" style="float: none; position: relative; top: 8px; right: 5px;" >
+        <li><a href="#"><i class="fa fa-database"></i>Usuário</a></li>
+        <li><a href="#">Upload de arquivo</a></li>
+    </ol>
+</section> 
+
+<section class="content">
+    {% if texto != '' %}
+    <div class="alert alert-success alert-dismissible">
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+        <h4><i class="icon fa fa-check"></i> Mensagem !</h4>{{ texto }}</div>
+    {% endif %}
+    <div class="box box-solid">
+        <div class="box-header with-border">
+            <h3 class="box-title">Upload de arquivo</h3>
+            <div class="box-tools">
+                <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+            </div>
+        </div>
+
+        <div class="box">
+            <div class="box-header with-border">
+              <h3 class="box-title">Modelo do arquivo CSV</h3>
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body">
+                <table class="table table-bordered" aria-describedby='modelo-de-importacao'>
+                    <tbody>
+                        <tr>
+                            <th>Coluna 1 - Nome completo*</th>
+                            <th>Coluna 2 - CPF*</th>
+                            <th>Coluna 3 - Matricula</th>
+                            <th>Coluna 4 - Papel*
+                                <a href="#" data-toggle="tooltip"
+                                    data-html="true"
+                                    data-placement="bottom" title=""
+                                    data-original-title="{% for papel in papeis %} {{papel.id}} - {{papel}} <br>{% endfor %}">
+                                    <i class="fa fa-fw fa-question-circle"></i>
+                                </a>
+                            </th>
+                            <th>Coluna 5 - Username*</th>
+                            <th>Coluna 6 - Email*</th>
+                            <th>Coluna 7 - Grupo* 
+                                <a href="#" data-toggle="tooltip"
+                                    data-html="true"
+                                    data-placement="bottom" title=""
+                                    data-original-title="{% for grupo in grupos %} {{grupo.id}} - {{grupo}} <br>{% endfor %}">
+                                    <i class="fa fa-fw fa-question-circle"></i>
+                                </a>
+                            </th>
+                            <th>Coluna 8 - É Staff*</th>
+                        </tr>
+                        <tr>
+                            <td>ANTÔNIO CARLOS</td>
+                            <td>12345678910</td>
+                            <td>XXXXX-X</td>
+                            <td>26</td>
+                            <td>antonio.carlos</td>
+                            <td>email@email.com</td>
+                            <td>65</td>
+                            <td>False</td>
+                        </tr>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="100%"><b>*Campos obrigatórios</b></td>
+                        </tr>
+                        <tr>
+                            <td colspan="100%"><b>Ao gerar o arquivo csv a partir do Calc ou Excel escolher as opções: Conjunto de caracteres: Unicode (UTF-8), Delimitador de campo: ponto e virgula (;), Delimitador de texto: aspas duplas (")</b></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+
+        <div class="box-body">
+            <form action="{% url 'users:importar_usuarios' %}" method="post" onsubmit="return checkSubmit()" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="form-group mb-4 mt-3">
+                    <label for="file_arquivo">Selecione um arquivo csv</label>
+                    <input type="file" title="Upload excel file" name="file" class="form-control-file" id="file_arquivo" required="required">
+                </div>
+                <input type="submit" value="Upload" id="upload_arquivo" name="time" class="mt-4 mb-4 btn btn-primary">
+            </form>
+        </div>
+
+        {% if planilha %}
+        <div class="box">
+            <div class="box-header with-border">
+                <h3 class="box-title">Lista de arquivos contidos na planilha</h3>
+            </div>
+            <div class="box-body">
+                <table class="table table-bordered" aria-describedby="resultado-da-importacao">
+                    <thead>
+                        <tr>
+                            <th>Nome completo</th>
+                            <th>CPF</th>
+                            <th>Matricula</th>
+                            <th>Papel</th>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>Grupo</th>
+                            <th>É Staff</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for p in planilha %}
+                        <tr>
+                            <td>{{ p.nome }}</td>
+                            <td>{{ p.cpf }}</td>
+                            <td>{{ p.matricula }}</td>
+                            <td>{{ p.papel }}</td>
+                            <td>{{ p.username }}</td>
+                            <td>{{ p.email }}</td>
+                            <td>{{ p.grupo }}</td>
+                            <td>{{ p.staff }}</td>
+                            <td><span class="label label-{{ p.status }}">{{ p.status_mensagem }}</span></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

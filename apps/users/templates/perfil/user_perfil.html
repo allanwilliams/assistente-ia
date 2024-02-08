@@ -1,0 +1,459 @@
+{% extends 'admin/base.html' %}
+{% load static core_fieldset %}
+
+{% block extrastyle %}
+<link rel="stylesheet" href="{% static 'ajax_select/css/ajax_select.css' %}">
+<link rel="stylesheet" href="{% static 'admin/adminlte-dist/css/app.css' %}">
+<link rel="stylesheet" href="//code.jquery.com/ui/1.13.1/themes/base/jquery-ui.css">
+<style>
+    .list-credencial-perfil {
+        height: 4.5em;
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .img-user {
+        height: 120px;
+        width: 120px;
+        display: block;
+        background-position: center;
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-color: #cccccc;
+        margin: auto;
+    }
+
+    .label-edit-photo {
+        position: relative;
+        background: #0000007a;
+        padding: 5px;
+        border-radius: 100%;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+    }
+
+    .errorlist {
+        color:red;
+    }
+
+    .modal-header{
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .modal-header::before,.modal-header::after{
+        all: initial;
+    }
+</style>
+
+{% endblock %}
+
+{% block page_content %}
+<section style='padding-top:30px' class="content-header">
+    <h1>Perfil do Usuário</h1>
+</section>
+
+<section class="content">
+    <div class="row">
+            <div class="col-md-4">
+                <div class="box box-primary">
+                    <div style="height: 17em" class="box-body box-profile">
+                        <div style='display:flex; align-items: center;justify-content:center'>
+                            {% if user.foto %}
+                            <a rel='noopener' href="{{user.foto.url|encfile}}" target="_blank">
+                                <img alt='' id="img-assistido" class="img-circle img-user"
+                                    style="background-image: url('{{user.foto.url|encfile}}')">
+                            </a>
+                            {% else %}
+                                <a>
+                                    <img alt='' onclick="escolherFoto()" id="img-assistido" class="img-circle img-user"
+                                        style="background-image: url('{% static 'images/user_placeholder.png' %}')">
+                                </a>
+                            {% endif %}
+                            {% if editavel %}
+                                <div style='display:flex; flex-direction:column;'>
+                                    <label id='label_foto' data-toggle="tooltip" data-placement="top" title="Escolher imagem"
+                                        class='label-edit-photo' for='id_foto'>
+                                        <i style="color: #fff" class='fa fa-pencil'> </i>
+                                    </label>
+                                    <a class="label-edit-photo" data-toggle="tooltip" data-placement="top"
+                                        title="Tirar Foto com Webcam" onclick="abrirWebcam()">
+                                        <i style="color: #fff" class="fa fa-camera"></i>
+                                    </a>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <h3 class="profile-username text-center">{{user.name.title}}</h3>
+                        <p class="text-muted text-center">{{user.papel|default:'Sem papel'}} {% if user.is_defensor %} - {{user.matricula}} {% endif %}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-8">  
+                <div class="box box-primary">
+                    <div style="padding: 0 10px;height: 17em; display:flex; gap:1em;justify-content:center" class="box-body">
+                        {% if user == request.user %}
+                        <div style="width: 100%;">
+                            <p style="font-size: 1.3em; font-weight:700;padding-top: 10px" class="box-title">Credenciais</p>
+                            <ul class="list-group list-group-unbordered">
+                                {% for key, credencial in request.user.get_user_credenciais.items %}
+                                    <li class="list-group-item list-credencial-perfil">
+                                        <div>
+                                            {% with 'imagens/'|add:credencial.label|add:'.png' as image_static %}
+                                                <img alt="" width="50px" src='{% static image_static %}' />
+                                            {% endwith %}
+                                        </div>
+                                        <div>
+                                            <a
+                                                class='btn btn-warning btn-credencial'
+                                                sistema-id="{{credencial.id}}"
+                                                sistema="{{credencial.label}}"
+                                                {% if credencial.value %} credencial-id="{{credencial.value.id}}" {% endif %}
+                                                {% if credencial.value %} credencial-username="{{credencial.value.usuario}}" {% endif %}
+                                            >
+                                                Cadastrar/Atualizar
+                                            </a>
+                                        </div>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% endif %}
+                        {% if user.groups.all %}
+                            <div style="width: 100%;">
+                                <p style="font-size: 1.3em; font-weight:700;padding-top: 10px" class="box-title">Grupos</p>
+                                <ul class="list-group list-group-unbordered">
+                                {% for i in user.groups.all %}
+                                    <li style="height: 4.5em;" class="list-group-item">{{ i.name.title }}</li>
+                                {% endfor %}
+                                </ul>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+    </div>
+    {% if editavel %}
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box box-primary">
+                <div class="box-body">
+                    {% include 'perfil/user_perfil_form.html' %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</section>
+<!-- Modal -->
+<div class="modal fade" id="modalWebcam" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	<div class="modal-dialog" role="document">
+		<div style="width:600px" class="modal-content">
+			<div class="modal-header">
+                <h4 class="modal-title" id="exampleModalLabel">
+                    Imagem - Webcam
+                </h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+			</div>
+			<div class="modal-body">
+                <video  id="video"  width="566px"></video>
+                <canvas id='canvas' style="width:566px"></canvas>
+                <button class="btn btn-success btn-block" id='capture'>Capturar Imagem</button>
+                
+                <div id="loader" style="color:#000; display:none; text-align: center;">
+                    <i id="loader" class="fa fa-spinner fa-spin fa-3x"></i> 
+                    <h3>Carregando...</h3>
+                </div>
+
+                <div id="comandos-pos-captura" style="display: flex; align-items: flex-end;">                    
+                    <button class="btn btn-danger btn-block" id="refazer">Refazer</button>
+                    <button class="btn btn-success btn-block" id="upload" data-assistido-id="">Concluir</button>
+                </div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- Modal credencial -->
+<div class="modal fade" id="modalCredencial" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+                <h4 class="modal-title" id="exampleModalLabel">
+                    Credencial <span id='label-sistema'>
+                        <img alt="" width="50px" id='img-credencial' src="" />
+                    </span>
+                </h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+			</div>
+			<div class="modal-body">
+                <form id='form-credencial'>
+                    <input type='hidden' name='sistema' id='sistema-id' />
+                    <input type='hidden' name='credencial' id='credencial-id' />
+                    <input type='hidden' name='user' value="{{request.user.id}}" />
+                    <div class="form-group">
+                        <label class="control-label text-right">Usuário</label>
+                        <div>
+                            <input required name='usuario' id='form-credencial-username' class='form-control' autocomplete="new-password" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label text-right">Senha</label>
+                        <div>
+                            <input required type='password' name='password' id='form-credencial-password' class='form-control' autocomplete="new-password" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label text-right">Confirmar Senha</label>
+                        <div>
+                            <input required type='password' name='confirmar_password' id='form-credencial-confirmar-password' class='form-control' autocomplete="new-password" />
+                        </div>
+                    </div>
+                    <div id='error-form-credencial' class="form-group errorlist">
+                        
+                    </div>
+                    <div style="display: flex; align-items: flex-end;">                    
+                        <button class="btn btn-success btn-block" >Salvar</button>
+                    </div>
+                </form>
+			</div>
+		</div>
+	</div>
+</div>
+
+{% endblock %}
+
+{% block extrajs %}
+<script type="text/javascript" src="/admin/jsi18n/"></script>
+<script type="text/javascript" src="{% static 'admin/js/core.js' %}"></script>
+<script type="text/javascript" src="{% static 'admin/js/calendar.js' %}"></script>
+<script type="text/javascript" src="{% static 'admin/js/admin/DateTimeShortcuts.js' %}"></script>
+<script type="text/javascript" src="{% static 'ajax_select/js/ajax_select.js' %}"></script>
+<script type="text/javascript" src="{% static 'ajax_select/js/bootstrap.js' %}"></script>
+<script>
+
+    $(document).ready(() => {
+        $(".user-processo-form").submit(() => {
+            $('#preloader').fadeIn('slow')
+        })
+        $('[data-toggle="popover"]').popover()
+    })
+
+    function escolherFoto() {
+        $('#id_foto').click()
+    }
+
+    $('#id_foto').on('change', (e) => {
+        $('#span-edited-photo').show()
+        getBase64(e.target.files[0], (result) => {
+            $('#img-assistido').css('background-image', `url(${result})`);
+        })
+    })
+
+    function getBase64(file, cb) {
+        let reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = function () {
+            cb(reader.result)
+        };
+        reader.onerror = function (error) {
+            console.log('Error: ', error);
+        };
+    }
+    function abrirWebcam() {
+        $("#comandos-pos-captura").hide()
+        $("#canvas").hide()
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(function (mediaStream) {
+                $("#modalWebcam").modal("show")
+                const video = document.querySelector('#video');
+                video.srcObject = mediaStream;
+                video.play();
+            })
+            .catch(function (err) {
+                Swal.fire({
+                    title: 'Não há permissões para acessar a webcam. Necessário habilitar no navegador para utilizar esta funcionalidade',
+                    icon: 'warning',
+                    confirmButtonColor: '#00a65a',
+                })
+            })
+    }
+
+    $('#refazer').click(function (e) {
+        e.preventDefault();
+        $("#video").show()
+        $("#canvas").hide()
+        $("#capture").show()
+        $("#comandos-pos-captura").hide()
+    });
+
+    $('#capture').click(function (e) {
+        e.preventDefault();
+        var canvas = document.querySelector("#canvas");
+        canvas.height = video.videoHeight;
+        canvas.width = video.videoWidth;
+        var context = canvas.getContext('2d');
+        context.drawImage(video, 0, 0)
+        $("#video").hide()
+        $("#capture").hide()
+        $("#canvas").show()
+        $("#comandos-pos-captura").show()
+    })
+
+    document.querySelector('#upload').addEventListener('click', function (e) {
+        e.preventDefault();
+        const loader = $('#loader')
+        $("#canvas").hide()
+        $("#comandos-pos-captura").hide()
+        loader.show()
+        var canvas = document.querySelector("#canvas");
+        let formAssistido = document.getElementById("form-user-id")
+        var form = new FormData(formAssistido);
+
+        canvas.toBlob(function (blob) {
+            delete form.foto
+            form.append('foto', blob, 'webcam.jpg');
+
+            let objectURL = URL.createObjectURL(blob);
+            let imgAssistidoDiv = document.getElementById('img-assistido');
+            imgAssistidoDiv.style.backgroundImage = `url(${objectURL})`;
+
+            let check = formAssistido.reportValidity();
+            if (check) {
+                $.ajax({
+                    url: "{% url 'users:perfil' id=user.id %}",
+                    type: 'POST',
+                    data: form,
+                    contentType: false,
+                    processData: false,
+                    success: (response) => {
+                        $('#modalWebcam').modal('hide')
+                        const msg = response.mensagem ? response.mensagem : 'Salvo com sucesso'
+                        Swal.fire({
+                            title: msg,
+                            icon: 'success',
+                            confirmButtonColor: '#00a65a',
+                        })
+                        location.reload()
+                    },
+                    error: (error) => {
+                        console.log(error.responseJSON)
+                    },
+                    complete: () => {
+                        loader.hide()
+                    }
+                })
+            } else {
+                $("#modalWebcam").modal("hide")
+                $("#video").show()
+                $("#capture").show()
+
+                Swal.fire({
+                    title: 'Revise os campos obrigatórios do assistido antes de salvar a imagem',
+                    icon: 'warning',
+                    confirmButtonColor: '#00a65a',
+                })
+            }
+        }, 'image/jpeg');
+    })
+
+    function getCep(input) {
+        if (input.value) {
+            const cep = input.value.replace(/\D/g, '');
+
+            if (cep != "") {
+                const validacep = /^[0-9]{8}$/;
+
+                if (validacep.test(cep)) {
+                    $.ajaxPrefilter(function (options, originalOptions, jqXHR) {
+                        delete options.headers['X-CSRFToken'];
+                    });
+                    $.getJSON(`https://viacep.com.br/ws/${cep}/json/`, (data) => {
+                        (data.logradouro) ? $('#id_endereco').val(data.logradouro) : $('#id_endereco').val('');
+
+                        (data.bairro) ? $('#id_bairro').val(data.bairro) : $('#id_bairro').val('');
+
+                        if (data.localidade){
+                            getCidade(data.localidade)   
+                        }else{
+                            $('#id_municipio').val(null);
+                            $('#id_municipio_text').val('')
+                        }
+                    })
+                }
+            }
+        }
+    }
+
+    function getCidade(cidade) {
+        $.getJSON(`/contrib/api/municipios/?nome=${cidade}`, (data) => {
+            if (data?.results) {
+                const local = data.results[0]
+                if (local.id && local.municipio_estado) {
+                    $('#id_municipio').val(local.id)
+                    $('#id_municipio_text').val(local.municipio_estado)
+                }
+            }
+        })
+    }
+
+    $('.btn-credencial').on('click',function(){
+        const sistema = $(this).attr('sistema')
+        const sistemaId = $(this).attr('sistema-id')
+        const credencialId = $(this).attr('credencial-id')
+        const credencialUsername = $(this).attr('credencial-username')
+        $('#img-credencial').attr('src',`/staticfiles/imagens/${sistema}.png`)
+        $('#sistema-id').val(sistemaId)
+        $('#modalCredencial').modal('show')
+        $('#form-credencial-password').val('')
+        $('#form-credencial-confirmar-password').val('')
+        if(credencialId){
+            $('#credencial-id').val(credencialId)
+            $('#form-credencial-username').val(credencialUsername)
+        }else {
+            $('#credencial-id').val('')
+            $('#form-credencial-username').val('')
+        } 
+    })
+
+    const formCredencial = document.getElementById('form-credencial')
+    formCredencial.addEventListener('submit', submit)
+
+    function submit(e, vincula=false) {
+        e.preventDefault()
+        var formData = $(e.target).serializeArray();
+        const data = formData.reduce((obj, item) => Object.assign(obj, { [item.name]: item.value }), {});  
+        if (data.password != data.confirmar_password){
+            $('#error-form-credencial').html('Senhas diferentes')
+            return false
+        }
+        const url = data.credencial ? `/users/api/user-credenciais/${data.credencial}/` : '/users/api/user-credenciais/'
+        const method = data.credencial ? 'PUT' : 'POST'
+
+        $.ajax({
+            url: url,
+            type: method,
+            data: data,
+            success: (response) => {
+                $('#modalCredencial').modal('hide')
+                const msg = response.mensagem ? response.mensagem : 'Credencial salva com sucesso'
+                Swal.fire({
+                    title: msg,
+                    icon: 'success',
+                    confirmButtonColor: '#00a65a',
+                })
+            },
+            error: (error) => {
+                console.log(error)
+            }
+        })
+    }
+</script>
+{% endblock %}

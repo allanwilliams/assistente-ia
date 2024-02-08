@@ -1,0 +1,21 @@
+{% load templatetags_fieldset %}
+<input type="text" 
+		name="{{name}}_text" 
+		id="{{html_id|to_str}}_text" 
+		class="vTextField"
+		value="" 
+		autocomplete="off"  {{ extra_attrs }} />
+{% if add_link %}
+	<a href="{{ add_link }}" class="add-another addlink" id="add_{{ html_id|to_str }}" onclick="return showAddAnotherPopup(this);"> add</a>
+{% endif %}
+<input type="hidden" 
+		class="vTextField"
+		name="{{name}}" 
+		id="{{html_id|to_str}}" 
+		value="{{current_ids}}" 
+		data-ajax-select="autocompleteselectmultiple" 
+		data-plugin-options="{{ data_plugin_options }}" />
+<div id="{{html_id|to_str}}_on_deck" class="results_on_deck"></div>
+{% block extra_script %}{% endblock %}
+{# django admin adds the help text. this is for use outside of the admin #}
+{% block help %}{% if help_text %}<p class="help">{{help_text}}</p>{% endif %}{% endblock %}

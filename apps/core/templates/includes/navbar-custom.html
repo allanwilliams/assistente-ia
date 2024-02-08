@@ -1,0 +1,144 @@
+{% load i18n static core_fieldset core_options %}
+{% get_use_fusionauth as use_fusionauth %}
+<input type="hidden" id="input-navbar-user-id" value="{{request.user.id}}">
+<link rel="stylesheet" href="{% static 'admin/css/custom-navbar.css' %}?v=1.1">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" />
+<li class="dropdown notifications-menu menu-lembretes nav-item">
+    <a href="#" class="dropdown-toggle nav-link" data-toggle="dropdown" aria-expanded="false">
+        <i class="fa fa-map-marker"></i>
+        <span class="label label-danger"></span>
+    </a>
+    <ul class="dropdown-menu">
+        <li class="header">Certidão de localização</li>
+        <li class="footer">
+            <a href="/admin/certidao_localizacao/certidao/add" title="Certidão">Emitir Certidão</a>
+            <a href="/admin/certidao_localizacao/certidao" title="Certidão">2ª Via</a>
+        </li>
+    </ul>
+</li>
+<li class="dropdown notifications-menu menu-lembretes nav-item">
+    <a href="#" class="dropdown-toggle nav-link" data-toggle="dropdown" aria-expanded="false">
+        <i class="fa fa-gear"></i>
+        <span class="label label-danger"></span>
+    </a>
+    <ul class="dropdown-menu">
+        <li class="header">Minhas Preferências</li>
+        <i id="spin-preferencias" class="spin-preferencias fa fa-spinner fa-spin fa-3x" style="color:#000; position: absolute; margin-left: calc(50% - 21px); margin-top:18px; display:none" ></i>
+        {% for key, user_preferencia in request.user.get_user_preferencias.items %}
+            {% if key != 'URL' %}
+            <li style="padding: 10px;">
+                <span style="display: flex; justify-content: space-between; align-items: center; color: #000 !important;">
+                    {{ user_preferencia.label }}
+                    <label class="switch">
+                        <input class='check_preferencia' type="checkbox" id="checkbox-preferencia-{{user_preferencia.id}}" data-preferencia="{{user_preferencia.id}}" {% if user_preferencia.value %} checked data-id="{{user_preferencia.value.id}}" {% endif %}>
+                        <span class="slider round"></span>
+                    </label>
+                </span>
+            </li>
+            {% endif %}
+        {% endfor %}
+    </ul>
+</li>
+<li class="dropdown notifications-menu menu-lembretes nav-item">
+    <a href="#" class="dropdown-toggle nav-link" data-toggle="dropdown" aria-expanded="false">
+        <i class="far fa-bell"></i>
+        <span class="label label-danger" id="count-lembretes-enviados"></span>
+    </a>
+    <ul class="dropdown-menu">
+        <li class="header">Meus Lembretes <span id="titulo-total-lembretes-enviados"></span> </li>
+        <li class="lista-lembretes" id="lista-lembretes-enviados"></li>
+        <li class="footer">
+            <a href="/admin/lembrete/lembretes/?verifica_origem=enviados&q=">Ver todos</a>
+            <a href="/admin/lembrete/lembretes/add/">Criar</a>
+        </li>
+    </ul>
+</li>
+<li class="dropdown notifications-menu menu-lembretes nav-item">
+    <a href="#" class="dropdown-toggle nav-link" data-toggle="dropdown" aria-expanded="false">
+        <i class="fa fa-bell"></i>
+        <span class="label label-danger" id="count-lembretes-recebidos"></span>
+    </a>
+    <ul class="dropdown-menu">
+        <li class="header">Lembretes Recebidos <span id="titulo-total-lembretes-recebidos"></span></li>
+        <li class="lista-lembretes" id="lista-lembretes-recebidos"></li>
+        <li class="footer">
+            <a href="/admin/lembrete/lembretes/?verifica_origem=recebidos&lembrete_proprio__exact=0&q=">Ver todos</a>
+            <a href="/admin/lembrete/lembretes/add/">Criar</a>
+        </li>
+    </ul>
+</li>
+<li class="dropdown user user-menu nav-item">
+    <a href="#" class="dropdown-toggle nav-link" data-toggle="dropdown">
+     
+        {% if request.user and request.user.foto %}
+        <img alt='' src="{{ request.user.foto.url|encfile }}" class="user-image" style="width: 30px; height:30px; background-color: #fff;">
+        {% else %}
+        <img alt='' src="{% static 'images/user_placeholder.png' %}" class="user-image" style="width: 30px; height:30px; background-color: #fff;">
+        {% endif %}
+        <span class="hidden-xs">{{ request.user.first_name }} {{ request.user.last_name }}</span>
+    </a>
+    <ul class="dropdown-menu side-perfil {% if not request.user.is_defensor %} side-perfil-colab {% endif %}">
+        <li class="user-header" style="height: auto;">
+            <div class="user-header-foto">
+                {% if request.user and request.user.foto %}
+                <img alt='' src="{{ request.user.foto.url|encfile }}" class="img-circle">
+                {% else %}
+                <img alt='' src="{% static 'images/user_placeholder.png' %}" class="img-circle">
+                {% endif %}
+                <a style="color: #fff;" href="/users/perfil/{{request.user.id}}">
+                    <label data-toggle="tooltip" data-placement="top" class="label-edit-perfil" data-original-title="Editar Perfil">
+                        <i class="fa-solid fa-pencil"></i>
+                    </label>
+                </a>
+            </div>
+            <p>
+                <strong>{{ request.user.first_name }} {{ request.user.last_name }}</strong> 
+                <br>
+                <small>
+                    {% if request.user.papel %}{{request.user.papel}}{% endif %} 
+                    <br>
+                    Usuário desde: {{ request.user.date_joined }}
+                </small>
+                <hr>
+                <div class="row">
+                    <div class="col-md-4 col-xs-4">
+                        <a class="icone-dropdown-perfil" title="E-Mail"  href="https://mail.defensoria.ce.def.br/" target="_blank" id='email_zimbra' rel="noopener">
+                            <img alt='' src="{% static 'imagens/email.png' %}" height="80px" width="80px"/><br>
+                            <small>E-Mail</small>
+                        </a>
+                    </div>
+                    <div class="col-md-4 col-xs-4">
+                        <a class="icone-dropdown-perfil" title="Escola" href="https://ead.defensoria.ce.def.br/" target="_blank" id='escola' rel="noopener">
+                            <img alt='' src="{% static 'imagens/escola.png' %}" height="80px" width="80px"/><br>
+                            <small>Escola</small>
+                        </a>
+                    </div>
+                    <div class="col-md-4 col-xs-4"> 
+                        <a class="icone-dropdown-perfil" title="Almoxarifado" href="https://almoxarifado.defensoria.ce.def.br/" target="_blank" id='almoxarifado' rel="noopener" >
+                            <img alt='' src="{% static 'imagens/almoxarifado.jpg' %}" height="80px" width="80px"/><br>
+                            <small>Almoxarifado</small>
+                        </a>
+                    </div>
+                </div>      
+            </p>
+        </li>
+        <li class="user-footer">
+            <hr>
+            <div class="row">
+                <div class="col-md-6 col-xs-6" style="text-align: center;">                    
+                    <a  href="{% if use_fusionauth %}/django_sso_app/sso-change-password{% else %}/admin/password_change/"{% endif %} class="item-footer">
+                        <i class="fa-solid fa-lock"></i> {% trans 'Change password' %}
+                    </a>
+                </div>
+                <div class="col-md-6 col-xs-6" style="text-align: center;">
+                    <a href="/admin/logout/" class="item-footer"><i class="fa-solid fa-power-off"></i> Encerrar sessão</a>
+                </div>
+            </div>
+        </li>
+    </ul>
+</li>
+
+{% block extrahead %}
+<script src={% static "admin/plugins/jQuery/jquery-2.2.3.min.js" %}></script>
+<script src="{% static 'admin/js/custom-navbar.js' %}?v=1.0"></script>
+{% endblock %}

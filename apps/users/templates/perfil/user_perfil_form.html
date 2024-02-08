@@ -1,0 +1,190 @@
+{% if messages %}
+{% for message in messages %}
+{% if message.tags == 'success' %}
+<script>
+    window.onload = () =>{        
+        Swal.fire({
+            title: '{{ message }}',
+            icon: 'success',
+            confirmButtonColor: '#00a65a',
+        })
+    }
+</script>
+{% else %}
+<div {% if message.tags %} class="alert alert-{{ message.tags }} alert-dismissible" {% endif %}>
+    {{ message }}
+    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+</div>
+{% endif %}
+{% endfor %}
+{% endif %}
+<form id="form-user-id" action="{% url 'users:perfil' id=user.id %}" method="POST" enctype="multipart/form-data"
+    class="user-processo-form">
+    {% csrf_token %}
+    <div class="row">
+        <div class="col-md-4">
+            <div class="form-group">
+                <label class="control-label text-right">{{ form.name.label }}</label>
+                <div>
+                    {{ form.name }}
+                    {{ form.name.errors }}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="form-group">
+                <label class="control-label text-right">{{ form.cpf.label }}</label>
+                <div>
+                    {{ form.cpf }}
+                    {{ form.cpf.errors }}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="form-group">
+                <label class="control-label text-right">{{ form.rg.label }}</label>
+                <div>
+                    {{ form.rg }}
+                    {{ form.rg.errors }}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="form-group">
+                <label class="control-label text-right">{{ form.nome_mae.label }}</label>
+                <div>
+                    {{ form.nome_mae }}
+                    {{ form.nome_mae.errors }}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-2">
+            <div class="form-group">
+                <label class="control-label text-right">{{ form.data_nascimento.label }}</label>
+                <div>
+                    {{ form.data_nascimento }}
+                    {{ form.data_nascimento.errors }}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-2">
+            <div class="form-group">
+                <label class="control-label text-right">{{ form.escolaridade.label }}</label>
+                <div>
+                    {{ form.escolaridade }}
+                    {{ form.escolaridade.errors }}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="form-group">
+                <label class="control-label text-right">{{ form.estado_civil.label }}</label>
+                <div>
+                    {{ form.estado_civil }}
+                    {{ form.estado_civil.errors }}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="form-group">
+                <label class="control-label text-right">{{ form.telefone.label }}</label>
+                <div>
+                    {{ form.telefone }}
+                    {{ form.telefone.errors }}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="form-group">
+                <label class="control-label text-right">{{ form.email_alternativo.label }}</label>
+                <div>
+                    {{ form.email_alternativo }}
+                    {{ form.email_alternativo.errors }}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-12"></div>
+        <div class="col-md-2">
+            <div class="form-group">
+                <label class="control-label text-right">{{ form.cep.label }}</label>
+                <div>
+                    {{ form.cep }}
+                    {{ form.cep.errors }}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="form-group">
+                <label class="control-label text-right">{{ form.endereco.label }}</label>
+                <div>
+                    {{ form.endereco }}
+                    {{ form.endereco.errors }}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="form-group">
+                <label class="control-label text-right">{{ form.numero.label }}</label>
+                <div>
+                    {{ form.numero }}
+                    {{ form.numero.errors }}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="form-group">
+                <label class="control-label text-right">{{ form.complemento.label }}</label>
+                <div>
+                    {{ form.complemento }}
+                    {{ form.complemento.errors }}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="form-group">
+                <label class="control-label text-right">{{ form.bairro.label }}</label>
+                <div>
+                    {{ form.bairro }}
+                    {{ form.bairro.errors }}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="form-group">
+                <label class="control-label text-right">{{ form.nacionalidade.label }}</label>
+                <div>
+                    {{ form.nacionalidade }}
+                    {{ form.nacionalidade.errors }}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="form-group">
+                <label class="control-label text-right">{{ form.estado.label }}</label>
+                <div>
+                    {{ form.estado }}
+                    {{ form.estado.errors }}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="form-group">
+                <label class="control-label text-right">{{ form.municipio.label }}</label>
+                <div>
+                    {{ form.municipio }}
+                    {{ form.municipio.errors }}
+                </div>
+            </div>
+        </div>
+        <div style="display: none;">
+            {{ form.foto }}
+            {{ form.foto.errors }}
+        </div>
+    </div>
+    <div class="box-footer">
+        <button type="submit" class="btn bg-green"><i class="fa-solid fa-save"></i> Salvar</button>
+    </div>
+</form>
