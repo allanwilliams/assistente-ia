@@ -10,30 +10,110 @@
 
     main #toolbar {
         width: 100%;
-        border: 1px solid aqua;
         padding: 10px;
-        border: 1px solid brown;
     }
     main #document {
         overflow: hidden;
         padding-top: 10px;
         gap: 10px;
         display: flex;
-        height: 960px;
+        height: 800px;
         justify-content: space-between;
        
     }
     main #document #pdf {
         flex: 65 1 0px;
         overflow: hidden;
-        border: 1px solid blueviolet;
+        border: 1px solid lightgrey;
         padding: 10px;
     }
     main #document #chat {
         flex: 35 1 0px;
         overflow: hidden;
-        border: 1px solid red;
-        padding: 10px;
+        border: 1px solid lightgray;
+    }
+    .chat-message-row {
+        display: flex;
+        padding-top: 8px;
+        padding-bottom: 8px;
+        width: 100%;
+    }
+
+    .chat-message-row.ai {
+        justify-content: flex-start;
+    }
+    .chat-message-row.human {
+        justify-content: flex-end;
+    }
+
+    .chat-message-row.ai .chat-message {
+        background-color: #f9f9fe;
+    }
+
+    .chat-message-row.human .chat-message {
+        background-color: #1777ff;
+        color: #fff;
+    }
+    .chat-message {
+        max-width: 500px;
+        border-radius: 8px;
+        padding: 6px 12px;
+        box-shadow: 0 0 3px #d1d2da;
+    }
+
+    .chat-header {
+        height: 42px;
+        padding: 0px 6px;
+        background: rgb(255, 255, 255);
+        display: flex;
+        align-items: center;
+        flex-shrink: 0;
+    }
+
+    #conversation {
+        flex-grow: 1;
+        overflow: auto;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+    }
+    #chat-footer {
+        display: flex;
+        justify-content: center;
+    }
+
+    #chat-form-input {
+        margin: 10px 0px 10px;
+        width: 100%;
+        padding: 0px 10px;
+        max-width: 768px;
+        display: flex;
+        flex-shrink: 0;
+        flex-grow: 1;
+        align-self: center;
+    }
+     #chat-form-input input[type=text] {
+        padding: 0 5px;
+        width: 100%;
+        height: 32px;
+        margin: 0;
+        box-sizing: border-box;
+    }
+
+     #chat-form-input button {
+        background-color: #1777ff;
+        width: 40px;
+        height: 32px;
+    }
+    .conversation-container {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around;
+        height: calc(100% - 42px);
+    }
+    #list-messages {
+        width: 100%;
+        padding: 0 10px;
     }
 </style>
 
@@ -44,7 +124,12 @@
 
 <main>
     <section id="toolbar">
-        <h1>Documento</h1>
+        <ul>
+            {% for c in chats %}
+            <li> <button class="btn-active-chat"  chat-id="{{c.id}}"> {{c.titulo}}</button></li>
+            {% endfor %}
+        </ul>
+
         <input type="file" id="document-file">
     </section>
     <section id="document">
@@ -52,11 +137,26 @@
             <div id="pdf-obj-container"></div>
         </div>
         <div id="chat">
-            <h3>Chat</h3>
-            
+            <div class="chat-header">
+                <h3>Chat</h3>
+            </div>
+            <div class="conversation-container">
+                <div id="conversation">
+                    <div id="list-messages"></div>
+                </div>
+                <div id="chat-footer">
+                    <form id="chat-form-input">
+                        <input type="text" id="chat-input-ask" />
+                        <button type="submit" class="btn" id="btn-send-ask">
+                            <i class="fa-solid fa-paper-plane"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
         </div>
     </section>
    
+    <input type="hidden" id="chat-id-open">
 </main>
 
 {% endblock %}
@@ -64,16 +164,143 @@
 
 {% block extrajs %}
 <script>
+    const inputTxtAsk = $('#chat-input-ask')
+    const btnSendAsk = $("#btn-send-ask")
+    const listMessagesEl = $("#list-messages")
+    const chatFormInput = $("#chat-form-input")
+    const btnActiveChat = $(".btn-active-chat")
+    const chatIdOpenEl = $('#chat-id-open')
 
-$('#document-file').change(async (event) => {
-    const target = event.target;
-    const file = target.files[0]
+    let conversation = [
+        {
+            origin: 'ia',
+            msg: 'O valor atribuído à causa pelo autor Rafael Feitosa dos Santos na ação de Usucapião Especial Urbano é de R$ 945.000,00'
+        },
+        {
+            origin: 'human',
+            msg: 'qual a data da petição inicial?'
+        },
 
-    $('#pdf-obj-container').html(`
-        <h3>${file.name}</h3> <br>
-        <embed src='${URL.createObjectURL(file)}' width="100%" height="800">
-    `)
-   
-})
+    ]
+
+
+
+    $(document).ready(() => {
+        chatFormInput.submit((e) => {
+            e.preventDefault()
+            const ask = inputTxtAsk.val()
+            inputTxtAsk.val('')
+
+            sendAsk(ask)
+        })
+
+        btnActiveChat.click(function(e) {
+            const chatId = $(this).attr('chat-id')
+            getChat(chatId)
+            console.log(chatId)
+        })
+
+        $('#document-file').change(async (event) => {
+            const target = event.target;
+            const file = target.files[0]
+
+            newChat(file)
+        })
+
+    })
+
+    function loadDocumento(titulo, url) {
+        $('#pdf-obj-container').html(`
+            <h3>${titulo}</h3> <br>
+            <embed src='${url}' width="100%" height="800">
+        `)
+    }
+
+   function getAutor(autor) {
+        const autores = {
+            1: 'human',
+            2: 'ai',
+        }
+
+        return autores[autor] 
+    }
+    
+    function fillChat(data) {
+        const {id, mensagens, titulo, documento } = data
+        loadDocumento(titulo, documento)
+        insertConversation(mensagens)
+
+        chatIdOpenEl.val(id)
+    }
+
+    function newChat(file) {
+
+        const formData = new FormData()
+        formData.append('titulo', file.name)
+        formData.append('documento', file)
+
+        $.ajax({
+            type:'POST',
+            url: `/documento/api/chat/`,
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: (data) => {
+               fillChat(data)
+            },
+            error: () => {
+
+            }
+        })
+
+    }
+
+    function getChat(chatId) {
+        $.ajax({
+            type: 'GET',
+            url: `/documento/api/chat/${chatId}`,
+            success: (data) => {
+               fillChat(data)
+            },
+            error: () => {
+
+            }
+        })
+    }
+
+    function insertConversation(mensagens) {
+        listMessagesEl.empty()
+        mensagens.forEach((e) => appendConversation(e))
+
+    }
+
+    function appendConversation(askMsg) {
+        let row = `
+                <div class="chat-message-row ${getAutor(askMsg.autor)}">
+                    <div class="chat-message" style="overflow: hidden;">
+                        <div class="chat-message-txt">${askMsg.texto}</div>
+                    </div>
+                </div>
+            `
+
+        listMessagesEl.append(row)
+    }
+
+    function sendAsk(texto) {
+        $.ajax({
+            type:'POST',
+            url: `/documento/api/mensagem/`,
+            data: {
+                chat: chatIdOpenEl.val(),
+                texto: texto,
+                autor: 1
+            },
+            success: (data) => {
+                appendConversation(data)
+            },
+        })
+    }
+
+
 </script>
 {% endblock %}

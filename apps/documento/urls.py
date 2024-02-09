@@ -3,7 +3,6 @@ from .views import chat
 
 app_name = "documento"
 urlpatterns = [
-    # path("api/", include("apps.core.api.urls")),
-
+    path("api/", include("apps.documento.api.urls")),
     path('chat', chat, name='chat')
 ]
