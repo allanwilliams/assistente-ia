@@ -6,7 +6,7 @@ from apps.documento.models import Chat
 
 
 def chat(request):
-    chats = Chat.objects.filter(criado_por=request.user)
+    chats = Chat.objects.filter(criado_por=request.user, ativo=True)
     context = {
         'chats': chats
     }

@@ -10,7 +10,10 @@
 
     main #toolbar {
         width: 100%;
-        padding: 10px;
+        padding: 15px 10px 10px 10px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
     }
     main #document {
         overflow: hidden;
@@ -115,6 +118,25 @@
         width: 100%;
         padding: 0 10px;
     }
+    .drag-area {
+        padding: 10px;
+        text-align: center;
+        border: 3px dashed #ccc;
+        cursor: pointer;
+    }
+    .drag-active {
+        background-color: rgba(0, 99, 177, 0.1);
+    }
+    .drag-area i {
+        font-size: 1.5rem;
+    }
+    .drag-area .drag-area-content {
+        margin-top: 10px;
+    }
+    .input-file-section {
+        width: 200px;
+    }
+
 </style>
 
 {% endblock %}
@@ -124,13 +146,30 @@
 
 <main>
     <section id="toolbar">
-        <ul>
-            {% for c in chats %}
-            <li> <button class="btn-active-chat"  chat-id="{{c.id}}"> {{c.titulo}}</button></li>
-            {% endfor %}
-        </ul>
+        <div class="input-file-section">
+            <div class="drag-area">
+                <i class="fa fa-solid fa-add"></i><span> Novo chat</span> 
+                <div class="drag-area-content">
+                    <p class="drag-file">Solte o PDF aqui</p> 
+                </div>
+                <input type="file" class="file-input" style="display: none;" />
+            </div>
+        </div>
 
-        <input type="file" id="document-file">
+        <div class="select-chat-section">
+            <div class="form-group">
+                <label class="control-label text-right">Meus chats</label>
+                <div>
+                    <select id="list-chats">
+                        <option value="">-------------</option>
+                        {% for c in chats %}
+                        <option value="{{c.id}}">{{c.titulo}}</option>
+                        {% endfor %}
+                    </select>
+                    <button class="btn" id="btn-remove-chat"  type="button" ><i class="fa fa-trash"></i></button>
+                </div>
+            </div>
+        </div>
     </section>
     <section id="document">
         <div id="pdf">
@@ -168,21 +207,15 @@
     const btnSendAsk = $("#btn-send-ask")
     const listMessagesEl = $("#list-messages")
     const chatFormInput = $("#chat-form-input")
-    const btnActiveChat = $(".btn-active-chat")
     const chatIdOpenEl = $('#chat-id-open')
+    const listChatsEl = $('#list-chats')
+    const pdfContainer = $('#pdf-obj-container')
+    const btnRemoveChat = $('#btn-remove-chat')
 
-    let conversation = [
-        {
-            origin: 'ia',
-            msg: 'O valor atribuído à causa pelo autor Rafael Feitosa dos Santos na ação de Usucapião Especial Urbano é de R$ 945.000,00'
-        },
-        {
-            origin: 'human',
-            msg: 'qual a data da petição inicial?'
-        },
 
-    ]
-
+    const dropArea = document.querySelector(".drag-area")
+    const fileInput = dropArea.querySelector(".file-input")
+    
 
 
     $(document).ready(() => {
@@ -190,40 +223,46 @@
             e.preventDefault()
             const ask = inputTxtAsk.val()
             inputTxtAsk.val('')
-
             sendAsk(ask)
         })
-
-        btnActiveChat.click(function(e) {
-            const chatId = $(this).attr('chat-id')
+        
+        listChatsEl.change((e) => {
+            const chatId = e.target.value
             getChat(chatId)
-            console.log(chatId)
         })
 
-        $('#document-file').change(async (event) => {
-            const target = event.target;
-            const file = target.files[0]
-
-            newChat(file)
+        btnRemoveChat.click(() => {
+            const chatId =  listChatsEl.val()
+            deleteChat(chatId)
         })
 
+        dropArea.onclick = () => {
+            fileInput.click();
+        };
+
+        fileInput.addEventListener("change", function (e) {
+            const target = e.target;
+            newChat(target)
+        });
+
+        dropArea.addEventListener("dragover", (event) => {
+            event.preventDefault();
+            dropArea.classList.add("drag-active");
+        });
+
+        dropArea.addEventListener("dragleave", () => {
+            dropArea.classList.remove("drag-active");
+        });
+
+        dropArea.addEventListener("drop", (e) => {
+            e.preventDefault();
+            dropArea.classList.remove("drag-active")
+            const target = e.dataTransfer;
+            newChat(target)
+        });
     })
 
-    function loadDocumento(titulo, url) {
-        $('#pdf-obj-container').html(`
-            <h3>${titulo}</h3> <br>
-            <embed src='${url}' width="100%" height="800">
-        `)
-    }
 
-   function getAutor(autor) {
-        const autores = {
-            1: 'human',
-            2: 'ai',
-        }
-
-        return autores[autor] 
-    }
     
     function fillChat(data) {
         const {id, mensagens, titulo, documento } = data
@@ -233,11 +272,42 @@
         chatIdOpenEl.val(id)
     }
 
-    function newChat(file) {
+    function loadDocumento(titulo, url) {
+        pdfContainer.html(`
+            <h3>${titulo}</h3> <br>
+            <embed src='${url}' width="100%" height="800">
+        `)
+    }
 
+
+    function insertConversation(mensagens) {
+        listMessagesEl.empty()
+        mensagens.forEach((e) => appendConversation(e))
+
+    }
+
+    function clearChat() {
+        listMessagesEl.empty()
+        pdfContainer.empty()
+    }
+
+    function updateChatList(data, type) {
+        if(type === 'add') {
+            listChatsEl.append(`<option value="${data.id}"> ${data.titulo}</option>`)
+        }
+        if(type === 'remove') {
+            const option = listChatsEl.find(`option[value='${data}']`)
+            option.remove()
+            clearChat()
+        }
+    }
+
+    function newChat(target) {
+        const file = target.files[0]
         const formData = new FormData()
         formData.append('titulo', file.name)
         formData.append('documento', file)
+        formData.append('ativo', true)
 
         $.ajax({
             type:'POST',
@@ -246,35 +316,48 @@
             contentType: false,
             processData: false,
             success: (data) => {
-               fillChat(data)
-            },
-            error: () => {
-
+                updateChatList(data, 'add')
+                fillChat(data)
             }
         })
 
     }
 
     function getChat(chatId) {
-        $.ajax({
-            type: 'GET',
-            url: `/documento/api/chat/${chatId}`,
-            success: (data) => {
-               fillChat(data)
-            },
-            error: () => {
-
-            }
-        })
+        if(chatId) {
+            $.ajax({
+                type: 'GET',
+                url: `/documento/api/chat/${chatId}`,
+                success: (data) => fillChat(data),
+            })
+        } else {
+            clearChat()
+        }
     }
 
-    function insertConversation(mensagens) {
-        listMessagesEl.empty()
-        mensagens.forEach((e) => appendConversation(e))
-
+    function deleteChat(chatId) {
+        if(chatId) {
+            $.ajax({
+                type: 'PATCH',
+                url: `/documento/api/chat/${chatId}/`,
+                data: {
+                    ativo: false
+                },
+                success: (data) => {
+                    updateChatList(chatId, 'remove')
+                },
+                error: () => {}
+            })
+        }
     }
+
 
     function appendConversation(askMsg) {
+        const getAutor = (autor) => {
+            const autores = { 1: 'human', 2: 'ai' }
+            return autores[autor] 
+        }
+
         let row = `
                 <div class="chat-message-row ${getAutor(askMsg.autor)}">
                     <div class="chat-message" style="overflow: hidden;">
