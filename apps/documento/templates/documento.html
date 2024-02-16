@@ -10,17 +10,16 @@
 
     main #toolbar {
         width: 100%;
-        padding: 15px 10px 10px 10px;
+        padding: 15px 10px 10px 0px;
         display: flex;
         align-items: center;
         gap: 15px;
     }
     main #document {
         overflow: hidden;
-        padding-top: 10px;
         gap: 10px;
         display: flex;
-        height: 800px;
+        height: 750px;
         justify-content: space-between;
        
     }
@@ -28,7 +27,6 @@
         flex: 65 1 0px;
         overflow: hidden;
         border: 1px solid lightgrey;
-        padding: 10px;
     }
     main #document #chat {
         flex: 35 1 0px;
@@ -64,9 +62,9 @@
         box-shadow: 0 0 3px #d1d2da;
     }
 
-    .chat-header {
+    .chat-header, .pdf-header {
         height: 42px;
-        padding: 0px 6px;
+        padding: 0px 6px 10px 6px;
         background: rgb(255, 255, 255);
         display: flex;
         align-items: center;
@@ -119,7 +117,7 @@
         padding: 0 10px;
     }
     .drag-area {
-        padding: 10px;
+        padding: 6px 10px;
         text-align: center;
         border: 3px dashed #ccc;
         cursor: pointer;
@@ -130,13 +128,15 @@
     .drag-area i {
         font-size: 1.5rem;
     }
+    .drag-file {
+        margin: 0;
+    }
     .drag-area .drag-area-content {
-        margin-top: 10px;
+        margin-top: 5px;
     }
     .input-file-section {
         width: 200px;
     }
-
 </style>
 
 {% endblock %}
@@ -211,7 +211,17 @@
     const listChatsEl = $('#list-chats')
     const pdfContainer = $('#pdf-obj-container')
     const btnRemoveChat = $('#btn-remove-chat')
+    const body = document.querySelector('body')
 
+    let chatAtual = null
+
+    body.addEventListener('click', function(event) {
+        if(event.target.classList.contains('btn-page') && chatAtual) {
+            const page = event.target.attributes['data-page'].value
+            const url = `${chatAtual.documento}#page=${page}`
+            loadDocumento(chatAtual.titulo, url)
+        }
+    })
 
     const dropArea = document.querySelector(".drag-area")
     const fileInput = dropArea.querySelector(".file-input")
@@ -268,13 +278,14 @@
         const {id, mensagens, titulo, documento } = data
         loadDocumento(titulo, documento)
         insertConversation(mensagens)
+        chatAtual = data
 
         chatIdOpenEl.val(id)
     }
 
     function loadDocumento(titulo, url) {
         pdfContainer.html(`
-            <h3>${titulo}</h3> <br>
+            <div class="pdf-header"><h3>${titulo}</h3></div>
             <embed src='${url}' width="100%" height="800">
         `)
     }
@@ -351,17 +362,24 @@
         }
     }
 
-
     function appendConversation(askMsg) {
         const getAutor = (autor) => {
             const autores = { 1: 'human', 2: 'ai' }
             return autores[autor] 
         }
 
+        var regex = /\[P(\d)\]/g;
+
+        let textoFormatado = askMsg.texto.replaceAll('\n', '<br>')
+
+        textoFormatado = textoFormatado.replace(regex, function(match, numero) {
+            return `<button class="btn-page" data-page="${numero}">${numero}</button>`;
+        });
+
         let row = `
                 <div class="chat-message-row ${getAutor(askMsg.autor)}">
                     <div class="chat-message" style="overflow: hidden;">
-                        <div class="chat-message-txt">${askMsg.texto}</div>
+                        <div class="chat-message-txt">${textoFormatado}</div>
                     </div>
                 </div>
             `
@@ -370,16 +388,20 @@
     }
 
     function sendAsk(texto) {
+        const data = {
+            chat: chatIdOpenEl.val(),
+            texto: texto,
+            autor: 1
+        }
+
         $.ajax({
             type:'POST',
             url: `/documento/api/mensagem/`,
-            data: {
-                chat: chatIdOpenEl.val(),
-                texto: texto,
-                autor: 1
-            },
-            success: (data) => {
-                appendConversation(data)
+            data: data, 
+            beforeSend:() => appendConversation(data),
+            success: (response) => {
+                appendConversation(response)
+                
             },
         })
     }
