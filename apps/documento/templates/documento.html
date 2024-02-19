@@ -5,58 +5,82 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" />
 
 <style>
-    main {
+
+    #document {
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        height: 100vh;
+        width: 100vw;
+    }
+    #document #toolbar {
+        flex: 13 1 0px;
+        overflow: hidden;
+        background-color: #272e30;
+        color: #fff;
+       
         padding: 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    #document #toolbar .drag-area {
+        padding: 6px 10px;
+        text-align: center;
+        border: 2px dotted #ccc;
+        cursor: pointer;
+        border-radius: 8px;
+        background-color: #4d5b5f;
+    }
+    #document #toolbar .drag-active {
+        background-color: #899a9f;
+    }
+    #document #toolbar .drag-area i {
+        font-size: 1.5rem;
+    }
+    #document #toolbar .drag-file {
+        margin: 0;
+    }
+    #document #toolbar .drag-area .drag-area-content {
+        margin-top: 5px;
     }
 
-    main #toolbar {
-        width: 100%;
-        padding: 15px 10px 10px 0px;
-        display: flex;
-        align-items: center;
-        gap: 15px;
-    }
-    main #document {
-        overflow: hidden;
-        gap: 10px;
-        display: flex;
-        height: 750px;
-        justify-content: space-between;
-       
-    }
-    main #document #pdf {
-        flex: 65 1 0px;
+    #document #pdf {
+        padding-bottom: 42px;
+        flex: 37 1 0px;
         overflow: hidden;
         border: 1px solid lightgrey;
     }
-    main #document #chat {
-        flex: 35 1 0px;
+
+    #document #chat {
+        flex: 37 1 0px;
         overflow: hidden;
         border: 1px solid lightgray;
     }
-    .chat-message-row {
+
+    #document #chat .chat-message-row {
         display: flex;
         padding-top: 8px;
         padding-bottom: 8px;
         width: 100%;
     }
 
-    .chat-message-row.ai {
+    #document #chat .chat-message-row.ai {
         justify-content: flex-start;
     }
-    .chat-message-row.human {
+    #document #chat .chat-message-row.human {
         justify-content: flex-end;
     }
 
-    .chat-message-row.ai .chat-message {
+    #document #chat .chat-message-row.ai .chat-message {
         background-color: #f9f9fe;
     }
 
-    .chat-message-row.human .chat-message {
+    #document #chat .chat-message-row.human .chat-message {
         background-color: #1777ff;
         color: #fff;
     }
-    .chat-message {
+    #document #chat .chat-message {
         max-width: 500px;
         border-radius: 8px;
         padding: 6px 12px;
@@ -70,6 +94,7 @@
         display: flex;
         align-items: center;
         flex-shrink: 0;
+        justify-content: space-between;
     }
 
     #conversation {
@@ -85,14 +110,9 @@
     }
 
     #chat-form-input {
-        margin: 10px 0px 10px;
         width: 100%;
         padding: 0px 10px;
-        max-width: 768px;
         display: flex;
-        flex-shrink: 0;
-        flex-grow: 1;
-        align-self: center;
     }
      #chat-form-input input[type=text] {
         padding: 0 5px;
@@ -100,12 +120,21 @@
         height: 32px;
         margin: 0;
         box-sizing: border-box;
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+        border-top-left-radius: 5px;
+        border-bottom-left-radius: 5px;
     }
 
      #chat-form-input button {
         background-color: #1777ff;
         width: 40px;
         height: 32px;
+        color: #fff;
+        border-top-left-radius: 0px;
+        border-bottom-left-radius: 0px;
+        border-top-right-radius: 5px;
+        border-bottom-right-radius: 5px;
     }
     .conversation-container {
         position: relative;
@@ -118,59 +147,47 @@
         width: 100%;
         padding: 0 10px;
     }
-    .drag-area {
-        padding: 6px 10px;
-        text-align: center;
-        border: 3px dashed #ccc;
+    .choice-link-chat {
+        width: 100%;
+    }
+    .choice-link-chat:hover { 
+        color: rgba(255, 255, 255, 0.55);
+    }
+    #list-chats {
+        display: flex;
+        gap: 5px;
+        flex-direction: column;
+    }
+
+    .btn-remove-chat {
         cursor: pointer;
-    }
-    .drag-active {
-        background-color: rgba(0, 99, 177, 0.1);
-    }
-    .drag-area i {
-        font-size: 1.5rem;
-    }
-    .drag-file {
-        margin: 0;
-    }
-    .drag-area .drag-area-content {
-        margin-top: 5px;
-    }
-    .input-file-section {
-        width: 200px;
     }
 
 </style>
 
 
 <main>
-    <section id="toolbar">
-        <div class="input-file-section">
-            <div class="drag-area">
-                <i class="fa fa-solid fa-add"></i><span> Novo chat</span> 
-                <div class="drag-area-content">
-                    <p class="drag-file">Solte o PDF aqui</p> 
+
+    <section id="document">
+        <div id="toolbar">
+            <div class="input-file-section">
+                <div class="drag-area">
+                    <i class="fa fa-solid fa-add"></i><span> Novo chat</span> 
+                    <div class="drag-area-content">
+                        <p class="drag-file">Solte o PDF aqui</p> 
+                    </div>
+                    <input type="file" class="file-input" style="display: none;" />
                 </div>
-                <input type="file" class="file-input" style="display: none;" />
+            </div>
+            <div class="select-chat-section">
+                <div id="list-chats">
+                    {% for c in chats %}
+                    <div class="choice-link-chat btn" data-id="{{c.id}}">{{c.titulo}}</div>
+                    {% endfor %}
+                </div>
             </div>
         </div>
 
-        <div class="select-chat-section">
-            <div class="form-group">
-                <label class="control-label text-right">Meus chats</label>
-                <div>
-                    <select id="list-chats">
-                        <option value="">-------------</option>
-                        {% for c in chats %}
-                        <option value="{{c.id}}">{{c.titulo}}</option>
-                        {% endfor %}
-                    </select>
-                    <button class="btn" id="btn-remove-chat"  type="button" ><i class="fa fa-trash"></i></button>
-                </div>
-            </div>
-        </div>
-    </section>
-    <section id="document">
         <div id="pdf">
             <div id="pdf-obj-container"></div>
         </div>
@@ -211,10 +228,16 @@
     const chatIdOpenEl = $('#chat-id-open')
     const listChatsEl = $('#list-chats')
     const pdfContainer = $('#pdf-obj-container')
-    const btnRemoveChat = $('#btn-remove-chat')
     const body = document.querySelector('body')
+    const dropArea = document.querySelector(".drag-area")
+    const fileInput = dropArea.querySelector(".file-input")
+    
 
     let chatAtual = null
+
+    $.ajaxSetup({
+        headers: {"X-CSRFToken": '{{ csrf_token }}' },
+    });
 
     body.addEventListener('click', function(event) {
         if(event.target.classList.contains('btn-page') && chatAtual) {
@@ -222,12 +245,19 @@
             const url = `${chatAtual.documento}#page=${page}`
             loadDocumento(chatAtual.titulo, url)
         }
+
+        if(event.target.classList.contains('choice-link-chat')) {
+            const chatId = event.target.attributes['data-id'].value
+            $('.choice-link-chat').removeClass('btn-info')
+            event.target.classList.add('btn-info')
+            getChat(chatId)
+        }
+
+        if(event.target.classList.contains('btn-remove-chat')) {
+            const chatId = event.target.attributes['data-remove-id'].value
+            deleteChat(chatId)
+        }
     })
-
-    const dropArea = document.querySelector(".drag-area")
-    const fileInput = dropArea.querySelector(".file-input")
-    
-
 
     $(document).ready(() => {
 
@@ -240,16 +270,6 @@
             sendAsk(ask)
         })
         
-        listChatsEl.change((e) => {
-            const chatId = e.target.value
-            getChat(chatId)
-        })
-
-        btnRemoveChat.click(() => {
-            const chatId =  listChatsEl.val()
-            deleteChat(chatId)
-        })
-
         dropArea.onclick = () => {
             fileInput.click();
         };
@@ -280,17 +300,19 @@
     
     function fillChat(data) {
         const {id, mensagens, titulo, documento } = data
-        loadDocumento(titulo, documento)
+        loadDocumento(titulo, documento, id)
         insertConversation(mensagens)
         chatAtual = data
-
         chatIdOpenEl.val(id)
     }
 
-    function loadDocumento(titulo, url) {
+    function loadDocumento(titulo, url, id) {
         pdfContainer.html(`
-            <div class="pdf-header"><h3>${titulo}</h3></div>
-            <embed src='${url}' width="100%" height="800">
+            <div class="pdf-header">
+                <h3>${titulo}</h3> 
+                <i data-remove-id='${id}' class='fa fa-trash btn-remove-chat'></i>
+            </div>
+            <embed src='${url}' width="100%" height="100%">
         `)
     }
 
@@ -309,10 +331,10 @@
 
     function updateChatList(data, type) {
         if(type === 'add') {
-            listChatsEl.append(`<option value="${data.id}"> ${data.titulo}</option>`)
+            listChatsEl.append(`<div class="choice-link-chat btn btn-info" data-id="${data.id}">${data.titulo}</div>`)
         }
         if(type === 'remove') {
-            const option = listChatsEl.find(`option[value='${data}']`)
+            const option = listChatsEl.find(`div[data-id='${data}']`)
             option.remove()
             clearChat()
         }
