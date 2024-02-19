@@ -6,12 +6,18 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 import requests
 import os
+from apps.users.models import User
 
 class Chat(BaseModel):
     titulo = models.CharField('Titulo', max_length=255)
     documento = models.FileField('Documento', upload_to='documento_chat')
     ativo = models.BooleanField('Ativo', default=True)
     chatpdf_source_id = models.CharField('Chat PDF source id', max_length=255, blank=True, null=True)
+    # usuario = models.ForeignKey(
+    #     User,
+    #     on_delete=models.DO_NOTHING,
+    #     related_name='%(class)s_usuario',
+    # )
 
     def __str__(self) -> str:
         return f'{self.id}'
@@ -67,3 +73,20 @@ class Mensagem(BaseModel):
     class Meta:
         verbose_name_plural = 'Mensagens'
 
+
+
+
+
+# class PerguntaUsuario(BaseModel):
+#     pergunta = models.TextField('Pergunta')
+#     usuario = models.ForeignKey(
+#         User,
+#         on_delete=models.DO_NOTHING,
+#         related_name='%(class)s_usuario',
+#     )
+
+#     def __str__(self) -> str:
+#         return f'{self.pergunta}'
+    
+#     class Meta:
+#         verbose_name_plural = 'Perguntas do usuário'

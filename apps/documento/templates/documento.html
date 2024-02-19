@@ -1,7 +1,8 @@
-{% extends 'admin/base.html' %}
 {% load static %}
-
-{% block extrastyle %}
+<link rel="stylesheet" href="//stackpath.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+<link rel="stylesheet" href="{% static 'admin/plugins/select2/select2.min.css' %}">
+<link rel="stylesheet" href="{% static 'css/custom_adminlte/base-v4.css' %}?v=1.0">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" />
 
 <style>
     main {
@@ -141,10 +142,6 @@
 
 </style>
 
-{% endblock %}
-
-
-{% block page_content %}
 
 <main>
     <section id="toolbar">
@@ -200,10 +197,12 @@
     <input type="hidden" id="chat-id-open">
 </main>
 
-{% endblock %}
+<script src="{% static 'admin/plugins/jQuery/jquery-2.2.3.min.js' %}"></script>
+<!-- jQuery UI 1.11.4 -->
+<script src="{% static 'admin/plugins/jQueryUI/jquery-ui.min.js' %}"></script>
+<!-- Select2 -->
+<script src="{% static 'admin/plugins/select2/select2.full.min.js' %}"></script>
 
-
-{% block extrajs %}
 <script>
     const inputTxtAsk = $('#chat-input-ask')
     const btnSendAsk = $("#btn-send-ask")
@@ -231,6 +230,9 @@
 
 
     $(document).ready(() => {
+
+        $('select:not(.filtered):not(.admin-autocomplete)').select2({dropdownAutoWidth : true});
+
         chatFormInput.submit((e) => {
             e.preventDefault()
             const ask = inputTxtAsk.val()
@@ -436,4 +438,3 @@
 
 
 </script>
-{% endblock %}
