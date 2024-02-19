@@ -31,7 +31,7 @@ class MensagemViewSet(ModelViewSet):
         chatpdf_source_id = nova_msg.chat.chatpdf_source_id
 
         headers = {
-            'x-api-key': 'sec_CPSnpaMaVcZyatxIozz9Jv8saovN1tbN',
+            'x-api-key': 'sec_16KMXQwy0VcwkGz7xYuDY9PxWGGgsHM6',
             "Content-Type": "application/json",
         }
 

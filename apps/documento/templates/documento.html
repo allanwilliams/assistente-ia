@@ -107,6 +107,7 @@
         height: 32px;
     }
     .conversation-container {
+        position: relative;
         display: flex;
         flex-direction: column;
         justify-content: space-around;
@@ -137,6 +138,7 @@
     .input-file-section {
         width: 200px;
     }
+
 </style>
 
 {% endblock %}
@@ -294,6 +296,7 @@
     function insertConversation(mensagens) {
         listMessagesEl.empty()
         mensagens.forEach((e) => appendConversation(e))
+        showLatestMessage()
 
     }
 
@@ -362,7 +365,7 @@
         }
     }
 
-    function appendConversation(askMsg) {
+    function appendConversation(askMsg, loading=true) {
         const getAutor = (autor) => {
             const autores = { 1: 'human', 2: 'ai' }
             return autores[autor] 
@@ -383,8 +386,18 @@
                     </div>
                 </div>
             `
-
+        
         listMessagesEl.append(row)
+    }
+
+    function removeLoading() {
+        $('#list-messages .fa-spinner').parent().parent().parent().remove()
+    }
+
+    function showLatestMessage() {
+        const conversation = document.querySelector('#conversation')
+        const messages = conversation.querySelectorAll('.chat-message-row')
+        messages[messages.length -1].scrollIntoView()
     }
 
     function sendAsk(texto) {
@@ -394,16 +407,31 @@
             autor: 1
         }
 
-        $.ajax({
-            type:'POST',
-            url: `/documento/api/mensagem/`,
-            data: data, 
-            beforeSend:() => appendConversation(data),
-            success: (response) => {
-                appendConversation(response)
-                
-            },
-        })
+        if(texto) {
+            $.ajax({
+                type:'POST',
+                url: `/documento/api/mensagem/`,
+                data: data, 
+                beforeSend:() => {
+                    btnSendAsk.prop("disabled", true);
+                    appendConversation(data)
+                    appendConversation({
+                        autor: 2,
+                        texto: "<i class='fa-solid fa-spinner fa-spin'></i>"
+                    })
+                    showLatestMessage()
+                },
+                success: (response) => {
+                    removeLoading()
+                    appendConversation(response, false)
+                },
+                error: () =>  removeLoading(),
+                complete: () => {
+                    showLatestMessage()
+                    btnSendAsk.prop("disabled", false);
+                }
+            })
+        }
     }
 
 

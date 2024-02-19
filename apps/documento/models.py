@@ -31,7 +31,7 @@ def criar_mensagens_chat(sender, instance, **kwargs):
                     ('file', ('file', file, 'application/octet-stream'))
                 ]
                 headers = {
-                    'x-api-key': 'sec_CPSnpaMaVcZyatxIozz9Jv8saovN1tbN'
+                    'x-api-key': 'sec_16KMXQwy0VcwkGz7xYuDY9PxWGGgsHM6'
                 }
 
                 response = requests.post(
