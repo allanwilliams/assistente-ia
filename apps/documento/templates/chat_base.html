@@ -1,0 +1,28 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Document</title>
+        <link rel="stylesheet" href="//stackpath.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+        <link rel="stylesheet" href="{% static 'admin/plugins/select2/select2.min.css' %}">
+        <link rel="stylesheet" href="{% static 'css/custom_adminlte/base-v4.css' %}?v=1.0">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" />
+        {% block extrastyle %}{% endblock %}
+    </head>
+<body>
+    
+    {% block conteudo %}{% endblock %}
+
+
+    <script src="{% static 'admin/plugins/jQuery/jquery-2.2.3.min.js' %}"></script>
+    <!-- jQuery UI 1.11.4 -->
+    <script src="{% static 'admin/plugins/jQueryUI/jquery-ui.min.js' %}"></script>
+    <!-- Select2 -->
+    <script src="{% static 'admin/plugins/select2/select2.full.min.js' %}"></script>
+    {% block extrajs %} {% endblock %}
+</body>
+</html>
+

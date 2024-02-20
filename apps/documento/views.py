@@ -11,4 +11,4 @@ def chat(request):
         'chats': chats
     }
 
-    return render(request, 'documento.html', context)
+    return render(request, 'chat.html', context)
