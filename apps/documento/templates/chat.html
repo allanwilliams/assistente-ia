@@ -180,11 +180,7 @@
                 </div>
             </div>
             <div class="select-chat-section">
-                <div id="list-chats">
-                    {% for c in chats %}
-                    <div class="choice-link-chat btn" data-id="{{c.id}}">{{c.titulo}}</div>
-                    {% endfor %}
-                </div>
+                <div id="list-chats"></div>
             </div>
         </div>
 
@@ -212,6 +208,7 @@
     </section>
    
     <input type="hidden" id="chat-id-open">
+    <input type="hidden"  id="user-id" value="{{request.user.id}}">
 </main>
 
 {% endblock %}
@@ -228,7 +225,7 @@
     const body = document.querySelector('body')
     const dropArea = document.querySelector(".drag-area")
     const fileInput = dropArea.querySelector(".file-input")
-    
+    const userId = $("#user-id")
 
     let chatAtual = null
 
@@ -291,8 +288,39 @@
             const target = e.dataTransfer;
             newChat(target)
         });
+        
+        if(userId.val()) {
+            getUserChats(userId.val())
+            .then((data) => data.json())
+            .then((data) => fillListChats(data.results))
+            .then(() => {
+                const url = window.location.search
+                const urlParams = new URLSearchParams(url);
+                const documento = urlParams.get('documento')
+                getChat(documento)
+                    
+                    
+                let links = $('.choice-link-chat')
+                links.removeClass('btn-info')
+
+                let link = links.filter((i, e) => e.attributes['data-id'].value === documento)
+                if(link.length > 0) {
+                    link[0].classList.add('btn-info')
+                }
+            })
+        }
     })
 
+
+    function fillListChats(chats) {
+        let list = ''
+
+        chats.forEach((c) => {
+           list += `<div class="choice-link-chat btn" data-id="${c.id}">${c.titulo}</div>`
+        })
+
+        listChatsEl.html(list)
+    }
 
     
     function fillChat(data) {
@@ -328,6 +356,7 @@
 
     function updateChatList(data, type) {
         if(type === 'add') {
+            $('.choice-link-chat').removeClass('btn-info')
             listChatsEl.append(`<div class="choice-link-chat btn btn-info" data-id="${data.id}">${data.titulo}</div>`)
         }
         if(type === 'remove') {
@@ -362,8 +391,9 @@
         if(chatId) {
             $.ajax({
                 type: 'GET',
-                url: `/documento/api/chat/${chatId}`,
+                url: `/documento/api/chat/${chatId}/?criado_por=${userId.val()}&ativo=true`,
                 success: (data) => fillChat(data),
+                error: (erro) => console.log(erro)
             })
         } else {
             clearChat()

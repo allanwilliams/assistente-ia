@@ -5,13 +5,25 @@ import requests
 from rest_framework.response import Response
 from rest_framework import status
 import json
+from django_filters import rest_framework as filters
 from apps.documento.choices import CHAT_AUTOR_IA
+
+
+class ChatFilter(filters.FilterSet):
+    class Meta:
+        model = Chat
+        fields = {
+            'criado_por': ['exact'],
+            'ativo': ['exact'],
+        }
 
 
 class ChatViewSet(ModelViewSet):
     queryset = Chat.objects.all()
     serializer_class = ChatSerializer
+    filterset_class = ChatFilter
     http_method_names = ['get', 'patch', 'post', 'delete','put']
+
 
 class MensagemViewSet(ModelViewSet):
     queryset = Mensagem.objects.all()
