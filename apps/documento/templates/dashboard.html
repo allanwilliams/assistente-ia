@@ -5,56 +5,65 @@
 
 <style>
 
-    body{
-        background-color: #fbfbfb3b;
-    }
-    .texto-body-input{
-        border: 1px dashed gray;
-        background-color: white;
-        padding: 0.2em;
-        height: 150px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-    .texto-body{
-        padding: 6em;
-        background-color: aliceblue;
-        border-radius: 10px;
-    }
-    .conteudo{
-        width: 70%;
-        margin: 0 auto;
-        display: flex;
-        flex-direction: column;
-        gap: 3em;
-        height: 80vh;
-    }
+body{
+    
+}
+div{
+    background-color: #ffffff;
+}
+.texto-body-input{
+    border: 1px dashed gray;
+    background-color: white;
+    padding: 0.2em;
+    height: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.texto-body{
+    padding: 6em;
+    background-color: #c5c5c512;
+    border-radius: 10px;
+}
+.conteudo{
+    width: 70%;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 3em;
+    height: 80vh;
+}
 
-    #grid-documentos-chats{
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 50px;
-        /* justify-items: center; */
-    }
+#grid-documentos-chats ,#grid-pergunta-chats{
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 50px;
+    /* justify-items: center; */
+}
 
-    .texto-header{
-        text-align: center;
-    }
+.texto-header{
+    text-align: center;
+    color: style='color:#fff;';
+}
 
-    .titulo-header{
-        font-weight: 900;
-        font-size: 18px;
-    }
+.titulo-header{
+    font-weight: 900;
+    font-size: 18px;
+    background: radial-gradient(circle, rgba(0, 94, 60, 1) 0%, rgba(1, 54, 34, 1) 74%, rgba(0, 54, 34, 1) 100%);
+    color: #ffffff;
+}
+.texto-header{
+    background: radial-gradient(circle, rgba(0, 94, 60, 1) 0%, rgba(1, 54, 34, 1) 74%, rgba(0, 54, 34, 1) 100%);
+}
 
-    .conteudo-documentos{
-        display: flex;
-        flex-direction: column;
-        gap: 1em;
-        box-shadow: 0px 2px 3px 0px gray;
-        padding: 2em;
-        border-radius: 1px 1px 5px 5px;
-    }
+.conteudo-documentos{
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+    box-shadow: 0px 2px 3px 0px gray;
+    padding: 2em;
+    border-radius: 1px 1px 5px 5px;
+}
 
 .documento-chat{
     display: flex;
@@ -87,13 +96,41 @@
     justify-content: center;    
 }
 
-.btn-remove-chat {
+.btn-remove-chat,.btn-remove-question {
     cursor: pointer;
 }
 
 .drag-active {
         background-color: #e9e9e94b !important;
     }
+
+.nova-pergunta-bloco{
+    display: flex;
+    gap: 1em;
+    justify-content: flex-start;
+    align-items: baseline;
+}
+input[type=text]{
+    /* border: none; */
+    width: 100%;
+
+}
+.btn-salvar{
+    border: none;
+    background-color: #00c0ef;
+    padding: 0.3em;
+    width: 5em;
+    border-radius: 3px;
+    font-weight: 900;
+    color: white;    
+}
+
+.question-div{
+    color: #337ab7;
+    display: flex;
+    gap: 10px;
+    align-items: baseline;
+}
 </style>
 {% endblock %}
 
@@ -101,8 +138,8 @@
 <div class="conteudo">
 
 <div class="texto-header">
-   <img src="{% static 'images/dpge.png' %}" alt="" width="450" style="padding: 1em 0;">
-   <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+   <img src="{% static 'imagens/cropped-LOGO-DEFENSORIA-HORIZONTAL-BRANCA_2023-4.png' %}" alt="" width="450" style="padding: 1em 0;">
+   <p style="color:#fff">Assistente de Documento Juridico ver:0.3</p>
 </div>
 
 <div class="texto-body">
@@ -118,13 +155,22 @@
 </div>
 
 <div>
-<div class="titulo-header">Meus documentos</div>
-<div class="conteudo-documentos">
-<div id="grid-documentos-chats"></div>
+    <div class="titulo-header">Perguntas Favoritas</div>
+    <div class="conteudo-documentos">
+    <div id="grid-pergunta-chats">
+    </div>
+    </div>
 </div>
+
+<div>
+    <div class="titulo-header">Meus documentos</div>
+    <div class="conteudo-documentos">
+        <div id="grid-documentos-chats"></div>
+    </div>
+</div>
+<br>
 </div>
 <input type="hidden"  id="user-id" value="{{request.user.id}}">
-</div>
 {% endblock %}
 
 {% block extrajs %}
@@ -133,6 +179,7 @@
     const fileInput = dropArea.querySelector(".file-input")
     const userId = $("#user-id")
     const gridChats = $("#grid-documentos-chats")
+    const gridQuestion = $("#grid-pergunta-chats")
     const body = document.querySelector('body')
     
     $(document).ready(() => {
@@ -146,7 +193,14 @@
             deleteChat(chatId)
             event.target.parentElement.parentElement.parentElement.remove()
         }
+
+        if(event.target.classList.contains('btn-remove-question')) {
+            const chatId = event.target.attributes['data-id'].value
+            deleteQuestion(chatId)
+            event.target.parentElement.parentElement.remove()
+        }        
     })
+
 
     fileInput.addEventListener("change", function (e) {
             const target = e.target;
@@ -214,7 +268,7 @@
                                 <img src="{% static 'images/icondoc.jpeg' %}" width="100" alt="">
                             </div>
                             <div>
-                                <i color: gray;' data-remove-id='${c.id}' class='fa fa-trash btn-remove-chat'></i>
+                                <i style='color:#00c0ef;' data-remove-id='${c.id}' class='fa fa-trash btn-remove-chat'></i>
                             </div>  
                         </div>                            
                             <div>
@@ -238,7 +292,42 @@
                 },
                 error: () => {}
             })
-        }
+        } 
+    }
+
+    function deleteQuestion(chatId) {
+        if(chatId) {
+            $.ajax({
+                type: 'PATCH',
+                url: `/documento/api/mensagem/${chatId}/`,
+                data: {
+                    is_favorito: false
+                },
+                success: (data) => {
+                    
+                },
+                error: () => {}
+            })
+        } 
     }    
+
+    function getQuestion(id){
+        fetch(`/documento/api/mensagem/?criado_por=${id}&is_favorito=true`)
+        .then(res=>res.json())
+        .then(data=>{
+            const questions = data.results.reduce((acc,d) => {
+                acc += `<div class='question-div'>
+                            <i style='font-weight: 900;' class="fa-regular fa-circle-question"></i>
+                            <div>
+                                ${d.texto}
+                                <i style='color:#00c0ef;' data-id='${d.id}' class="fa fa-trash btn-remove-question"></i>
+                            </div>
+                        </div>`
+                return acc
+            },'')
+            gridQuestion.html(questions)
+        })
+    }     
+    getQuestion(userId.val())      
 </script>
 {% endblock %}

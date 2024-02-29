@@ -7,7 +7,6 @@ from django.dispatch import receiver
 import requests
 import os
 from apps.users.models import User
-
 class Chat(BaseModel):
     titulo = models.CharField('Titulo', max_length=255)
     documento = models.FileField('Documento', upload_to='documento_chat')
@@ -44,17 +43,25 @@ def criar_mensagens_chat(sender, instance, **kwargs):
                 response = requests.post(
                     'https://api.chatpdf.com/v1/sources/add-file', headers=headers, files=files)
 
-                msg_inicial = 'Bem vindo ao dede chat. Faça a primeira pergunda.'
+                msg_inicial = 'Bem vindo ao Dede chat.'
 
                 if response.status_code == 200:
                     instance.chatpdf_source_id = response.json()['sourceId']
                     instance.save()
+
                 else:
                     msg_inicial = 'Houve um erro ao processar o PDF'
 
 
                 nova_mensagem = Mensagem(texto=msg_inicial, chat_id=instance.id, autor=CHAT_AUTOR_IA, criado_em=datetime.now())
                 nova_mensagem.save()
+
+                if response.status_code == 200 and instance.chatpdf_source_id:
+                    from .utils import create_questions
+                    question = 'faca topicos com valor da causa, condecao honorario, certidao transito julgado, comprimento de sentenca'
+                    CQ = create_questions(chat=instance.id,texto=question,autor=CHAT_AUTOR_IA,not_save = True)
+
+               
         except Exception as e:
             print('erro', e)
 
@@ -67,27 +74,10 @@ class Mensagem(BaseModel):
         related_name='%(class)s_chat',
     )
     autor = models.IntegerField('Autor', choices=CHOICES_CHAT_AUTOR)
+    is_favorito = models.BooleanField('Favorito por usuário',default=False)
 
     def __str__(self) -> str:
         return f'{self.chat} - {self.get_autor_display()}'
     
     class Meta:
         verbose_name_plural = 'Mensagens'
-
-
-
-
-
-# class PerguntaUsuario(BaseModel):
-#     pergunta = models.TextField('Pergunta')
-#     usuario = models.ForeignKey(
-#         User,
-#         on_delete=models.DO_NOTHING,
-#         related_name='%(class)s_usuario',
-#     )
-
-#     def __str__(self) -> str:
-#         return f'{self.pergunta}'
-    
-#     class Meta:
-#         verbose_name_plural = 'Perguntas do usuário'

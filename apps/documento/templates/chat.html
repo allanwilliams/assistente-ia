@@ -163,6 +163,37 @@
     .btn-remove-chat {
         cursor: pointer;
     }
+
+    .question-box{
+        position: absolute;
+        bottom: 3em;
+        box-shadow: 0px 0px 4px 0px gray;
+        padding: 1em;
+        font-size: 1.2rem;
+        border-radius: 5px;
+        background-color: white;
+        opacity: .9;
+    }
+    .hide{
+        display: none;
+    }
+    ul{
+        list-style-type: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    li{
+        padding: 0.3em;
+        background-color: #1777ff;
+        margin: 0.3em;
+        border-radius: 5px;
+        color: white;
+    }
+
+    .question{
+        cursor: pointer;
+    }
 </style>
 {% endblock %}
 
@@ -197,7 +228,11 @@
                 </div>
                 <div id="chat-footer">
                     <form id="chat-form-input">
-                        <input type="text" id="chat-input-ask" />
+                        <div id="questionBox" class="hide question-box">
+                            <ul id="lista-question">
+                            </ul>
+                        </div>
+                        <input autocomplete="off" type="text" id="chat-input-ask" />
                         <button type="submit" class="btn" id="btn-send-ask">
                             <i class="fa-solid fa-paper-plane"></i>
                         </button>
@@ -226,6 +261,11 @@
     const dropArea = document.querySelector(".drag-area")
     const fileInput = dropArea.querySelector(".file-input")
     const userId = $("#user-id")
+    const listaQuestion = $('#lista-question')
+    const inputask = document.querySelector('#chat-input-ask')
+    const questionBox = document.querySelector('#questionBox')
+
+    
 
     let chatAtual = null
 
@@ -251,6 +291,30 @@
             const chatId = event.target.attributes['data-remove-id'].value
             deleteChat(chatId)
         }
+
+
+        if(event.target.classList.contains('salvar-favoritos')) {
+            const msgID = event.target.attributes['data-id'].value
+            const favorito = event.target.attributes['data-favorito'].value
+            event.target.attributes['data-favorito'].value = !(favorito === 'true')
+            
+            saveQuestion(msgID, favorito)
+            
+            event.target.classList.remove('fa-solid')
+            event.target.classList.remove('fa-regular')
+            
+            const CF = (val) => {
+                event.target.classList.add(val)
+            } 
+
+            (favorito === 'true') ? CF('fa-regular') : CF('fa-solid');
+        }
+        if(event.target.classList.contains('question')) {
+            inputTxtAsk.val(event.target.innerText)
+            listaQuestion.html('')
+            questionBox.classList.add('hide')            
+        }
+        
     })
 
     $(document).ready(() => {
@@ -267,7 +331,12 @@
         dropArea.onclick = () => {
             fileInput.click();
         };
-
+        let delaySearchQestion
+        inputask.addEventListener('input',(e)=>{
+            clearTimeout(delaySearchQestion)
+            delaySearchQestion = setTimeout(()=>{getQuestion(userId.val(),e.target.value)},500)
+        })
+        
         fileInput.addEventListener("change", function (e) {
             const target = e.target;
             newChat(target)
@@ -421,8 +490,14 @@
             const autores = { 1: 'human', 2: 'ai' }
             return autores[autor] 
         }
+        const getFavoriteMSG = () => {
+            if(askMsg.id && askMsg.autor === 1) {
+                return `<i data-id='${askMsg.id}' style='cursor:pointer;' data-favorito='${(askMsg.is_favorito)}' class='fa-${(askMsg.is_favorito) ?  'solid' : 'regular'}  fa-star salvar-favoritos'></i>`
+            }
+            return ''
+        }
 
-        var regex = /\[P(\d)\]/g;
+        var regex = /\[P(\d+)\]/g;
 
         let textoFormatado = askMsg.texto.replaceAll('\n', '<br>')
 
@@ -433,7 +508,7 @@
         let row = `
                 <div class="chat-message-row ${getAutor(askMsg.autor)}">
                     <div class="chat-message" style="overflow: hidden;">
-                        <div class="chat-message-txt">${textoFormatado}</div>
+                        <div class="chat-message-txt">${textoFormatado} ${getFavoriteMSG()}
                     </div>
                 </div>
             `
@@ -485,6 +560,52 @@
         }
     }
 
+    function saveQuestion(id, is_favorito){
+        const data = {
+            is_favorito: !(is_favorito === 'true')
+        }
+        if(id) {
+            $.ajax({
+                type:'PATCH',
+                url: `/documento/api/mensagem/${id}/`,
+                data: data, 
+                success: (response) => {
+                    console.log(response)
+                },
+                error: () =>  removeLoading(),
+                complete: () => {
+                    // showLatestMessage()
+                    // btnSendAsk.prop("disabled", false);
+                }
+            })
+        }
+    }
+
+    function getQuestion(id,question){
+        if (question.trim().length > 0){
+        fetch(`/documento/api/mensagem/?criado_por=${id}&is_favorito=true&texto__icontains=${question}`)
+        .then(res=>res.json())
+        .then(data=>{
+            const questions = data.results.reduce((acc,d) => {
+                acc += `<li class='question'>${d.texto}</li>`
+                return acc
+            },'')
+
+            if (questions.length > 0){
+                questionBox.classList.remove('hide')
+                listaQuestion.html(questions)
+            }else{
+                listaQuestion.html('')
+                questionBox.classList.add('hide')
+            }
+            
+        })
+    }else{
+        listaQuestion.html('')
+        questionBox.classList.add('hide')
+
+    }
+    }
 
 </script>
 {% endblock %}

@@ -8,8 +8,6 @@ class MensagemSerializer(ModelSerializer):
         model = Mensagem
         fields = '__all__'
 
-
-
 class ChatSerializer(ModelSerializer):
     mensagens = MensagemSerializer(source='mensagem_chat', many=True, read_only=True)
 

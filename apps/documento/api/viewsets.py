@@ -7,7 +7,7 @@ from rest_framework import status
 import json
 from django_filters import rest_framework as filters
 from apps.documento.choices import CHAT_AUTOR_IA
-
+from ..utils import create_questions
 
 class ChatFilter(filters.FilterSet):
     class Meta:
@@ -15,6 +15,16 @@ class ChatFilter(filters.FilterSet):
         fields = {
             'criado_por': ['exact'],
             'ativo': ['exact'],
+        }
+
+
+class MensagemFilter(filters.FilterSet):
+    class Meta:
+        model = Mensagem
+        fields = {
+            'criado_por': ['exact'],
+            'is_favorito': ['exact'],
+            'texto':['icontains'],
         }
 
 
@@ -28,6 +38,7 @@ class ChatViewSet(ModelViewSet):
 class MensagemViewSet(ModelViewSet):
     queryset = Mensagem.objects.all()
     serializer_class = MensagemSerializer
+    filterset_class = MensagemFilter
     http_method_names = ['get', 'patch', 'post', 'delete','put']
 
 
@@ -37,37 +48,37 @@ class MensagemViewSet(ModelViewSet):
         texto = request.POST.get('texto')
         autor = request.POST.get('autor')
 
-        nova_msg = Mensagem(chat_id=chat, texto=texto, autor=autor)
-        nova_msg.save()
+        CQ = create_questions(chat=chat,texto=texto,autor=autor)
+        # nova_msg = Mensagem(chat_id=chat, texto=texto, autor=autor)
+        # nova_msg.save()
 
-        chatpdf_source_id = nova_msg.chat.chatpdf_source_id
+        # chatpdf_source_id = nova_msg.chat.chatpdf_source_id
 
-        headers = {
-            'x-api-key': 'sec_16KMXQwy0VcwkGz7xYuDY9PxWGGgsHM6',
-            "Content-Type": "application/json",
-        }
+        # headers = {
+        #     'x-api-key': 'sec_16KMXQwy0VcwkGz7xYuDY9PxWGGgsHM6',
+        #     "Content-Type": "application/json",
+        # }
 
-        data = {
-            "referenceSources": True,
-            'sourceId': chatpdf_source_id,
-            'messages': [
-                {
-                    'role': "user",
-                    'content': texto,
-                }
-            ]
-        }
+        # data = {
+        #     "referenceSources": True,
+        #     'sourceId': chatpdf_source_id,
+        #     'messages': [
+        #         {
+        #             'role': "user",
+        #             'content': texto,
+        #         }
+        #     ]
+        # }
 
-        response = requests.post(
-            'https://api.chatpdf.com/v1/chats/message', headers=headers, json=data)
+        # response = requests.post(
+        #     'https://api.chatpdf.com/v1/chats/message', headers=headers, json=data)
 
-        resposta_chatpdf = Mensagem(chat_id=chat, texto='', autor=CHAT_AUTOR_IA)
+        # resposta_chatpdf = Mensagem(chat_id=chat, texto='', autor=CHAT_AUTOR_IA)
         
-        if response.status_code == 200:
-            resposta_chatpdf.texto = response.json()['content']
-        else:
-            resposta_chatpdf.texto = 'Erro ao responder'
+        # if response.status_code == 200:
+        #     resposta_chatpdf.texto = response.json()['content']
+        # else:
+        #     resposta_chatpdf.texto = 'Erro ao responder'
 
-        resposta_chatpdf.save()
-
-        return Response({ "texto": resposta_chatpdf.texto, "autor": resposta_chatpdf.autor }, status=status.HTTP_201_CREATED)
+        # resposta_chatpdf.save()
+        return Response({ "texto": CQ.texto, "autor": CQ.autor }, status=status.HTTP_201_CREATED)
