@@ -4,12 +4,8 @@
 {% block extrastyle %}
 
 <style>
-
-body{
-    
-}
-div{
-    background-color: #ffffff;
+body {
+    background: radial-gradient(circle, rgba(0, 94, 60, 1) 0%, rgba(1, 54, 34, 1) 74%, rgba(0, 54, 34, 1) 100%);
 }
 .texto-body-input{
     border: 1px dashed gray;
@@ -22,7 +18,7 @@ div{
 }
 .texto-body{
     padding: 6em;
-    background-color: #c5c5c512;
+    background-color: #eaeaea;
     border-radius: 10px;
 }
 .conteudo{
@@ -30,15 +26,13 @@ div{
     margin: 0 auto;
     display: flex;
     flex-direction: column;
-    gap: 1em;
-    height: 80vh;
+    gap: 2em;
 }
 
 #grid-documentos-chats ,#grid-pergunta-chats{
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 50px;
-    /* justify-items: center; */
 }
 
 .texto-header{
@@ -52,9 +46,7 @@ div{
     background: radial-gradient(circle, rgba(0, 94, 60, 1) 0%, rgba(1, 54, 34, 1) 74%, rgba(0, 54, 34, 1) 100%);
     color: #ffffff;
 }
-.texto-header{
-    background: radial-gradient(circle, rgba(0, 94, 60, 1) 0%, rgba(1, 54, 34, 1) 74%, rgba(0, 54, 34, 1) 100%);
-}
+
 
 .conteudo-documentos{
     display: flex;
@@ -63,6 +55,7 @@ div{
     box-shadow: 0px 2px 3px 0px gray;
     padding: 2em;
     border-radius: 1px 1px 5px 5px;
+    background-color: #fff;
 }
 
 .documento-chat{
@@ -146,41 +139,37 @@ input[type=text]{
 
 {% block conteudo %}
 <div class="conteudo">
-    <div class="cab">
-        <span><i class="fa-solid fa-user"></i><span> {{request.user.name}}</span></span>
-        <span> <a href="/admin/logout"><i style="color:white;" class="fa-regular fa-circle-xmark"></i></a></span>
+    <div class="texto-header">
+    <img src="{% static 'imagens/cropped-LOGO-DEFENSORIA-HORIZONTAL-BRANCA_2023-4.png' %}" alt="" width="450" style="padding: 1em 0;">
+    <p style="color:#fff">Assistente de Documento Juridico ver:0.3</p>
     </div>
-<div class="texto-header">
-   <img src="{% static 'imagens/cropped-LOGO-DEFENSORIA-HORIZONTAL-BRANCA_2023-4.png' %}" alt="" width="450" style="padding: 1em 0;">
-   <p style="color:#fff">Assistente de Documento Juridico ver:0.3</p>
-</div>
-<div class="texto-body">
-    <!-- <div class="texto-body-input"> -->
-        <div class="drag-area">
-            <div class="drag-area-content">
-                <div><i class="fa-sharp fa-solid fa-cloud-arrow-up" style="color:#00c0ef;font-size:3em"></i></div>
-                <div class="drag-file">Arraste e solte ou <span style="color: #00c0ef;text-decoration: underline;cursor: pointer;"> clique aqui!</span></div>
-                <input type="file" class="file-input" style="display: none;" />
-            </div>  
-        </div>      
-    <!-- </div> -->
-</div>
+    <div class="texto-body">
+        <!-- <div class="texto-body-input"> -->
+            <div class="drag-area">
+                <div class="drag-area-content">
+                    <div><i class="fa-sharp fa-solid fa-cloud-arrow-up" style="color:#00c0ef;font-size:3em"></i></div>
+                    <div class="drag-file">Arraste e solte ou <span style="color: #00c0ef;text-decoration: underline;cursor: pointer;"> clique aqui!</span></div>
+                    <input type="file" class="file-input" style="display: none;" />
+                </div>  
+            </div>      
+        <!-- </div> -->
+    </div>
 
-<div id="perguntas_favoritas">
-    <div class="titulo-header">Perguntas Favoritas</div>
-    <div class="conteudo-documentos">
-    <div id="grid-pergunta-chats">
+    <div id="perguntas_favoritas">
+        <div class="titulo-header">Perguntas Favoritas</div>
+        <div class="conteudo-documentos">
+        <div id="grid-pergunta-chats">
+        </div>
+        </div>
     </div>
-    </div>
-</div>
 
-<div id="meus_documentos">
-    <div class="titulo-header">Meus documentos</div>
-    <div class="conteudo-documentos">
-        <div id="grid-documentos-chats"></div>
-    </div>
-</div> 
-<br>
+    <div id="meus_documentos">
+        <div class="titulo-header">Meus documentos</div>
+        <div class="conteudo-documentos">
+            <div id="grid-documentos-chats"></div>
+        </div>
+    </div> 
+    <br>
 </div>
 <input type="hidden"  id="user-id" value="{{request.user.id}}">
 {% endblock %}
@@ -193,8 +182,10 @@ input[type=text]{
     const gridChats = $("#grid-documentos-chats")
     const gridQuestion = $("#grid-pergunta-chats")
     const body = document.querySelector('body')
+    const loader = $("#preloader")
     
     $(document).ready(() => {
+        // loader.fadeIn()
         $.ajaxSetup({
             headers: {"X-CSRFToken": '{{ csrf_token }}' },
         });
@@ -261,12 +252,14 @@ input[type=text]{
         $.ajax({
             type:'POST',
             url: `/documento/api/chat/`,
+            beforeSend: () => loader.fadeIn(),
             data: formData,
             contentType: false,
             processData: false,
             success: (data) => {
                 window.location.href = `/documento/chat/?documento=${data.id}`
-            }
+            },
+            complete: () => loader.fadeOut()
         })
 
     }

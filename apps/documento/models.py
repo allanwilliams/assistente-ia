@@ -43,7 +43,7 @@ def criar_mensagens_chat(sender, instance, **kwargs):
                 response = requests.post(
                     'https://api.chatpdf.com/v1/sources/add-file', headers=headers, files=files)
 
-                msg_inicial = 'Bem vindo ao Dede chat.'
+                # msg_inicial = 'Bem vindo ao Dede chat.'
 
                 if response.status_code == 200:
                     instance.chatpdf_source_id = response.json()['sourceId']
@@ -51,15 +51,14 @@ def criar_mensagens_chat(sender, instance, **kwargs):
 
                 else:
                     msg_inicial = 'Houve um erro ao processar o PDF'
+                    nova_mensagem = Mensagem(texto=msg_inicial, chat_id=instance.id, autor=CHAT_AUTOR_IA, criado_em=datetime.now())
+                    nova_mensagem.save()
 
-
-                nova_mensagem = Mensagem(texto=msg_inicial, chat_id=instance.id, autor=CHAT_AUTOR_IA, criado_em=datetime.now())
-                nova_mensagem.save()
-
-                if response.status_code == 200 and instance.chatpdf_source_id:
-                    from .utils import create_questions
-                    question = 'faca topicos com valor da causa, condecao honorario, certidao transito julgado, comprimento de sentenca'
-                    CQ = create_questions(chat=instance.id,texto=question,autor=CHAT_AUTOR_IA,not_save = True)
+                # Apenas para Honoráios
+                # if response.status_code == 200 and instance.chatpdf_source_id:
+                #     from .utils import create_questions
+                #     question = 'faca topicos com valor da causa, condecao honorario, certidao transito julgado, comprimento de sentenca'
+                #     CQ = create_questions(chat=instance.id,texto=question,autor=CHAT_AUTOR_IA,not_save = True)
 
                
         except Exception as e:

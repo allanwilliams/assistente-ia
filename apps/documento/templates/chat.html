@@ -6,8 +6,8 @@
         position: relative;
         overflow: hidden;
         display: flex;
-        height: 100vh;
-        width: 100vw;
+        height: calc(100vh - 46px);
+        width: 100%;
     }
     #document #toolbar {
         flex: 13 1 0px;
@@ -177,13 +177,13 @@
     .hide{
         display: none;
     }
-    ul{
+    ul {
         list-style-type: none;
         margin: 0;
         padding: 0;
     }
 
-    li{
+    li.question {
         padding: 0.3em;
         background-color: #1777ff;
         margin: 0.3em;
@@ -191,7 +191,13 @@
         color: white;
     }
 
+
     .question{
+        cursor: pointer;
+    }
+
+    .btn-send-fake {
+        color: #1777ff;
         cursor: pointer;
     }
 </style>
@@ -264,6 +270,7 @@
     const listaQuestion = $('#lista-question')
     const inputask = document.querySelector('#chat-input-ask')
     const questionBox = document.querySelector('#questionBox')
+    const loader = $("#preloader")
 
     
 
@@ -292,7 +299,6 @@
             deleteChat(chatId)
         }
 
-
         if(event.target.classList.contains('salvar-favoritos')) {
             const msgID = event.target.attributes['data-id'].value
             const favorito = event.target.attributes['data-favorito'].value
@@ -309,16 +315,22 @@
 
             (favorito === 'true') ? CF('fa-regular') : CF('fa-solid');
         }
+
         if(event.target.classList.contains('question')) {
             inputTxtAsk.val(event.target.innerText)
             listaQuestion.html('')
             questionBox.classList.add('hide')            
+        } 
+
+        if(event.target.classList.contains('btn-send-fake')) {
+            const msgID = event.target.attributes['data-id'].value
+            const text = $(`#${msgID}`).text()
+            showLatestMessage()
+            sendAsk(text)
         }
-        
     })
 
     $(document).ready(() => {
-
         $('select:not(.filtered):not(.admin-autocomplete)').select2({dropdownAutoWidth : true});
 
         chatFormInput.submit((e) => {
@@ -414,10 +426,24 @@
     function insertConversation(mensagens) {
         listMessagesEl.empty()
 
-        const fakeConversation = {
-            
-        }
-
+        const fakeConversation = `
+            <div class="chat-message-row ai">
+                <div class="chat-message" style="overflow: hidden;">
+                    <div class="chat-message-txt">
+                        <p><b>Bem vindo! Temos aqui algumas perguntas pré-definidas. Se desejar submetê-las clique no ícone de enviar ao lado de cada uma.</b></p>
+                        <ul>
+                            <li><i class="btn-send-fake fa-solid fa-paper-plane" data-id="msg-default-1"></i> <span id="msg-default-1" >Resuma detalhadamente a petição inicial indicando os principais argumentos e pedidos</span></li>
+                            <li><i class="btn-send-fake fa-solid fa-paper-plane" data-id="msg-default-2"></i> <span id="msg-default-2">Resuma detalhadamente a contestação indicando os principais argumentos e pedidos</span></li>
+                            <li><i class="btn-send-fake fa-solid fa-paper-plane" data-id="msg-default-3"></i> <span id="msg-default-3">Resuma detalhadamente a sentença  indicando os principais argumentos e a decisão final</span></li>
+                            <li><i class="btn-send-fake fa-solid fa-paper-plane" data-id="msg-default-4"></i> <span id="msg-default-4">Resuma detalhadamente o recurso indicando os principais argumentos e pedidos</span></li>
+                            <li><i class="btn-send-fake fa-solid fa-paper-plane" data-id="msg-default-5"></i> <span id="msg-default-5">Resuma detalhadamente o acórdão indicando os principais argumentos e a decisão final</span></li>
+                            <li><i class="btn-send-fake fa-solid fa-paper-plane" data-id="msg-default-6"></i> <span id="msg-default-6">Resuma detalhadamente o todos processo indicando as principais informações da petição inicial - contestação - sentença - recurso - acórdão -  indicando a página de cada de forma que seja possível acessar facilmente</span></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        `
+        listMessagesEl.append(fakeConversation)
 
         mensagens.forEach((e) => appendConversation(e))
         showLatestMessage()
@@ -454,10 +480,12 @@
             data: formData,
             contentType: false,
             processData: false,
+            beforeSend:() => loader.fadeIn(),
             success: (data) => {
                 updateChatList(data, 'add')
                 fillChat(data)
-            }
+            },
+            complete: () => loader.fadeOut() 
         })
 
     }
@@ -514,7 +542,7 @@
         let row = `
                 <div class="chat-message-row ${getAutor(askMsg.autor)}">
                     <div class="chat-message" style="overflow: hidden;">
-                        <div class="chat-message-txt">${textoFormatado} ${getFavoriteMSG()}
+                        <div class="chat-message-txt">${textoFormatado} ${getFavoriteMSG()}</div>
                     </div>
                 </div>
             `
