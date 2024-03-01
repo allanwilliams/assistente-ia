@@ -413,6 +413,12 @@
 
     function insertConversation(mensagens) {
         listMessagesEl.empty()
+
+        const fakeConversation = {
+            
+        }
+
+
         mensagens.forEach((e) => appendConversation(e))
         showLatestMessage()
 
