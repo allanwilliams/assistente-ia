@@ -11,9 +11,23 @@
         <link rel="stylesheet" href="{% static 'css/custom_adminlte/base-v4.css' %}?v=1.0">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" />
         {% block extrastyle %}{% endblock %}
+        <style>
+            .cab{
+                display: flex;
+                flex-direction: row;
+                padding: 1em 0.5em;
+                box-shadow: 0px 2px 3px 0px #ccc;
+                justify-content: space-between;
+                background: radial-gradient(circle, rgba(0, 94, 60, 1) 0%, rgba(1, 54, 34, 1) 74%, rgba(0, 54, 34, 1) 100%);
+                color: #fff;
+            }
+        </style>
     </head>
 <body>
-    
+    <div class="cab">
+        <span><i class="fa-solid fa-user"></i><span> {{request.user.name}}</span></span>
+        <span> <a href="/admin/logout"><i style="color:white;" class="fa-regular fa-circle-xmark"></i></a></span>
+    </div>
     {% block conteudo %}{% endblock %}
 
 

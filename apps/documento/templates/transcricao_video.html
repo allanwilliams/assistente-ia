@@ -1,0 +1,57 @@
+{% extends 'admin/base.html' %}
+{% load static %}
+
+
+{% block page_content %}
+    <style>
+        ::cue {
+            background: gray; 
+            color: white;
+            font-size: 0.9em;
+        }
+
+        ::cue(b) {
+            color: white;
+        }
+    </style>
+    <div class="container">
+
+        <h2>Transcrição de vídeo</h2>
+
+        <!-- <video id="video" controls preload="metadata">
+            <source src="/media/video/motivacao.mp4" type="video/mp4" />
+            <track
+                label="English"
+                kind="subtitles"
+                srclang="en"
+                src="/media/legenda/motivacao.vtt"
+                default 
+            />
+        </video> -->
+        <form action="{% url 'documento:transcricao_video' %}" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="audio">Audio</label>
+                <input type="file" class="form-control-file" id="audio" name="audio">
+            </div>
+            <button type="submit" class="btn btn-primary">Enviar</button>
+        </form>
+        <br>
+        {% if transcricao %}
+        <video id="video" controls preload="metadata">
+            <source src="/media/video/{{video_name}}.mp4" type="video/mp4" />
+            <track
+                label="English"
+                kind="subtitles"
+                srclang="en"
+                src="/media/legenda/{{legenda_name}}.vtt"
+                default 
+            />
+        </video>
+        <div class="alert alert-success" role="alert">
+            <h4 class="alert-heading">Transcrição</h4>
+            <p>{{transcricao}}</p>
+        </div>
+        {% endif %}
+    </div>
+{% endblock %}

@@ -55,7 +55,7 @@
             {% if adminlte_welcome_sign.valid %}
             {{ adminlte_welcome_sign.welcome_sign }}
             {% else %}
-            {% trans 'Login and Enjoy' %}
+            {% comment %} {% trans 'Login and Enjoy' %} {% endcomment %}
             {% endif %}
         </p>
         <p class="text-center">{% trans "Thanks for spending some quality time with the Web site today." %}</p>

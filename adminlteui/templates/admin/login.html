@@ -8,13 +8,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>
-        {% get_adminlte_option 'site_title' as adminlte_site_title %}
-        {% if adminlte_site_title.valid %}
-        {{ adminlte_site_title.site_title }}
-        {% else %}
-        {{ site_title|default:_('Django site admin') }}
-        {% endif %}
-        | {% trans "Log in" %}
+        Dona DEDE - Seja bem-vindo!
     </title>
     <!-- Tell the browser to be responsive to screen width -->
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
@@ -25,7 +19,7 @@
     <!-- Ionicons -->
     <link rel="stylesheet" href="//cdn.bootcss.com/ionicons/2.0.1/css/ionicons.min.css">
     <!-- Theme style -->
-    <link rel="stylesheet" href={% static "admin/dist/css/AdminLTE.min.css" %}>
+    <link rel="stylesheet" href={% static "admin/adminlte-dist/css/AdminLTE.min.css" %}>
     <!-- iCheck -->
     <link rel="stylesheet" href={% static "admin/plugins/iCheck/square/blue.css" %}>
 
@@ -35,24 +29,71 @@
     <script src="//oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
     <script src="//oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
+
+    <style>
+        .login-box-body, .register-box-body{
+            border-radius: 5px;    
+        }
+        input{
+            border: none !important;
+            border-bottom: 1px solid #1ABB9C !important;
+        }
+
+        .btn-primary{
+            background-color: #E0A800;
+            border: 1px solid #ffc002;
+            border-radius: 5px !important;
+        }
+
+        .btn-primary:hover{
+            background-color: #b18501;
+            border: 1px solid #ac8102;
+            border-radius: 5px !important;
+        }
+
+        a{
+            color: #1ABB9C;
+        }
+    </style>
+
 </head>
 
-<body class="hold-transition login-page">
+<body class="hold-transition login-page" style="background-color: #133622;">
 
     <div class="login-box">
         <div class="login-logo">
-            <a href="/">
-                <b>
-                    {% get_adminlte_option 'site_header' as adminlte_site_header  %}
-                    {% if adminlte_site_header.valid %}
-                    {{ adminlte_site_header.site_header }}
-                    {% else %}
-                    {{ site_header }}
-                    {% endif %}
-                </b>
-            </a>
+            {% comment %} <img src="{% static 'nossa-defensoria.png' %}" height="50px"> {% endcomment %}
+            <h3 style='color:white;'>Assistente de Documentos<h3>
         </div>
-
+        <div>
+            {% block messages %}
+            {% if messages %}
+            {% for message in messages %}
+            {% if message.tags == 'success' %}
+            <div class="alert alert-success alert-dismissible">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                <h5><i class="icon fa fa-check"></i>{{ message|capfirst }}</h5>
+            </div>
+            {% elif message.tags == 'error' %}
+            <div class="alert alert-danger alert-dismissible">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                <h5><i class="icon fa fa-ban"></i>{{ message|capfirst }}</h5>
+            </div>
+            {% elif message.tags == 'warning' %}
+            <div class="alert alert-warning alert-dismissible">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                <h5><i class="icon fa fa-warning"></i>{{ message|capfirst }}</h5>
+            </div>
+            {% elif message.tags == 'info' %}
+            <div class="alert alert-info alert-dismissible">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                <h5><i class="icon fa fa-info"></i>{{ message|capfirst }}</h5>
+            </div>
+            {% endif %}
+            {% endfor %}
+            {% endif %}
+            {% endblock messages %}
+        </div>
         <!-- /.login-logo -->
         <div class="login-box-body">
             <p class="login-box-msg">
@@ -60,7 +101,7 @@
                 {% if adminlte_welcome_sign.valid %}
                 {{ adminlte_welcome_sign.welcome_sign }}
                 {% else %}
-                {% trans 'Login and Enjoy' %}
+                {% comment %} {% trans 'Login and Enjoy' %} {% endcomment %}
                 {% endif %}
             </p>
             <form action="{{ app_path }}" method="post">
@@ -80,16 +121,17 @@
                 <div class="form-group has-feedback">
                     <input id="id_password" name="password" type="password" class="form-control"
                         placeholder="{% trans 'password' %}" required>
-                    <span class="glyphicon glyphicon-lock form-control-feedback"></span>
+                    <label id='label-senha' title='Exibir senha' style='pointer-events: all;cursor: pointer;' class='form-control-feedback' for='mostrar-senha'><i id='icone' style='font-size: 1.2em' class='fa fa-eye'> </i></label>
                 </div>
                 <div class="row">
                     <div class="col-xs-8">
                         <div class="checkbox icheck">
                             <label>
-                                <input type="checkbox"> {% trans 'Remember me' %}
+                                <input id='lembreme' type="checkbox"> Lembre-me
                             </label>
                         </div>
-                    </div>
+                    </div>                    
+                    <input style='display: none' id='mostrar-senha' name='mostrar-senha' type='checkbox' />
                     <!-- /.col -->
                     <div class="col-xs-4">
                         <button type="submit" class="btn btn-primary btn-block btn-flat">{% trans "Log in" %}</button>
@@ -97,8 +139,7 @@
                     <!-- /.col -->
                 </div>
             </form>
-            
-            <!--<div class="social-auth-links text-center">-->
+                        <!--<div class="social-auth-links text-center">-->
             <!--<p>- {% trans "Other" %} -</p>-->
             <!--<a href="#" class="btn btn-block btn-social btn-facebook btn-flat"><i class="fa fa-facebook"></i>{% trans 'Sign in using Facebook' %}</a>-->
             <!--<a href="#" class="btn btn-block btn-social btn-google btn-flat"><i class="fa fa-google-plus"></i>{% trans 'Sign in using Google+' %}</a>-->
@@ -124,8 +165,23 @@
     <!-- iCheck -->
     <script src={% static "admin/plugins/iCheck/icheck.min.js" %}></script>
     <script>
+        const mostra = document.getElementById('mostrar-senha')
+        const icone = document.getElementById('icone')
+        const label = document.getElementById('label-senha')
+        $(mostra).on('change', function() {
+            const password = document.getElementById('id_password')
+            if (mostra.checked) {
+                $(label).attr('title','Ocultar senha')
+                password.type = 'text'
+                $(icone).attr('class', 'fa fa-eye-slash');
+            } else {
+                $(label).attr('title','Exibir senha')
+                $(icone).attr('class', 'fa fa-eye');
+                password.type = 'password'
+            }
+        });
         $(function () {
-            $('input').iCheck({
+            $('#lembreme').iCheck({
                 checkboxClass: 'icheckbox_square-blue',
                 radioClass: 'iradio_square-blue',
                 increaseArea: '20%' // optional

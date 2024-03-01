@@ -30,7 +30,7 @@ div{
     margin: 0 auto;
     display: flex;
     flex-direction: column;
-    gap: 3em;
+    gap: 1em;
     height: 80vh;
 }
 
@@ -131,17 +131,29 @@ input[type=text]{
     gap: 10px;
     align-items: baseline;
 }
+
+.cab{
+    display: flex;
+    flex-direction: row;
+    padding: 1em 0.5em;
+    box-shadow: 0px 2px 3px 0px #ccc;
+    justify-content: space-between;
+    background: radial-gradient(circle, rgba(0, 94, 60, 1) 0%, rgba(1, 54, 34, 1) 74%, rgba(0, 54, 34, 1) 100%);
+    color: #fff;
+}
 </style>
 {% endblock %}
 
 {% block conteudo %}
 <div class="conteudo">
-
+    <div class="cab">
+        <span><i class="fa-solid fa-user"></i><span> {{request.user.name}}</span></span>
+        <span> <a href="/admin/logout"><i style="color:white;" class="fa-regular fa-circle-xmark"></i></a></span>
+    </div>
 <div class="texto-header">
    <img src="{% static 'imagens/cropped-LOGO-DEFENSORIA-HORIZONTAL-BRANCA_2023-4.png' %}" alt="" width="450" style="padding: 1em 0;">
    <p style="color:#fff">Assistente de Documento Juridico ver:0.3</p>
 </div>
-
 <div class="texto-body">
     <!-- <div class="texto-body-input"> -->
         <div class="drag-area">
@@ -154,7 +166,7 @@ input[type=text]{
     <!-- </div> -->
 </div>
 
-<div>
+<div id="perguntas_favoritas">
     <div class="titulo-header">Perguntas Favoritas</div>
     <div class="conteudo-documentos">
     <div id="grid-pergunta-chats">
@@ -162,12 +174,12 @@ input[type=text]{
     </div>
 </div>
 
-<div>
+<div id="meus_documentos">
     <div class="titulo-header">Meus documentos</div>
     <div class="conteudo-documentos">
         <div id="grid-documentos-chats"></div>
     </div>
-</div>
+</div> 
 <br>
 </div>
 <input type="hidden"  id="user-id" value="{{request.user.id}}">
@@ -324,7 +336,11 @@ input[type=text]{
                             </div>
                         </div>`
                 return acc
+                
             },'')
+            if(questions.length == 0){
+               $('#perguntas_favoritas').hide()
+            }
             gridQuestion.html(questions)
         })
     }     
