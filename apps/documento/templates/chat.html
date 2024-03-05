@@ -80,6 +80,15 @@
         background-color: #1777ff;
         color: #fff;
     }
+    #document #chat .chat-message-row .btn-page {
+        border-radius: 24px;
+        cursor: pointer;
+        color: rgb(255, 255, 255);
+        background: rgb(156, 182, 218);
+        padding: 2px 6px;
+        font-size: 12px;
+        user-select: none;
+    }
     #document #chat .chat-message {
         position: relative;
         max-width: 500px;
@@ -92,6 +101,16 @@
         font-size: 16px;
         margin-right: -6px;
         padding-left: 3px;
+        cursor: pointer;
+    }
+    #document #chat .chat-header #chat-header-actions {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        padding-right: 5px;
+    }
+    #document #chat .chat-header #chat-header-actions i {
+        color: #272e30;
         cursor: pointer;
     }
 
@@ -168,10 +187,6 @@
         flex-direction: column;
     }
 
-    .btn-remove-chat {
-        cursor: pointer;
-    }
-
     .question-box{
         position: absolute;
         bottom: 3em;
@@ -235,6 +250,7 @@
         <div id="chat">
             <div class="chat-header">
                 <h3>Chat</h3>
+                <div id="chat-header-actions"></div>
             </div>
             <div class="conversation-container">
                 <div id="conversation">
@@ -279,6 +295,7 @@
     const inputask = document.querySelector('#chat-input-ask')
     const questionBox = document.querySelector('#questionBox')
     const loader = $("#preloader")
+    const chatHeaderActions = $("#chat-header-actions")
 
     let chatAtual = null
 
@@ -294,11 +311,6 @@
             $('.choice-link-chat').removeClass('btn-info')
             event.target.classList.add('btn-info')
             getChat(chatId)
-        }
-
-        if(event.target.classList.contains('btn-remove-chat')) {
-            const chatId = event.target.attributes['data-remove-id'].value
-            deleteChat(chatId)
         }
 
         if(event.target.classList.contains('salvar-favoritos')) {
@@ -411,14 +423,13 @@
         insertConversation(mensagens)
         chatAtual = data
         chatIdOpenEl.val(id)
-        prepareClipboardBtns() 
+        prepareActionsChat() 
     }
 
     function loadDocumento(titulo, url, id) {
         pdfContainer.html(`
             <div class="pdf-header">
                 <h3>${titulo}</h3> 
-                <i data-remove-id='${id}' class='fa fa-trash btn-remove-chat'></i>
             </div>
             <embed src='${url}' width="100%" height="100%">
         `)
@@ -545,13 +556,14 @@
         let textoFormatado = askMsg.texto.replaceAll('\n', '<br>')
 
         textoFormatado = textoFormatado.replace(regex, function(match, numero) {
-            return `<button class="btn-page" data-page="${numero}">${numero}</button>`;
+            return `<span class="btn-page" data-page="${numero}">${numero}</span>`;
         });
 
         let row = `
                 <div class="chat-message-row ${getAutor(askMsg.autor)}">
                     <div class="chat-message" style="overflow: hidden;">
-                        <div class="chat-message-txt" id="message-${askMsg.id}"><div>${getClipboardAction(askMsg)} ${textoFormatado}</div> ${getFavoriteMSG()} </div>
+                        ${getClipboardAction(askMsg)}
+                        <div class="chat-message-txt" id="message-${askMsg.id}"><div> ${textoFormatado}</div> ${getFavoriteMSG()} </div>
                     </div>
                 </div>
             `
@@ -593,7 +605,7 @@
                 success: (response) => {
                     removeLoading()
                     appendConversation(response, false)
-                    prepareClipboardBtns() 
+                    prepareActionsChat() 
                 },
                 error: () =>  removeLoading(),
                 complete: () => {
@@ -626,34 +638,44 @@
     }
 
     function getQuestion(id,question){
-        if (question.trim().length > 0){
-        fetch(`/documento/api/mensagem/?criado_por=${id}&is_favorito=true&texto__icontains=${question}`)
-        .then(res=>res.json())
-        .then(data=>{
-            const questions = data.results.reduce((acc,d) => {
-                acc += `<li class='question'>${d.texto}</li>`
-                return acc
-            },'')
+        if (question.trim().length > 0) {
+            fetch(`/documento/api/mensagem/?criado_por=${id}&is_favorito=true&texto__icontains=${question}`)
+            .then(res=>res.json())
+            .then(data=>{
+                const questions = data.results.reduce((acc,d) => {
+                    acc += `<li class='question'>${d.texto}</li>`
+                    return acc
+                },'')
 
-            if (questions.length > 0){
-                questionBox.classList.remove('hide')
-                listaQuestion.html(questions)
-            }else{
-                listaQuestion.html('')
-                questionBox.classList.add('hide')
-            }
-            
-        })
-    }else{
-        listaQuestion.html('')
-        questionBox.classList.add('hide')
+                if (questions.length > 0){
+                    questionBox.classList.remove('hide')
+                    listaQuestion.html(questions)
+                }else{
+                    listaQuestion.html('')
+                    questionBox.classList.add('hide')
+                }
+                
+            })
+        } else{
+            listaQuestion.html('')
+            questionBox.classList.add('hide')
 
+        }
     }
-    }
 
-    function prepareClipboardBtns () {
-        $('[data-toggle="tooltip"]').tooltip()
+    function prepareActionsChat () {
+        const menuActions = `
+            <div id="chat-header-actions">
+                <a href="/documento/export-chat-txt/${chatAtual.id}"><i class="fa-solid fa-download" data-toggle="tooltip" data-placement="bottom" title="Exportar chat"></i></a>
+                <i id="remove-conversation" class="fa-solid fa-trash" data-toggle="tooltip" data-placement="bottom" title="Deletar Chat"></i>
+            </div>
+        `
+        chatHeaderActions.html(menuActions)
+        
+        $("#remove-conversation").click(() => deleteChat(chatAtual.id))
+
         const clipboard = new ClipboardJS('.clipboard-btn');
+
         clipboard.on('success', function(e) {
             const el = e.trigger
             e.clearSelection();
@@ -665,6 +687,8 @@
                 el.classList.add('fa-clipboard')
             }, 2000)
         });
+
+        $('[data-toggle="tooltip"]').tooltip()
     }
 
 </script>

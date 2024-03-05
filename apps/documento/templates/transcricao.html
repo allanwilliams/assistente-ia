@@ -1,0 +1,608 @@
+{% extends 'chat_base.html' %}
+
+{% block extrastyle %}
+<style>
+    #document {
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        height: calc(100vh - 46px);
+        width: 100%;
+    }
+    #document #toolbar {
+        flex: 13 1 0px;
+        overflow: hidden;
+        background-color: #272e30;
+        color: #fff;
+       
+        padding: 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    #document #toolbar .drag-area {
+        padding: 6px 10px;
+        text-align: center;
+        border: 2px dotted #ccc;
+        cursor: pointer;
+        border-radius: 8px;
+        background-color: #4d5b5f;
+    }
+    #document #toolbar .drag-active {
+        background-color: #899a9f;
+    }
+    #document #toolbar .drag-area i {
+        font-size: 1.5rem;
+    }
+    #document #toolbar .drag-file {
+        margin: 0;
+    }
+    #document #toolbar .drag-area .drag-area-content {
+        margin-top: 5px;
+    }
+
+    #document #pdf {
+        padding-bottom: 42px;
+        flex: 37 1 0px;
+        overflow: hidden;
+        border: 1px solid lightgrey;
+    }
+
+    #document #pdf #pdf-obj-container {
+        height: 100%;
+    }
+
+    #document #transcricao {
+        flex: 37 1 0px;
+        overflow: hidden;
+        border: 1px solid lightgray;
+    }
+
+    #document #transcricao .transcricao-message-row {
+        display: flex;
+        padding-top: 8px;
+        padding-bottom: 8px;
+        width: 100%;
+    }
+
+    #document #transcricao .transcricao-message-row.ai {
+        justify-content: flex-start;
+    }
+    #document #transcricao .transcricao-message-row.human {
+        justify-content: flex-end;
+    }
+
+    #document #transcricao .transcricao-message-row.ai .transcricao-message {
+        background-color: #f9f9fe;
+    }
+
+    #document #transcricao .transcricao-message-row.human .transcricao-message {
+        background-color: #1777ff;
+        color: #fff;
+    }
+    #document #transcricao .transcricao-message {
+        position: relative;
+        max-width: 500px;
+        border-radius: 8px;
+        padding: 6px 12px;
+        box-shadow: 0 0 3px #d1d2da;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 1em;
+    }
+    #document #transcricao .transcricao-message .clipboard-btn {
+        float: right;
+        font-size: 16px;
+        margin-right: -6px;
+        padding-left: 3px;
+        cursor: pointer;
+    }
+
+    .transcricao-header, .pdf-header {
+        height: 42px;
+        padding: 0px 6px 10px 6px;
+        background: rgb(255, 255, 255);
+        display: flex;
+        align-items: center;
+        flex-shrink: 0;
+        justify-content: space-between;
+    }
+
+    #conversation {
+        flex-grow: 1;
+        overflow: auto;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+    }
+    #transcricao-footer {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 10px;
+    }
+
+    #transcricao-form-input {
+        width: 100%;
+        padding: 0px 10px;
+        display: flex;
+    }
+     #transcricao-form-input input[type=text] {
+        padding: 0 5px;
+        width: 100%;
+        height: 32px;
+        margin: 0;
+        box-sizing: border-box;
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+        border-top-left-radius: 5px;
+        border-bottom-left-radius: 5px;
+    }
+
+     #transcricao-form-input button {
+        background-color: #1777ff;
+        width: 40px;
+        height: 32px;
+        color: #fff;
+        border-top-left-radius: 0px;
+        border-bottom-left-radius: 0px;
+        border-top-right-radius: 5px;
+        border-bottom-right-radius: 5px;
+    }
+    .conversation-container {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around;
+        height: calc(100% - 42px);
+    }
+    #list-messages {
+        width: 100%;
+        padding: 0 10px;
+    }
+    .choice-link-transcricao {
+        width: 100%;
+    }
+    .choice-link-transcricao:hover { 
+        color: rgba(255, 255, 255, 0.55);
+    }
+    #list-Transcricoes {
+        display: flex;
+        gap: 5px;
+        flex-direction: column;
+    }
+
+    .btn-remove-transcricao {
+        cursor: pointer;
+    }
+
+    .question-box{
+        position: absolute;
+        bottom: 3em;
+        box-shadow: 0px 0px 4px 0px gray;
+        padding: 1em;
+        font-size: 1.2rem;
+        border-radius: 5px;
+        background-color: white;
+        opacity: .9;
+    }
+    .hide{
+        display: none;
+    }
+    ul {
+        list-style-type: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    li.question {
+        padding: 0.3em;
+        background-color: #1777ff;
+        margin: 0.3em;
+        border-radius: 5px;
+        color: white;
+    }
+
+
+    .question{
+        cursor: pointer;
+    }
+
+    .btn-send-fake {
+        color: #1777ff;
+        cursor: pointer;
+    }
+
+    .avatar {
+        padding: 0.2em;
+        border-radius: 100%;
+        min-width: 3em;
+        min-height: 3em;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .avatar .fa-user {
+        font-size: 1.5em;
+    }
+
+    video{
+        width: 100%;
+    }
+</style>
+{% endblock %}
+
+{% block conteudo %}
+<main>
+    <section id="document">
+        <div id="toolbar">
+            <div class="input-file-section">
+                <div class="drag-area">
+                    <i class="fa fa-solid fa-add"></i><span> Nova transcrição</span> 
+                    <div class="drag-area-content">
+                        <p class="drag-file">Solte o arquivo aqui</p> 
+                    </div>
+                    <input type="file" class="file-input" style="display: none;" />
+                </div>
+            </div>
+            <div class="select-transcricao-section">
+                <div id="list-Transcricoes"></div>
+            </div>
+        </div>
+
+        <div id="transcricao">
+            <div class="transcricao-header">
+                <form id="transcricao-form-input">
+                    <div id="questionBox" class="hide question-box">
+                        <ul id="lista-question">
+                        </ul>
+                    </div>
+                    <input autocomplete="off" type="text" id="transcricao-input-ask" />
+                    <button type="submit" class="btn" id="btn-send-ask">
+                        <i class="fa-solid fa-search"></i>
+                    </button>
+                </form>
+            </div>
+            <div class="conversation-container">
+                <div id="conversation">
+                    <div id="list-messages"></div>
+                </div>
+                <div id="transcricao-footer">
+                    
+                </div>
+            </div>
+        </div>
+        <div id="pdf">
+            <div id="pdf-obj-container"></div>
+        </div>
+    </section>
+   
+    <input type="hidden" id="transcricao-id-open">
+    <input type="hidden"  id="user-id" value="{{request.user.id}}">
+</main>
+
+{% endblock %}
+
+{% block extrajs %}
+<script>
+    const inputTxtAsk = $('#transcricao-input-ask')
+    const btnSendAsk = $("#btn-send-ask")
+    const listMessagesEl = $("#list-messages")
+    const transcricaoFormInput = $("#transcricao-form-input")
+    const transcricaoIdOpenEl = $('#transcricao-id-open')
+    const listTranscricoesEl = $('#list-Transcricoes')
+    const pdfContainer = $('#pdf-obj-container')
+    const body = document.querySelector('body')
+    const dropArea = document.querySelector(".drag-area")
+    const fileInput = dropArea.querySelector(".file-input")
+    const userId = $("#user-id")
+    const listaQuestion = $('#lista-question')
+    const inputask = document.querySelector('#transcricao-input-ask')
+    const questionBox = document.querySelector('#questionBox')
+    const loader = $("#preloader")
+
+    let transcricaoAtual = null
+
+    body.addEventListener('click', function(event) {
+        if(event.target.classList.contains('btn-page') && transcricaoAtual) {
+            const page = event.target.attributes['data-page'].value
+            const url = `${transcricaoAtual.documento}#page=${page}`
+            loadDocumento(transcricaoAtual.titulo, url)
+        }
+
+        if(event.target.classList.contains('choice-link-transcricao')) {
+            const transcricaoId = event.target.attributes['data-id'].value
+            $('.choice-link-transcricao').removeClass('btn-info')
+            event.target.classList.add('btn-info')
+            getTranscricao(transcricaoId)
+        }
+
+        if(event.target.classList.contains('btn-remove-transcricao')) {
+            const transcricaoId = event.target.attributes['data-remove-id'].value
+            deletetranscricao(transcricaoId)
+        }
+
+        if(event.target.classList.contains('salvar-favoritos')) {
+            const msgID = event.target.attributes['data-id'].value
+            const favorito = event.target.attributes['data-favorito'].value
+            event.target.attributes['data-favorito'].value = !(favorito === 'true')
+            
+            saveQuestion(msgID, favorito)
+            
+            event.target.classList.remove('fa-solid')
+            event.target.classList.remove('fa-regular')
+            
+            const CF = (val) => {
+                event.target.classList.add(val)
+            } 
+
+            (favorito === 'true') ? CF('fa-regular') : CF('fa-solid');
+        }
+
+        if(event.target.classList.contains('question')) {
+            inputTxtAsk.val(event.target.innerText)
+            listaQuestion.html('')
+            questionBox.classList.add('hide')            
+        } 
+
+        if(event.target.classList.contains('btn-send-fake')) {
+            const msgID = event.target.attributes['data-id'].value
+            const text = $(`#${msgID}`).text()
+            showLatestMessage()
+            sendAsk(text)
+        }
+    })
+
+    $(document).ready(() => {
+
+        transcricaoFormInput.submit((e) => {
+            e.preventDefault()
+            const ask = inputTxtAsk.val()
+            inputTxtAsk.val('')
+            sendAsk(ask)
+        })
+        
+        dropArea.onclick = () => {
+            fileInput.click();
+        };
+        let delaySearchQestion
+        inputask.addEventListener('input',(e)=>{
+            clearTimeout(delaySearchQestion)
+            delaySearchQestion = setTimeout(()=>{getQuestion(userId.val(),e.target.value)},500)
+        })
+        
+        fileInput.addEventListener("change", function (e) {
+            const target = e.target;
+            newtranscricao(target)
+        });
+
+        dropArea.addEventListener("dragover", (event) => {
+            event.preventDefault();
+            dropArea.classList.add("drag-active");
+        });
+
+        dropArea.addEventListener("dragleave", () => {
+            dropArea.classList.remove("drag-active");
+        });
+
+        dropArea.addEventListener("drop", (e) => {
+            e.preventDefault();
+            dropArea.classList.remove("drag-active")
+            const target = e.dataTransfer;
+            newtranscricao(target)
+        });
+        
+        if(userId.val()) {
+            getUserTranscricoes(userId.val())
+            .then((data) => data.json())
+            .then((data) => fillListTranscricoes(data.results))
+            .then(() => {
+                const url = window.location.search
+                const urlParams = new URLSearchParams(url);
+                const documento = urlParams.get('arquivo')
+                getTranscricao(documento)
+                    
+                    
+                let links = $('.choice-link-transcricao')
+                links.removeClass('btn-info')
+
+                let link = links.filter((i, e) => e.attributes['data-id'].value === documento)
+                if(link.length > 0) {
+                    link[0].classList.add('btn-info')
+                }
+            })
+        }
+    })
+
+
+    function getUserTranscricoes(userId) {
+        return fetch(`/documento/api/media-transcricao/?criado_por=${userId}&ativo=true`)
+    }
+
+    function fillListTranscricoes(Transcricoes) {
+        let list = ''
+
+        Transcricoes.forEach((c) => {
+           list += `<div class="choice-link-transcricao btn" data-id="${c.id}">${c.titulo}</div>`
+        })
+
+        listTranscricoesEl.html(list)
+    }
+
+    
+    function filltranscricao(data) {
+        const {id, transcricoes, titulo, arquivo, tipo, legenda } = data
+        loadDocumento(titulo, arquivo, id,tipo,legenda)
+        insertConversation(transcricoes)
+        transcricaoAtual = data
+        transcricaoIdOpenEl.val(id)
+        $('[data-toggle="tooltip"]').tooltip()
+    }
+
+    function loadDocumento(titulo, url, id, tipo, legenda) {
+        let embed = `<embed src='${url}' width="100%" height="100%">`
+        if (tipo == 1){
+            embed = `
+            <video id="video_teste"
+                controls 
+                preload="auto"
+                class=""
+            >
+                <source src="${url}" />
+                <track
+                    label="English"
+                    kind="subtitles"
+                    srclang="en"
+                    src="${legenda}"
+                    default 
+                />
+            </video>
+        `
+        }
+        pdfContainer.html(`
+            <div class="pdf-header">
+                <h3>${titulo}</h3> 
+                <i data-remove-id='${id}' class='fa fa-trash btn-remove-transcricao'></i>
+            </div>
+            ${embed}
+        `)
+    }
+
+
+    function insertConversation(transcricoes) {
+        listMessagesEl.empty()
+
+        transcricoes.forEach((e) => appendConversation(e))
+    }
+
+    function cleartranscricao() {
+        listMessagesEl.empty()
+        pdfContainer.empty()
+    }
+
+    function updatetranscricaoList(data, type) {
+        if(type === 'add') {
+            $('.choice-link-transcricao').removeClass('btn-info')
+            listTranscricoesEl.append(`<div class="choice-link-transcricao btn btn-info" data-id="${data.id}">${data.titulo}</div>`)
+        }
+        if(type === 'remove') {
+            const option = listTranscricoesEl.find(`div[data-id='${data}']`)
+            option.remove()
+            cleartranscricao()
+        }
+    }
+
+    function newtranscricao(target) {
+        const file = target.files[0]
+        const formData = new FormData()
+        formData.append('titulo', file.name)
+        formData.append('arquivo', file)
+        formData.append('ativo', true)
+        formData.append('tipo', 2)
+
+        $.ajax({
+            type:'POST',
+            url: `/documento/api/media-transcricao/`,
+            data: formData,
+            contentType: false,
+            processData: false,
+            beforeSend:() => loader.fadeIn(),
+            success: (data) => {
+                updatetranscricaoList(data, 'add')
+                filltranscricao(data)
+            },
+            complete: () => loader.fadeOut() 
+        })
+
+    }
+
+    function getTranscricao(transcricaoId) {
+        if(transcricaoId) {
+            $.ajax({
+                type: 'GET',
+                url: `/documento/api/media-transcricao/${transcricaoId}/?criado_por=${userId.val()}&ativo=true`,
+                success: (data) => filltranscricao(data),
+                error: (erro) => console.log(erro)
+            })
+        } else {
+            cleartranscricao()
+        }
+    }
+
+    function deletetranscricao(transcricaoId) {
+        if(transcricaoId) {
+            $.ajax({
+                type: 'PATCH',
+                url: `/documento/api/media-transcricao/${transcricaoId}/`,
+                data: {
+                    ativo: false
+                },
+                success: (data) => {
+                    updatetranscricaoList(transcricaoId, 'remove')
+                },
+                error: () => {}
+            })
+        }
+    }
+
+    function appendConversation(askMsg, loading=true) {
+        let textoFormatado = askMsg.texto.replaceAll('\n', '<br>')
+
+        let row = `
+                <div class="transcricao-message-row">
+                    <div class="transcricao-message" style="overflow: hidden;">
+                        <div class='avatar bg-primary'>
+                            <i class='fa fa-user'></i>
+                        </div>
+                        <div class="transcricao-message-txt" id="message-${askMsg.id}">
+                            <div><strong>${askMsg.tempo_inicial} <i class='fa fa-arrow-right'></i> ${askMsg.tempo_final}</strong></div>
+                            <div>${textoFormatado}</div>
+                        </div>
+                    </div>
+                </div>
+            `
+        
+        listMessagesEl.append(row)
+    }
+
+    function removeLoading() {
+        $('#list-messages .fa-spinner').parent().parent().parent().remove()
+    }
+
+    function showLatestMessage() {
+        const conversation = document.querySelector('#conversation')
+        const messages = conversation.querySelectorAll('.transcricao-message-row')
+        messages[messages.length -1].scrollIntoView()
+    }
+
+    function getQuestion(id,question){
+        if (question.trim().length > 0){
+        fetch(`/documento/api/mensagem/?criado_por=${id}&is_favorito=true&texto__icontains=${question}`)
+        .then(res=>res.json())
+        .then(data=>{
+            const questions = data.results.reduce((acc,d) => {
+                acc += `<li class='question'>${d.texto}</li>`
+                return acc
+            },'')
+
+            if (questions.length > 0){
+                questionBox.classList.remove('hide')
+                listaQuestion.html(questions)
+            }else{
+                listaQuestion.html('')
+                questionBox.classList.add('hide')
+            }
+            
+        })
+    }else{
+        listaQuestion.html('')
+        questionBox.classList.add('hide')
+
+    }
+    }
+
+</script>
+{% endblock %}

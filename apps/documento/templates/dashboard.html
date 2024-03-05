@@ -125,15 +125,7 @@ input[type=text]{
     align-items: baseline;
 }
 
-.cab{
-    display: flex;
-    flex-direction: row;
-    padding: 1em 0.5em;
-    box-shadow: 0px 2px 3px 0px #ccc;
-    justify-content: space-between;
-    background: radial-gradient(circle, rgba(0, 94, 60, 1) 0%, rgba(1, 54, 34, 1) 74%, rgba(0, 54, 34, 1) 100%);
-    color: #fff;
-}
+
 </style>
 {% endblock %}
 
@@ -176,6 +168,19 @@ input[type=text]{
 
 {% block extrajs %}
 <script>
+    const audioTypes = [
+        'audio/midi',
+        'audio/mpeg',
+        'audio/webm',
+        'audio/ogg',
+        'audio/wav',
+        
+    ]
+    const mediaTranscriptionTypes = audioTypes + [
+        'video/webm',
+        'video/ogg'
+    ]
+
     const dropArea = document.querySelector(".drag-area")
     const fileInput = dropArea.querySelector(".file-input")
     const userId = $("#user-id")
@@ -229,9 +234,9 @@ input[type=text]{
             e.preventDefault();
             dropArea.classList.remove("drag-active")
             const target = e.dataTransfer;
-            newChat(target)
-            console.log('drop')
-            
+            const isTranscription = getIsTranscription(target)
+            if(isTranscription) newTranscription(target)
+            else newChat(target)
         });        
 
 
@@ -241,6 +246,11 @@ input[type=text]{
             .then((data) => fillListChats(data.results))
         }
     })  
+
+    function getIsTranscription(target){
+        const file = target.files[0]
+        return mediaTranscriptionTypes.indexOf(file.type) != -1
+    }
 
     function newChat(target) {
         const file = target.files[0]
@@ -258,6 +268,30 @@ input[type=text]{
             processData: false,
             success: (data) => {
                 window.location.href = `/documento/chat/?documento=${data.id}`
+            },
+            complete: () => loader.fadeOut()
+        })
+
+    }
+
+    function newTranscription(target) {
+        const file = target.files[0]
+        const tipo = audioTypes.indexOf(file.type) != -1 ? 2 : 1
+        const formData = new FormData()
+        formData.append('titulo', file.name)
+        formData.append('arquivo', file)
+        formData.append('ativo', true)
+        formData.append('tipo', tipo)
+
+        $.ajax({
+            type:'POST',
+            url: `/documento/api/media-transcricao/`,
+            beforeSend: () => loader.fadeIn(),
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: (data) => {
+                window.location.href = `/documento/transcricao/?arquivo=${data.id}`
             },
             complete: () => loader.fadeOut()
         })

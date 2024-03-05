@@ -1,6 +1,6 @@
 from rest_framework.viewsets import ModelViewSet
-from apps.documento.models import Chat, Mensagem
-from apps.documento.api.serializers import ChatSerializer, MensagemSerializer
+from apps.documento.models import Chat, Mensagem, MediaTranscricao, Transcricao
+from apps.documento.api.serializers import ChatSerializer, MensagemSerializer, MediaTranscricaoSerializer, TranscricaoSerializer
 import requests
 from rest_framework.response import Response
 from rest_framework import status
@@ -17,6 +17,15 @@ class ChatFilter(filters.FilterSet):
             'ativo': ['exact'],
         }
 
+class MediaTranscricaoFilter(filters.FilterSet):
+    class Meta:
+        model = MediaTranscricao
+        fields = {
+            'criado_por': ['exact'],
+            'ativo': ['exact'],
+        }
+
+
 
 class MensagemFilter(filters.FilterSet):
     class Meta:
@@ -24,6 +33,14 @@ class MensagemFilter(filters.FilterSet):
         fields = {
             'criado_por': ['exact'],
             'is_favorito': ['exact'],
+            'texto':['icontains'],
+        }
+
+class TranscricaoFilter(filters.FilterSet):
+    class Meta:
+        model = Transcricao
+        fields = {
+            'criado_por': ['exact'],
             'texto':['icontains'],
         }
 
@@ -49,36 +66,11 @@ class MensagemViewSet(ModelViewSet):
         autor = request.POST.get('autor')
 
         CQ = create_questions(chat=chat,texto=texto,autor=autor)
-        # nova_msg = Mensagem(chat_id=chat, texto=texto, autor=autor)
-        # nova_msg.save()
-
-        # chatpdf_source_id = nova_msg.chat.chatpdf_source_id
-
-        # headers = {
-        #     'x-api-key': 'sec_16KMXQwy0VcwkGz7xYuDY9PxWGGgsHM6',
-        #     "Content-Type": "application/json",
-        # }
-
-        # data = {
-        #     "referenceSources": True,
-        #     'sourceId': chatpdf_source_id,
-        #     'messages': [
-        #         {
-        #             'role': "user",
-        #             'content': texto,
-        #         }
-        #     ]
-        # }
-
-        # response = requests.post(
-        #     'https://api.chatpdf.com/v1/chats/message', headers=headers, json=data)
-
-        # resposta_chatpdf = Mensagem(chat_id=chat, texto='', autor=CHAT_AUTOR_IA)
         
-        # if response.status_code == 200:
-        #     resposta_chatpdf.texto = response.json()['content']
-        # else:
-        #     resposta_chatpdf.texto = 'Erro ao responder'
+        return Response({"id": CQ.id, "texto": CQ.texto, "autor": CQ.autor }, status=status.HTTP_201_CREATED)
 
-        # resposta_chatpdf.save()
-        return Response({ "texto": CQ.texto, "autor": CQ.autor }, status=status.HTTP_201_CREATED)
+class MediaTranscricaoViewSet(ModelViewSet):
+    queryset = MediaTranscricao.objects.all()
+    serializer_class = MediaTranscricaoSerializer
+    filterset_class = MediaTranscricaoFilter
+    http_method_names = ['get', 'patch', 'post', 'delete','put']

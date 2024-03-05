@@ -1,5 +1,6 @@
 from django.shortcuts import render
-from apps.documento.models import Chat
+from django.http import HttpResponse
+from apps.documento.models import Chat, MediaTranscricao, Mensagem
 from openai import OpenAI
 from pydub import AudioSegment
 import subprocess
@@ -26,8 +27,10 @@ def chat(request):
 
 def dashboard(request):
     chats = Chat.objects.filter(criado_por=request.user, ativo=True)
+    transcricoes = MediaTranscricao.objects.filter(criado_por=request.user, ativo=True)
     context = {
-        'chats': chats
+        'chats': chats,
+        'transcricoes': transcricoes
     }
 
     return render(request, 'dashboard.html', context)
@@ -44,8 +47,11 @@ def convert_to_time(number, microseconds=False):
 
 
 def transcricao_video(request):
-    context = {}
-    
+    transcricoes = MediaTranscricao.objects.filter(criado_por=request.user, ativo=True)
+    context = {
+        'transcricoes': transcricoes
+    }
+
     if request.method == 'POST':
         audio_file = request.FILES['audio']
 
@@ -110,3 +116,32 @@ def transcricao_video(request):
     return render(request, 'transcricao_video.html', context)
 
 
+def transcricao(request):
+    context = {}
+    arquivo = request.GET.get('arquivo')
+    if arquivo:
+        transcricao = MediaTranscricao.objects.get(pk=arquivo)
+        context = {
+            'transcricao':transcricao
+        }
+
+    return render(request, 'transcricao.html', context)
+    
+
+def export_chat_txt(request, id=None):
+
+    chat = Chat.objects.filter(id=id).first()
+
+    if chat:
+        mensagens = Mensagem.objects.filter(chat=chat)
+        texto = []
+        for m in mensagens:
+            persona = 'Eu' if m.autor == 1 else 'IA'
+            texto.append(f'{persona}: {m.texto}\n\r')
+
+        texto = ''.join(texto) 
+
+        response = HttpResponse(texto, content_type='text/plain;charset=UTF-8')
+        response['Content-Disposition'] = f"attachment; filename=chat.txt"
+
+        return response
