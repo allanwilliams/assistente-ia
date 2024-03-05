@@ -81,10 +81,18 @@
         color: #fff;
     }
     #document #chat .chat-message {
+        position: relative;
         max-width: 500px;
         border-radius: 8px;
         padding: 6px 12px;
         box-shadow: 0 0 3px #d1d2da;
+    }
+    #document #chat .chat-message .clipboard-btn-container {
+        float: right;
+        font-size: 16px;
+        margin-right: -6px;
+        padding-left: 3px;
+        cursor: pointer;
     }
 
     .chat-header, .pdf-header {
@@ -272,13 +280,7 @@
     const questionBox = document.querySelector('#questionBox')
     const loader = $("#preloader")
 
-    
-
     let chatAtual = null
-
-    $.ajaxSetup({
-        headers: {"X-CSRFToken": '{{ csrf_token }}' },
-    });
 
     body.addEventListener('click', function(event) {
         if(event.target.classList.contains('btn-page') && chatAtual) {
@@ -331,7 +333,6 @@
     })
 
     $(document).ready(() => {
-        $('select:not(.filtered):not(.admin-autocomplete)').select2({dropdownAutoWidth : true});
 
         chatFormInput.submit((e) => {
             e.preventDefault()
@@ -410,6 +411,7 @@
         insertConversation(mensagens)
         chatAtual = data
         chatIdOpenEl.val(id)
+        prepareClipboardBtns() 
     }
 
     function loadDocumento(titulo, url, id) {
@@ -531,6 +533,13 @@
             return ''
         }
 
+        const getClipboardAction = (askMsg) => {
+            if(askMsg.id && askMsg.autor === 2) {
+                return `<div class="clipboard-btn-container" data-toggle="tooltip" data-placement="left" title="Copiar" ><i class="fa-regular fa-clipboard clipboard-btn" data-clipboard-target="#message-${askMsg.id}"></i></div>`
+            }
+            return ''
+        }
+
         var regex = /\[P(\d+)\]/g;
 
         let textoFormatado = askMsg.texto.replaceAll('\n', '<br>')
@@ -542,7 +551,7 @@
         let row = `
                 <div class="chat-message-row ${getAutor(askMsg.autor)}">
                     <div class="chat-message" style="overflow: hidden;">
-                        <div class="chat-message-txt">${textoFormatado} ${getFavoriteMSG()}</div>
+                        <div class="chat-message-txt" id="message-${askMsg.id}"><div>${getClipboardAction(askMsg)} ${textoFormatado}</div> ${getFavoriteMSG()} </div>
                     </div>
                 </div>
             `
@@ -584,6 +593,7 @@
                 success: (response) => {
                     removeLoading()
                     appendConversation(response, false)
+                    prepareClipboardBtns() 
                 },
                 error: () =>  removeLoading(),
                 complete: () => {
@@ -639,6 +649,22 @@
         questionBox.classList.add('hide')
 
     }
+    }
+
+    function prepareClipboardBtns () {
+        $('[data-toggle="tooltip"]').tooltip()
+        const clipboard = new ClipboardJS('.clipboard-btn');
+        clipboard.on('success', function(e) {
+            const el = e.trigger
+            e.clearSelection();
+            el.classList.remove('fa-clipboard')
+            el.classList.add('fa-square-check')
+
+            setTimeout(() => {
+                el.classList.remove('fa-square-check')
+                el.classList.add('fa-clipboard')
+            }, 2000)
+        });
     }
 
 </script>
