@@ -125,7 +125,7 @@ body {
 <div class="conteudo">
     <div class="texto-header">
     <img src="{% static 'imagens/cropped-LOGO-DEFENSORIA-HORIZONTAL-BRANCA_2023-4.png' %}" alt="" width="450" style="padding: 1em 0;">
-    <p style="color:#fff">Assistente de Documento Juridico ver:0.3</p>
+    <h2 style="color:#fff">{{titulo}}</h2>
     </div>
     <div class="texto-body">
         <!-- <div class="texto-body-input"> -->
@@ -148,7 +148,7 @@ body {
     </div>
 
     <div id="meus_documentos">
-        <div class="titulo-header">Meus documentos</div>
+        <div class="titulo-header">{{titulo_tabela}}</div>
         <div class="conteudo-documentos">
             <div id="grid-documentos-chats"></div>
         </div>

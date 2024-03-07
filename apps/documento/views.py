@@ -32,7 +32,9 @@ def dashboard(request):
         context = {
             'chats': chats,
             'api': 'chat',
-            'redirect': 'chat/?documento'
+            'redirect': 'chat/?documento',
+            'titulo': 'Assistente de Documento Jurídico',
+            'titulo_tabela': 'Meus Documentos'
         }
 
         return render(request, 'dashboard.html', context)
@@ -42,7 +44,9 @@ def dashboard(request):
         context = {
             'transcricoes': transcricoes,
             'api': 'media-transcricao',
-            'redirect': 'transcricao/?arquivo'
+            'redirect': 'transcricao/?arquivo',
+            'titulo': 'Assistente de Transcrição de Media',
+            'titulo_tabela': 'Minhas transcrições'
         }
         return render(request, 'dashboard.html', context)
     
