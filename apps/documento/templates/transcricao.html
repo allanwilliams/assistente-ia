@@ -2,56 +2,6 @@
 
 {% block extrastyle %}
 <style>
-    #document {
-        position: relative;
-        overflow: hidden;
-        display: flex;
-        height: calc(100vh - 46px);
-        width: 100%;
-    }
-    #document #toolbar {
-        flex: 13 1 0px;
-        overflow: hidden;
-        background-color: #272e30;
-        color: #fff;
-       
-        padding: 10px;
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-    }
-    #document #toolbar .drag-area {
-        padding: 6px 10px;
-        text-align: center;
-        border: 2px dotted #ccc;
-        cursor: pointer;
-        border-radius: 8px;
-        background-color: #4d5b5f;
-    }
-    #document #toolbar .drag-active {
-        background-color: #899a9f;
-    }
-    #document #toolbar .drag-area i {
-        font-size: 1.5rem;
-    }
-    #document #toolbar .drag-file {
-        margin: 0;
-    }
-    #document #toolbar .drag-area .drag-area-content {
-        margin-top: 5px;
-    }
-
-    #document #pdf {
-        padding-bottom: 42px;
-        flex: 37 1 0px;
-        overflow: hidden;
-        border: 1px solid lightgrey;
-    }
-
-    #document #pdf #pdf-obj-container {
-        height: 100%;
-    }
-
     #document #transcricao {
         flex: 37 1 0px;
         overflow: hidden;
@@ -99,6 +49,11 @@
         cursor: pointer;
     }
 
+    .transcricao-header, .pdf-header h3 {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
     .transcricao-header, .pdf-header {
         height: 42px;
         padding: 0px 6px 10px 6px;
@@ -123,6 +78,7 @@
     }
 
     #transcricao-form-input {
+        margin-top: 12px;
         width: 100%;
         padding: 0px 10px;
         display: flex;
@@ -162,6 +118,8 @@
     }
     .choice-link-transcricao {
         width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
     .choice-link-transcricao:hover { 
         color: rgba(255, 255, 255, 0.55);
@@ -232,6 +190,18 @@
     video{
         width: 100%;
     }
+
+    video.audio {
+        height: 60px;
+    }
+
+    .highlight {
+        background-color: #ffff00;
+        font-weight: 800;
+    }
+
+
+    
 </style>
 {% endblock %}
 
@@ -255,16 +225,12 @@
 
         <div id="transcricao">
             <div class="transcricao-header">
-                <form id="transcricao-form-input">
-                    <div id="questionBox" class="hide question-box">
-                        <ul id="lista-question">
-                        </ul>
-                    </div>
+                <div id="transcricao-form-input">
                     <input autocomplete="off" type="text" id="transcricao-input-ask" />
-                    <button type="submit" class="btn" id="btn-send-ask">
+                    <button class="btn" id="btn-find-text">
                         <i class="fa-solid fa-search"></i>
                     </button>
-                </form>
+                </div>
             </div>
             <div class="conversation-container">
                 <div id="conversation">
@@ -300,9 +266,10 @@
     const fileInput = dropArea.querySelector(".file-input")
     const userId = $("#user-id")
     const listaQuestion = $('#lista-question')
-    const inputask = document.querySelector('#transcricao-input-ask')
     const questionBox = document.querySelector('#questionBox')
     const loader = $("#preloader")
+    const btnFindText = document.querySelector('#btn-find-text')
+    const transcricaoInputAsk = document.querySelector('#transcricao-input-ask')
 
     let transcricaoAtual = null
 
@@ -355,7 +322,7 @@
             sendAsk(text)
         }
     })
-
+    
     $(document).ready(() => {
 
         transcricaoFormInput.submit((e) => {
@@ -368,12 +335,6 @@
         dropArea.onclick = () => {
             fileInput.click();
         };
-        let delaySearchQestion
-        inputask.addEventListener('input',(e)=>{
-            clearTimeout(delaySearchQestion)
-            delaySearchQestion = setTimeout(()=>{getQuestion(userId.val(),e.target.value)},500)
-        })
-        
         fileInput.addEventListener("change", function (e) {
             const target = e.target;
             newtranscricao(target)
@@ -417,7 +378,7 @@
         }
     })
 
-
+    
     function getUserTranscricoes(userId) {
         return fetch(`/documento/api/media-transcricao/?criado_por=${userId}&ativo=true`)
     }
@@ -443,34 +404,62 @@
     }
 
     function loadDocumento(titulo, url, id, tipo, legenda) {
-        let embed = `<embed src='${url}' width="100%" height="100%">`
+        let classe = 'audio'
         if (tipo == 1){
-            embed = `
+            classe = 'video'
+        }
+        embed = `
             <video id="video_teste"
                 controls 
                 preload="auto"
-                class=""
+                class="${classe}"
             >
                 <source src="${url}" />
                 <track
-                    label="English"
+                    label="Português"
                     kind="subtitles"
                     srclang="en"
                     src="${legenda}"
                     default 
                 />
-            </video>
-        `
-        }
+            </video>`
         pdfContainer.html(`
             <div class="pdf-header">
-                <h3>${titulo}</h3> 
+                <h3 title="${titulo}">${titulo}</h3> 
                 <i data-remove-id='${id}' class='fa fa-trash btn-remove-transcricao'></i>
             </div>
             ${embed}
         `)
     }
 
+    btnFindText.addEventListener('click',function(){
+        const busca = transcricaoInputAsk.value
+        destacarPorString(busca)
+    })
+
+    transcricaoInputAsk.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
+        const busca = transcricaoInputAsk.value
+        destacarPorString(busca)
+      }
+    });
+
+    function destacarPorString(textoBusca) {
+        textoBusca = textoBusca.trim()
+        var mensagens = document.querySelectorAll('.text-msg');
+        for(const mensagem of mensagens){
+            
+            var texto = mensagem.innerHTML;
+            texto = texto.replace(/<span class="highlight">(.*?)<\/span>/g, '$1');
+            var regex = new RegExp(textoBusca, 'gi'); // 'gi' para correspondência global e sem diferenciar maiúsculas e minúsculas
+            var textoAtualizado = texto.replace(regex, function(match) {
+                return '<span class="highlight">' + match + '</span>';
+            });
+    
+            
+            mensagem.innerHTML = textoAtualizado
+        }
+    }
 
     function insertConversation(transcricoes) {
         listMessagesEl.empty()
@@ -559,7 +548,7 @@
                         </div>
                         <div class="transcricao-message-txt" id="message-${askMsg.id}">
                             <div><strong>${askMsg.tempo_inicial} <i class='fa fa-arrow-right'></i> ${askMsg.tempo_final}</strong></div>
-                            <div>${textoFormatado}</div>
+                            <div class='text-msg'>${textoFormatado}</div>
                         </div>
                     </div>
                 </div>

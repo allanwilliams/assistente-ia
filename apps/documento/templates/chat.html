@@ -2,56 +2,6 @@
 
 {% block extrastyle %}
 <style>
-    #document {
-        position: relative;
-        overflow: hidden;
-        display: flex;
-        height: calc(100vh - 46px);
-        width: 100%;
-    }
-    #document #toolbar {
-        flex: 13 1 0px;
-        overflow: hidden;
-        background-color: #272e30;
-        color: #fff;
-       
-        padding: 10px;
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-    }
-    #document #toolbar .drag-area {
-        padding: 6px 10px;
-        text-align: center;
-        border: 2px dotted #ccc;
-        cursor: pointer;
-        border-radius: 8px;
-        background-color: #4d5b5f;
-    }
-    #document #toolbar .drag-active {
-        background-color: #899a9f;
-    }
-    #document #toolbar .drag-area i {
-        font-size: 1.5rem;
-    }
-    #document #toolbar .drag-file {
-        margin: 0;
-    }
-    #document #toolbar .drag-area .drag-area-content {
-        margin-top: 5px;
-    }
-
-    #document #pdf {
-        padding-bottom: 42px;
-        flex: 37 1 0px;
-        overflow: hidden;
-        border: 1px solid lightgrey;
-    }
-
-    #document #pdf #pdf-obj-container {
-        height: 100%;
-    }
-
     #document #chat {
         flex: 37 1 0px;
         overflow: hidden;
@@ -222,6 +172,9 @@
     .btn-send-fake {
         color: #1777ff;
         cursor: pointer;
+    }
+    .cab a {
+        color: #000 !important;
     }
 </style>
 {% endblock %}

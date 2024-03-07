@@ -43,10 +43,15 @@ body {
 .titulo-header{
     font-weight: 900;
     font-size: 18px;
-    background: radial-gradient(circle, rgba(0, 94, 60, 1) 0%, rgba(1, 54, 34, 1) 74%, rgba(0, 54, 34, 1) 100%);
-    color: #ffffff;
+    background-color: #eaeaea;
 }
-
+.documento-chat{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #1677ff;
+    gap: 10px;
+}
 
 .conteudo-documentos{
     display: flex;
@@ -58,12 +63,6 @@ body {
     background-color: #fff;
 }
 
-.documento-chat{
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    color: #1677ff;
-}
 
 .titulo-header{
     box-shadow: 0px 0px 2px 0px gray;
@@ -94,8 +93,8 @@ body {
 }
 
 .drag-active {
-        background-color: #e9e9e94b !important;
-    }
+    background-color: #e9e9e94b !important;
+}
 
 .nova-pergunta-bloco{
     display: flex;
@@ -103,33 +102,26 @@ body {
     justify-content: flex-start;
     align-items: baseline;
 }
-input[type=text]{
-    /* border: none; */
-    width: 100%;
 
-}
-.btn-salvar{
-    border: none;
-    background-color: #00c0ef;
-    padding: 0.3em;
-    width: 5em;
-    border-radius: 3px;
-    font-weight: 900;
-    color: white;    
-}
-
-.question-div{
-    color: #337ab7;
+.cab {
     display: flex;
-    gap: 10px;
-    align-items: baseline;
+    flex-direction: row;
+    padding: 1em 1em;
+    justify-content: flex-end;
+    align-items: center;
 }
 
+.cab a {
+    color: #fff;
+}
 
 </style>
 {% endblock %}
 
 {% block conteudo %}
+<div class="cab">
+    <a href="/admin/logout"><i class="fa-solid fa-arrow-right-from-bracket"></i> Sair</a>
+</div>
 <div class="conteudo">
     <div class="texto-header">
     <img src="{% static 'imagens/cropped-LOGO-DEFENSORIA-HORIZONTAL-BRANCA_2023-4.png' %}" alt="" width="450" style="padding: 1em 0;">
@@ -168,18 +160,24 @@ input[type=text]{
 
 {% block extrajs %}
 <script>
+    const documentType = [
+        'application/pdf'
+    ]
     const audioTypes = [
         'audio/midi',
         'audio/mpeg',
         'audio/webm',
         'audio/ogg',
-        'audio/wav',
-        
+        'audio/wav',    
     ]
-    const mediaTranscriptionTypes = audioTypes + [
+    const videoTypes = [
         'video/webm',
-        'video/ogg'
+        'video/ogg',
+        'video/mp4',
+        'video/x-msvideo'
     ]
+    const mediaTranscriptionTypes = audioTypes.concat(videoTypes)
+    const allowedMedias = mediaTranscriptionTypes.concat(documentType)
 
     const dropArea = document.querySelector(".drag-area")
     const fileInput = dropArea.querySelector(".file-input")
@@ -189,6 +187,8 @@ input[type=text]{
     const body = document.querySelector('body')
     const loader = $("#preloader")
     
+    fileInput.accept = allowedMedias.join(',')
+
     $(document).ready(() => {
         // loader.fadeIn()
         $.ajaxSetup({
@@ -212,7 +212,13 @@ input[type=text]{
 
     fileInput.addEventListener("change", function (e) {
             const target = e.target;
-            newChat(target)
+            if(validateDocument(target)){
+                const isTranscription = getIsTranscription(target)
+                if(isTranscription) newTranscription(target)
+                else newChat(target)
+            }else{
+                showMessage('Tipo de arquivo não suportado',3000)
+            }
         });
         dropArea.onclick = () => {
                 fileInput.click();
@@ -234,9 +240,13 @@ input[type=text]{
             e.preventDefault();
             dropArea.classList.remove("drag-active")
             const target = e.dataTransfer;
-            const isTranscription = getIsTranscription(target)
-            if(isTranscription) newTranscription(target)
-            else newChat(target)
+            if(validateDocument(target)){
+                const isTranscription = getIsTranscription(target)
+                if(isTranscription) newTranscription(target)
+                else newChat(target)
+            }else{
+                showMessage('Tipo de arquivo não suportado',3000)
+            }
         });        
 
 
@@ -246,6 +256,11 @@ input[type=text]{
             .then((data) => fillListChats(data.results))
         }
     })  
+
+    function validateDocument(target){
+        const file = target.files[0]
+        return allowedMedias.indexOf(file.type) != -1
+    }
 
     function getIsTranscription(target){
         const file = target.files[0]
@@ -303,16 +318,10 @@ input[type=text]{
         chats.forEach((c) => {
            list += ` <div class="documento-chat" >
                         <div style="display: flex;">   
-                            <div>
-                                <img src="{% static 'images/icondoc.jpeg' %}" width="100" alt="">
-                            </div>
-                            <div>
-                                <i style='color:#00c0ef;' data-remove-id='${c.id}' class='fa fa-trash btn-remove-chat'></i>
-                            </div>  
+                            <img src="{% static 'images/icondoc.jpeg' %}" width="50" alt="">
+                            <i style='' data-remove-id='${c.id}' class='fa fa-trash btn-remove-chat'></i>
                         </div>                            
-                            <div>
-                            <a href="/documento/chat/?documento=${c.id}">${c.titulo}</a>
-                        </div>
+                        <a href="/documento/chat/?documento=${c.id}">${c.titulo}</a>
                     </div> `
         })
         gridChats.html(list)

@@ -37,5 +37,5 @@ class TranscricaoAdmin(AuditoriaAdmin):
         'texto',
     )
 
-    list_display = ('media_transcricao', 'texto')
+    list_display = ('id', 'media_transcricao')
 

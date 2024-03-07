@@ -116,6 +116,7 @@ def transcrever_audio_media_transcricao(sender, instance, **kwargs):
     if instance and not instance.chat and instance.ativo:
         ROOT = os.path.abspath(os.path.dirname(f'media/arquivo_transcricao'))
         ROOT_LEGENDA = os.path.abspath(os.path.dirname(f'media/legenda_transcricao'))
+        ROOT_PDF = os.path.abspath(os.path.dirname(f'media/documento_chat'))
         
         file_path = '{}/{}'.format(ROOT, instance.arquivo)
     
@@ -124,7 +125,7 @@ def transcrever_audio_media_transcricao(sender, instance, **kwargs):
             filename_audio = str(arquivo_file.name).split('.')[-2]
             path_media_legenda = f'{ROOT_LEGENDA}/{filename_audio}.vtt'
             path_media_audio = f'{ROOT}/{filename_audio}.wav'
-            path_media_pdf = f'{ROOT}/{filename_audio}.pdf'
+            path_media_pdf = f'{ROOT_PDF}/{filename_audio}.pdf'
             
             # converte arquivo em wav
             subprocess.run(['ffmpeg','-y','-i', file_path, '-f', 'wav', '-acodec', 'pcm_s16le', '-ar', '22050', '-ac', '1', 'copy', path_media_audio])
@@ -148,6 +149,7 @@ def transcrever_audio_media_transcricao(sender, instance, **kwargs):
                         vtt.write('WEBVTT\n')
                         
                         for t in transcricao.segments:
+                            print('[+++++++]',t)
                             start = convert_to_time(t.get('start'), True)
                             end = convert_to_time(t.get('end'), True)
                             text = t.get('text')

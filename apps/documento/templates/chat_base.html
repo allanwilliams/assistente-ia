@@ -10,18 +10,11 @@
         <link rel="stylesheet" href="{% static 'admin/plugins/select2/select2.min.css' %}">
         <link rel="stylesheet" href="{% static 'css/custom_adminlte/base-v4.css' %}?v=1.0">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastify-js/1.6.1/toastify.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
         {% block extrastyle %}{% endblock %}
         <style>
-            .cab {
-                display: flex;
-                flex-direction: row;
-                padding: 1em 0.5em;
-                box-shadow: 0px 2px 3px 0px #ccc;
-                justify-content: space-between;
-                background: radial-gradient(circle, rgba(0, 94, 60, 1) 0%, rgba(1, 54, 34, 1) 74%, rgba(0, 54, 34, 1) 100%);
-                color: #fff;
-                align-items: center;
-            }
+           
+
 
             #preloader {
                 position: fixed; 
@@ -68,13 +61,60 @@
                 0% { transform: rotate(0deg); }
                 100% { transform: rotate(360deg); }
             }
+
+            #document {
+                position: relative;
+                overflow: hidden;
+                display: flex;
+                height: 100vh;
+                width: 100%;
+            }
+            #document #toolbar {
+                flex: 13 1 0px;
+                overflow: hidden;
+                background-color: #272e30;
+                color: #fff;
+            
+                padding: 10px;
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+            }
+            #document #toolbar .drag-area {
+                padding: 6px 10px;
+                text-align: center;
+                border: 2px dotted #ccc;
+                cursor: pointer;
+                border-radius: 8px;
+                background-color: #4d5b5f;
+            }
+            #document #toolbar .drag-active {
+                background-color: #899a9f;
+            }
+            #document #toolbar .drag-area i {
+                font-size: 1.5rem;
+            }
+            #document #toolbar .drag-file {
+                margin: 0;
+            }
+            #document #toolbar .drag-area .drag-area-content {
+                margin-top: 5px;
+            }
+
+            #document #pdf {
+                padding-bottom: 42px;
+                flex: 37 1 0px;
+                overflow: hidden;
+                border: 1px solid lightgrey;
+            }
+
+            #document #pdf #pdf-obj-container {
+                height: 100%;
+            }
         </style>
     </head>
 <body>
-    <div class="cab">
-        <span><i class="fa-solid fa-user"></i><span> {{request.user.name}}</span></span>
-        <span> <a href="/admin/logout"><i style="color:white;" class="fa-regular fa-circle-xmark"></i></a></span>
-    </div>
+   
     <div id="preloader">
         <div class="wrapper-loader">
             <div class="spinner-loader"></div>
@@ -93,6 +133,7 @@
     <script src="{% static 'admin/bootstrap/js/bootstrap.min.js' %}"></script>
 
     <script src="{% static 'clipboard/clipboard.min.js' %}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastify-js/1.6.1/toastify.min.js"crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     
     <script>
         $(document).ready(() =>{
@@ -106,7 +147,20 @@
         function getUserChats(userId) {
             return fetch(`/documento/api/chat/?criado_por=${userId}&ativo=true`)
         }
-
+        function showMessage(text,duration){
+            Toastify({
+                text,
+                duration,
+                close: true,
+                gravity: "top", // `top` or `bottom`
+                position: "center", // `left`, `center` or `right`
+                stopOnFocus: true, // Prevents dismissing of toast on hover
+                style: {
+                    background: "linear-gradient(to right, #00b09b, #96c93d)",
+                },
+                onClick: function(){} // Callback after click
+            }).showToast();
+        }
     </script>
 
     {% block extrajs %} {% endblock %}
