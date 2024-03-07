@@ -130,9 +130,11 @@
         flex-direction: column;
     }
 
-    .btn-remove-transcricao {
+    .btn-remove-transcricao, .btn-edit-speaker {
         cursor: pointer;
     }
+
+
 
     .question-box{
         position: absolute;
@@ -254,6 +256,25 @@
 
 {% block extrajs %}
 <script>
+    const documentType = [
+        'application/pdf'
+    ]
+    const audioTypes = [
+        'audio/midi',
+        'audio/mpeg',
+        'audio/webm',
+        'audio/ogg',
+        'audio/wav',    
+    ]
+    const videoTypes = [
+        'video/webm',
+        'video/ogg',
+        'video/mp4',
+        'video/x-msvideo'
+    ]
+    const mediaTranscriptionTypes = audioTypes.concat(videoTypes)
+    const allowedMedias = mediaTranscriptionTypes.concat(documentType)
+
     const inputTxtAsk = $('#transcricao-input-ask')
     const btnSendAsk = $("#btn-send-ask")
     const listMessagesEl = $("#list-messages")
@@ -320,6 +341,12 @@
             const text = $(`#${msgID}`).text()
             showLatestMessage()
             sendAsk(text)
+        }
+
+        if(event.target.classList.contains('btn-edit-speaker')) {
+            const msgId = event.target.attributes['data-id'].value
+            const speaker = event.target.attributes['data-speaker'].value
+            openDialogEditSpeaker(msgId,speaker)
         }
     })
     
@@ -486,11 +513,12 @@
 
     function newtranscricao(target) {
         const file = target.files[0]
+        const tipo = audioTypes.indexOf(file.type) != -1 ? 2 : 1
         const formData = new FormData()
         formData.append('titulo', file.name)
         formData.append('arquivo', file)
         formData.append('ativo', true)
-        formData.append('tipo', 2)
+        formData.append('tipo', tipo)
 
         $.ajax({
             type:'POST',
@@ -547,6 +575,7 @@
                             <i class='fa fa-user'></i>
                         </div>
                         <div class="transcricao-message-txt" id="message-${askMsg.id}">
+                            <div><strong>${askMsg.speaker}</strong> <i class="fa-solid fa-pen btn btn-edit-speaker" data-id="${askMsg.id}" data-speaker="${askMsg.speaker}"></i></div>
                             <div><strong>${askMsg.tempo_inicial} <i class='fa fa-arrow-right'></i> ${askMsg.tempo_final}</strong></div>
                             <div class='text-msg'>${textoFormatado}</div>
                         </div>
@@ -591,6 +620,48 @@
         questionBox.classList.add('hide')
 
     }
+    }
+
+    function openDialogEditSpeaker(id, speaker) {
+        Swal.fire({
+            title: "Editar speaker",
+            html: `
+                <div class="form-group">
+                    <input class="form-control" id='name' type='text' value='${speaker}'>
+                </div>
+                <label>
+                    <input id="replace-all" type="checkbox"> Substituir todos
+                </label>
+            `,
+            showCancelButton: true,
+            preConfirm: () => ({
+               name: document.getElementById('name').value,
+               replaceAll: document.getElementById('replace-all').checked,
+            })
+        }).then((result) => {
+            if(result.isConfirmed) {
+                const { name , replaceAll } = result.value
+                updateSpeakerName({id, name, replaceAll})
+            }
+        })
+    }
+
+    function updateSpeakerName({id, name, replaceAll}) {
+        console.log(id, name, replaceAll)
+        $.ajax({
+            type: 'PATCH',
+            url: `/documento/api/transcricao/${id}/`,
+            data: {
+                speaker: name,
+                replaceAll
+            },
+            success: (data) => {
+                getTranscricao(transcricaoAtual.id)
+            },
+            error: () => {}
+        })
+
+
     }
 
 </script>

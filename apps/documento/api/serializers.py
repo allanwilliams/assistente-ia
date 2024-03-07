@@ -14,6 +14,16 @@ class TranscricaoSerializer(ModelSerializer):
         model = Transcricao
         fields = '__all__'
 
+    def update(self, instance, validated_data):
+        request = self.context.get('request')
+        replace_all = request.POST.get('replaceAll')
+        
+        if replace_all == 'true':
+            speaker = validated_data.get('speaker')
+            Transcricao.objects.filter(media_transcricao_id=instance.media_transcricao.id,speaker=instance.speaker).update(speaker=speaker)
+        
+        return super().update(instance, validated_data)
+
 class ChatSerializer(ModelSerializer):
     mensagens = MensagemSerializer(source='mensagem_chat', many=True, read_only=True)
 

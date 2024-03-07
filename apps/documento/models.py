@@ -12,6 +12,8 @@ import os
 import subprocess
 from openai import OpenAI
 import pdfkit
+from apps.documento.utils import process_audio, get_diarizations, get_speaker
+import json
 
 class Chat(BaseModel):
     titulo = models.CharField('Titulo', max_length=255)
@@ -99,6 +101,8 @@ class MediaTranscricao(BaseModel):
         related_name='%(class)s_chat',
         blank=True,null=True
     )
+    diarizacao = models.TextField("Diarização",blank=True,null=True)
+    transcricao = models.TextField("Transcrição",blank=True,null=True)
 
     def __str__(self):
         return f'{self.titulo}'
@@ -128,11 +132,12 @@ def transcrever_audio_media_transcricao(sender, instance, **kwargs):
             path_media_pdf = f'{ROOT_PDF}/{filename_audio}.pdf'
             
             # converte arquivo em wav
-            subprocess.run(['ffmpeg','-y','-i', file_path, '-f', 'wav', '-acodec', 'pcm_s16le', '-ar', '22050', '-ac', '1', 'copy', path_media_audio])
-
+            path_media_audio = process_audio(file_path)
+            
             # converte arquivo wav em mp3
-            convert = AudioSegment.from_wav(path_media_audio)
+            convert = AudioSegment.from_file(file_path)
             audio_file = convert.export('exemplo.mp3', format="mp3")
+            
             
             if audio_file:
                 # envia arquiv para OpenAI
@@ -144,12 +149,12 @@ def transcrever_audio_media_transcricao(sender, instance, **kwargs):
                 )
 
                 if transcricao:
+                    diarization = get_diarizations(path_media_audio)
                     texto_total = ""
                     with open(path_media_legenda, 'w') as vtt:
                         vtt.write('WEBVTT\n')
                         
                         for t in transcricao.segments:
-                            print('[+++++++]',t)
                             start = convert_to_time(t.get('start'), True)
                             end = convert_to_time(t.get('end'), True)
                             text = t.get('text')
@@ -165,10 +170,17 @@ def transcrever_audio_media_transcricao(sender, instance, **kwargs):
                                 'texto': text,
                                 'tempo_inicial': start,
                                 'tempo_final': end,
+                                'speaker': get_speaker(diarization,t.get('start'),t.get('end'))
                             }
-                            transcricao = Transcricao(**dict_transcricao)
-                            transcricao.save()
-                            instance.legenda = f'{filename_audio}.vtt'
+                            transcricao_new = Transcricao(**dict_transcricao)
+                            transcricao_new.save()
+
+                        instance.legenda = f'{filename_audio}.vtt'
+                        instance.diarizacao = diarization
+                        transcricao_obj = {
+                            "segments": transcricao.segments,
+                        }
+                        instance.transcricao = json.dumps(transcricao_obj)
                             
                     vtt.close()
                     
@@ -198,6 +210,10 @@ class Transcricao(BaseModel):
     texto = models.CharField("Texto",max_length=500)
     tempo_inicial = models.CharField("Tempo inicial",max_length=12)
     tempo_final = models.CharField("Tempo final",max_length=12)
+    speaker = models.CharField("Speaker",max_length=50, blank=True, null=True)
+
+    class Meta:
+        ordering = ['id',]
 
     def __str__(self):
         return f'{self.media_transcricao.titulo}'

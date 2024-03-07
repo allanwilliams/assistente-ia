@@ -74,3 +74,10 @@ class MediaTranscricaoViewSet(ModelViewSet):
     serializer_class = MediaTranscricaoSerializer
     filterset_class = MediaTranscricaoFilter
     http_method_names = ['get', 'patch', 'post', 'delete','put']
+
+class TranscricaoViewSet(ModelViewSet):
+    queryset = Transcricao.objects.all()
+    serializer_class = TranscricaoSerializer
+    http_method_names = ['get', 'patch', 'post', 'delete','put']
+
+    
