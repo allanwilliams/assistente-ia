@@ -337,7 +337,7 @@
         });
         
         if(userId.val()) {
-            getUserChats(userId.val())
+            getUserChats(userId.val(), 'chat')
             .then((data) => data.json())
             .then((data) => fillListChats(data.results))
             .then(() => {

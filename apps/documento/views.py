@@ -26,17 +26,27 @@ def chat(request):
 
 
 def dashboard(request):
-    chats = Chat.objects.filter(criado_por=request.user, ativo=True)
-    transcricoes = MediaTranscricao.objects.filter(criado_por=request.user, ativo=True)
-    context = {
-        'chats': chats,
-        'transcricoes': transcricoes
-    }
+    path = request.path 
+    if 'dashboard-documento' in path:
+        chats = Chat.objects.filter(criado_por=request.user, ativo=True)
+        context = {
+            'chats': chats,
+            'api': 'chat',
+            'redirect': 'chat/?documento'
+        }
 
-    return render(request, 'dashboard.html', context)
-
-
-
+        return render(request, 'dashboard.html', context)
+    
+    if 'dashboard-media' in path:
+        transcricoes = MediaTranscricao.objects.filter(criado_por=request.user, ativo=True)
+        context = {
+            'transcricoes': transcricoes,
+            'api': 'media-transcricao',
+            'redirect': 'transcricao/?arquivo'
+        }
+        return render(request, 'dashboard.html', context)
+    
+    
 def convert_to_time(number, microseconds=False):
     delta_tempo = datetime.timedelta(seconds=number)
     time = "{:02}:{:02}:{:02}".format(delta_tempo.seconds // 3600, (delta_tempo.seconds % 3600) // 60, delta_tempo.seconds % 60)
@@ -114,7 +124,6 @@ def transcricao_video(request):
                 context['legenda_name'] = format_html(filename_audio)
 
     return render(request, 'transcricao_video.html', context)
-
 
 def transcricao(request):
     context = {}

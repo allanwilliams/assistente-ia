@@ -144,8 +144,8 @@
             $('select:not(.filtered):not(.admin-autocomplete)').select2({dropdownAutoWidth : true});
         })
 
-        function getUserChats(userId) {
-            return fetch(`/documento/api/chat/?criado_por=${userId}&ativo=true`)
+        function getUserChats(userId, api) {
+            return fetch(`/documento/api/${api}/?criado_por=${userId}&ativo=true`)
         }
         function showMessage(text,duration){
             Toastify({

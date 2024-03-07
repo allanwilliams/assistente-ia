@@ -199,7 +199,7 @@ body {
          if(event.target.classList.contains('btn-remove-chat')) {
             const chatId = event.target.attributes['data-remove-id'].value
             deleteChat(chatId)
-            event.target.parentElement.parentElement.parentElement.remove()
+            event.target.parentElement.parentElement.remove()
         }
 
         if(event.target.classList.contains('btn-remove-question')) {
@@ -251,7 +251,7 @@ body {
 
 
         if(userId.val()) {
-            getUserChats(userId.val())
+            getUserChats(userId.val(), '{{api}}')
             .then((data) => data.json())
             .then((data) => fillListChats(data.results))
         }
@@ -321,7 +321,7 @@ body {
                             <img src="{% static 'images/icondoc.jpeg' %}" width="50" alt="">
                             <i style='' data-remove-id='${c.id}' class='fa fa-trash btn-remove-chat'></i>
                         </div>                            
-                        <a href="/documento/chat/?documento=${c.id}">${c.titulo}</a>
+                        <a href="/documento/{{redirect}}=${c.id}">${c.titulo}</a>
                     </div> `
         })
         gridChats.html(list)
@@ -331,7 +331,7 @@ body {
         if(chatId) {
             $.ajax({
                 type: 'PATCH',
-                url: `/documento/api/chat/${chatId}/`,
+                url: `/documento/api/{{api}}/${chatId}/`,
                 data: {
                     ativo: false
                 },
