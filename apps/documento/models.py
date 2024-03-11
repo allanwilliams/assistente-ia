@@ -128,7 +128,7 @@ def transcrever_audio_media_transcricao(sender, instance, **kwargs):
             path_media_pdf = f'{ROOT_PDF}/{filename_audio}.pdf'
             
             # converte arquivo em wav
-            subprocess.run(['ffmpeg','-y','-i', file_path, '-f', 'wav', '-acodec', 'pcm_s16le', '-ar', '22050', '-ac', '1', 'copy', path_media_audio])
+            subprocess.run(['ffmpeg','-y','-i', file_path, '-f', 'wav', '-acodec', 'pcm_s16le', '-ar', '22050', '-vol', '300', '-ac', '1', 'copy', path_media_audio])
 
             # converte arquivo wav em mp3
             convert = AudioSegment.from_wav(path_media_audio)
@@ -149,7 +149,6 @@ def transcrever_audio_media_transcricao(sender, instance, **kwargs):
                         vtt.write('WEBVTT\n')
                         
                         for t in transcricao.segments:
-                            print('[+++++++]',t)
                             start = convert_to_time(t.get('start'), True)
                             end = convert_to_time(t.get('end'), True)
                             text = t.get('text')
