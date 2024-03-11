@@ -163,8 +163,8 @@ def transcrever_audio_media_transcricao(sender, instance, **kwargs):
                             dict_transcricao = {
                                 'media_transcricao': instance,
                                 'texto': text,
-                                'tempo_inicial': start,
-                                'tempo_final': end,
+                                'tempo_inicial': convert_to_time(t.get('start'), False),
+                                'tempo_final': convert_to_time(t.get('end'), False)
                             }
                             transcricao = Transcricao(**dict_transcricao)
                             transcricao.save()

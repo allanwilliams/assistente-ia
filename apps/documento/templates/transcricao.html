@@ -13,6 +13,7 @@
         padding-top: 8px;
         padding-bottom: 8px;
         width: 100%;
+        position: relative;
     }
 
     #document #transcricao .transcricao-message-row.ai {
@@ -32,21 +33,20 @@
     }
     #document #transcricao .transcricao-message {
         position: relative;
-        max-width: 500px;
         border-radius: 8px;
         padding: 6px 12px;
         box-shadow: 0 0 3px #d1d2da;
         display: flex;
-        justify-content: center;
         align-items: center;
         gap: 1em;
+        width: 100%;
     }
-    #document #transcricao .transcricao-message .clipboard-btn {
-        float: right;
-        font-size: 16px;
-        margin-right: -6px;
-        padding-left: 3px;
+    #document #transcricao .transcricao-message-row .clipboard-btn-container {
+        right: 5px;
+        top: 9px;
+        font-size: 14px;
         cursor: pointer;
+        position: absolute;
     }
 
     .transcricao-header, .pdf-header h3 {
@@ -211,9 +211,9 @@
         <div id="toolbar">
             <div class="input-file-section">
                 <div class="drag-area">
-                    <i class="fa fa-solid fa-add"></i><span> Nova transcrição</span> 
+                    <i class="fa-sharp fa-solid fa-cloud-arrow-up" style="color:#00c0ef; font-size: 20px;"></i><span></span> 
                     <div class="drag-area-content">
-                        <p class="drag-file">Solte o arquivo aqui</p> 
+                        <p class="drag-file">Arraste/solte ou clique aqui para adicionar</p> 
                     </div>
                     <input type="file" class="file-input" style="display: none;" />
                 </div>
@@ -254,6 +254,25 @@
 
 {% block extrajs %}
 <script>
+    const documentType = [
+        'application/pdf'
+    ]
+    const audioTypes = [
+        'audio/midi',
+        'audio/mpeg',
+        'audio/webm',
+        'audio/ogg',
+        'audio/wav',    
+    ]
+    const videoTypes = [
+        'video/webm',
+        'video/ogg',
+        'video/mp4',
+        'video/x-msvideo'
+    ]
+    const mediaTranscriptionTypes = audioTypes.concat(videoTypes)
+    const allowedMedias = mediaTranscriptionTypes.concat(documentType)
+
     const inputTxtAsk = $('#transcricao-input-ask')
     const btnSendAsk = $("#btn-send-ask")
     const listMessagesEl = $("#list-messages")
@@ -400,7 +419,7 @@
         insertConversation(transcricoes)
         transcricaoAtual = data
         transcricaoIdOpenEl.val(id)
-        $('[data-toggle="tooltip"]').tooltip()
+        prepareActions()
     }
 
     function loadDocumento(titulo, url, id, tipo, legenda) {
@@ -486,11 +505,12 @@
 
     function newtranscricao(target) {
         const file = target.files[0]
+        const tipo = audioTypes.indexOf(file.type) != -1 ? 2 : 1
         const formData = new FormData()
         formData.append('titulo', file.name)
         formData.append('arquivo', file)
         formData.append('ativo', true)
-        formData.append('tipo', 2)
+        formData.append('tipo', tipo)
 
         $.ajax({
             type:'POST',
@@ -540,6 +560,10 @@
     function appendConversation(askMsg, loading=true) {
         let textoFormatado = askMsg.texto.replaceAll('\n', '<br>')
 
+        const getClipboardAction = (askMsg) => {
+            return `<div class="clipboard-btn-container" data-toggle="tooltip" data-placement="left" title="Copiar" ><i class="fa-regular fa-clipboard clipboard-btn" data-clipboard-target="#message-${askMsg.id}"></i></div>`
+        }
+
         let row = `
                 <div class="transcricao-message-row">
                     <div class="transcricao-message" style="overflow: hidden;">
@@ -547,10 +571,11 @@
                             <i class='fa fa-user'></i>
                         </div>
                         <div class="transcricao-message-txt" id="message-${askMsg.id}">
-                            <div><strong>${askMsg.tempo_inicial} <i class='fa fa-arrow-right'></i> ${askMsg.tempo_final}</strong></div>
-                            <div class='text-msg'>${textoFormatado}</div>
+                            <div><strong>${askMsg.tempo_inicial} <i class='fa fa-arrow-right'></i> ${askMsg.tempo_final}</strong>:</div>
+                            <div class='text-msg'>${textoFormatado}</div> 
                         </div>
                     </div>
+                    ${getClipboardAction(askMsg)}
                 </div>
             `
         
@@ -592,6 +617,26 @@
 
     }
     }
+
+    function prepareActions () {
+       
+        const clipboard = new ClipboardJS('.clipboard-btn');
+
+        clipboard.on('success', function(e) {
+            const el = e.trigger
+            e.clearSelection();
+            el.classList.remove('fa-clipboard')
+            el.classList.add('fa-square-check')
+
+            setTimeout(() => {
+                el.classList.remove('fa-square-check')
+                el.classList.add('fa-clipboard')
+            }, 2000)
+        });
+
+        $('[data-toggle="tooltip"]').tooltip()
+    }
+
 
 </script>
 {% endblock %}
