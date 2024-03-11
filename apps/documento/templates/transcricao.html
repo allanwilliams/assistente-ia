@@ -133,7 +133,9 @@
     .btn-remove-transcricao {
         cursor: pointer;
     }
-
+    .pointer {
+        cursor: pointer;
+    }
     .question-box{
         position: absolute;
         bottom: 3em;
@@ -339,6 +341,10 @@
             const text = $(`#${msgID}`).text()
             showLatestMessage()
             sendAsk(text)
+        } 
+        if(event.target.classList.contains('btn-go-to-time')) {
+            const time = event.target.attributes['data-time'].value
+            goToTime(time)
         }
     })
     
@@ -428,7 +434,7 @@
             classe = 'video'
         }
         embed = `
-            <video id="video_teste"
+            <video id="media-el"
                 controls 
                 preload="auto"
                 class="${classe}"
@@ -571,7 +577,7 @@
                             <i class='fa fa-user'></i>
                         </div>
                         <div class="transcricao-message-txt" id="message-${askMsg.id}">
-                            <div><strong>${askMsg.tempo_inicial} <i class='fa fa-arrow-right'></i> ${askMsg.tempo_final}</strong>:</div>
+                            <div><i class="fa-solid fa-forward-step pointer btn-go-to-time" data-time=${askMsg.tempo_inicial_segundos} data-toggle="tooltip" data-placement="bottom" title="Ir para"></i> <strong>${askMsg.tempo_inicial} <i class='fa fa-arrow-right'></i> ${askMsg.tempo_final}</strong>: </div>
                             <div class='text-msg'>${textoFormatado}</div> 
                         </div>
                     </div>
@@ -637,6 +643,10 @@
         $('[data-toggle="tooltip"]').tooltip()
     }
 
+    function goToTime(time) {
+        const mediaEl = document.getElementById('media-el')
+        mediaEl.currentTime = time
+    }
 
 </script>
 {% endblock %}

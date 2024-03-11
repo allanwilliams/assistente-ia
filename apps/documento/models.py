@@ -164,7 +164,8 @@ def transcrever_audio_media_transcricao(sender, instance, **kwargs):
                                 'media_transcricao': instance,
                                 'texto': text,
                                 'tempo_inicial': convert_to_time(t.get('start'), False),
-                                'tempo_final': convert_to_time(t.get('end'), False)
+                                'tempo_final': convert_to_time(t.get('end'), False),
+                                'tempo_inicial_segundos': int(t.get('start'))
                             }
                             transcricao = Transcricao(**dict_transcricao)
                             transcricao.save()
@@ -197,6 +198,7 @@ class Transcricao(BaseModel):
     )
     texto = models.CharField("Texto",max_length=500)
     tempo_inicial = models.CharField("Tempo inicial",max_length=12)
+    tempo_inicial_segundos = models.IntegerField("Tempo inicial em segundos", default=0)
     tempo_final = models.CharField("Tempo final",max_length=12)
 
     def __str__(self):

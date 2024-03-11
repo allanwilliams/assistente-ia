@@ -91,6 +91,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',    
     "django_currentuser.middleware.ThreadLocalUserMiddleware",
+    'DjangoRangeMiddleware.middleware.RangesMiddleware',
     "apps.session.middleware.SessionMiddleware",
 ]
 
