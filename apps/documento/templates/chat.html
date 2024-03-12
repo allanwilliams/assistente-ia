@@ -485,6 +485,22 @@
         }
     }
 
+    function resetChat(chatId) {
+        if(chatId) {
+            loader.fadeIn()
+            $.ajax({
+                type: 'GET',
+                url: `/documento/api/chat/${chatId}/resetar_chat/`,
+                success: (data) => {
+                    console.log(data)
+                },
+                error: () => {},
+                complete: () => loader.fadeOut()
+            })
+        }
+        getChat(chatId)
+    }
+
     function appendConversation(askMsg, loading=true) {
         const getAutor = (autor) => {
             const autores = { 1: 'human', 2: 'ai' }
@@ -620,12 +636,14 @@
         const menuActions = `
             <div id="chat-header-actions">
                 <a href="/documento/export-chat-txt/${chatAtual.id}"><i class="fa-solid fa-download" data-toggle="tooltip" data-placement="bottom" title="Exportar chat"></i></a>
+                <i id="reset-conversation" class="fa-solid fa-rotate-left" data-toggle="tooltip" data-placement="bottom" title="Resetar Chat"></i>
                 <i id="remove-conversation" class="fa-solid fa-trash" data-toggle="tooltip" data-placement="bottom" title="Deletar Chat"></i>
             </div>
         `
         chatHeaderActions.html(menuActions)
         
         $("#remove-conversation").click(() => deleteChat(chatAtual.id))
+        $("#reset-conversation").click(() => resetChat(chatAtual.id))
 
         const clipboard = new ClipboardJS('.clipboard-btn');
 

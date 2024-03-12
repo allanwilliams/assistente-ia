@@ -12,6 +12,7 @@ import os
 import subprocess
 from openai import OpenAI
 import pdfkit
+from config.settings import ROOT_DIR
 
 class Chat(BaseModel):
     titulo = models.CharField('Titulo', max_length=255)
@@ -114,15 +115,15 @@ def transcrever_audio_media_transcricao(sender, instance, **kwargs):
         return time
 
     if instance and not instance.chat and instance.ativo:
-        ROOT = os.path.abspath(os.path.dirname(f'media/arquivo_transcricao'))
-        ROOT_LEGENDA = os.path.abspath(os.path.dirname(f'media/legenda_transcricao'))
-        ROOT_PDF = os.path.abspath(os.path.dirname(f'media/documento_chat'))
+        ROOT = f'{ROOT_DIR}/media'
+        ROOT_LEGENDA = f'{ROOT_DIR}/media/legenda_transcricao'
+        ROOT_PDF = f'{ROOT_DIR}/media/documento_chat'
         
         file_path = '{}/{}'.format(ROOT, instance.arquivo)
     
         try:
             arquivo_file = instance.arquivo
-            filename_audio = str(arquivo_file.name).split('.')[-2]
+            filename_audio = str(arquivo_file.name).split('.')[-2].split('/')[1]
             path_media_legenda = f'{ROOT_LEGENDA}/{filename_audio}.vtt'
             path_media_audio = f'{ROOT}/{filename_audio}.wav'
             path_media_pdf = f'{ROOT_PDF}/{filename_audio}.pdf'
@@ -168,15 +169,15 @@ def transcrever_audio_media_transcricao(sender, instance, **kwargs):
                             }
                             transcricao = Transcricao(**dict_transcricao)
                             transcricao.save()
-                            instance.legenda = f'{filename_audio}.vtt'
+                            instance.legenda = f'legenda_transcricao/{filename_audio}.vtt'
                             
                     vtt.close()
                     
-                    pdfkit.from_string(texto_total, path_media_pdf)
+                    pdfkit.from_string(texto_total, path_media_pdf,options={'encoding': "UTF-8",})
 
                     dict_chat = {
                         'titulo': filename_audio,
-                        'documento': f'{filename_audio}.pdf',
+                        'documento': f'documento_chat/{filename_audio}.pdf',
                         'ativo': True,
                         'usuario': instance.criado_por,
                     }
