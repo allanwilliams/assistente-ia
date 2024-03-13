@@ -495,10 +495,13 @@
                     console.log(data)
                 },
                 error: () => {},
-                complete: () => loader.fadeOut()
+                complete: () => {
+                    loader.fadeOut()
+                    getChat(chatId)
+                }
             })
         }
-        getChat(chatId)
+        
     }
 
     function appendConversation(askMsg, loading=true) {
