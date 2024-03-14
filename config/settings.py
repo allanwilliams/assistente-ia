@@ -67,6 +67,7 @@ THIRD_PARTY_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     "reversion",
+    'background_task',
 ]
 
 LOCAL_APPS = [
@@ -91,6 +92,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',    
     "django_currentuser.middleware.ThreadLocalUserMiddleware",
+    'DjangoRangeMiddleware.middleware.RangesMiddleware',
     "apps.session.middleware.SessionMiddleware",
 ]
 
@@ -165,7 +167,7 @@ TOKEN_LIFETIME_DAY = 1
 
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 
-SESSION_COOKIE_AGE = 24 * 60 * 60
+SESSION_COOKIE_AGE = 30 * 24 * 60 * 60
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(days=TOKEN_LIFETIME_DAY),

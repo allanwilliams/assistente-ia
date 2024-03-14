@@ -33,6 +33,10 @@ class ChatSerializer(ModelSerializer):
 
 class MediaTranscricaoSerializer(ModelSerializer):
     transcricoes = TranscricaoSerializer(source='transcricao_media_transcricao', many=True, read_only=True)
+    status_str = SerializerMethodField()
+
+    def get_status_str(self, obj):
+        return obj.get_status_display() if obj.status else None
 
     class Meta:
         model = MediaTranscricao

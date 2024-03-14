@@ -9,9 +9,11 @@ from django.core.files.storage import FileSystemStorage
 from config.settings import BASE_DIR
 from django.utils.html import format_html
 import datetime
+from django.contrib.auth.decorators import login_required
 
 client = OpenAI(api_key="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")
 
+@login_required
 def chat(request):
     documento = request.GET.get('documento')
     context = {}
@@ -24,7 +26,7 @@ def chat(request):
     
     return render(request, 'chat.html',context=context)
 
-
+@login_required
 def dashboard(request):
     path = request.path 
     if 'dashboard-documento' in path:
@@ -129,6 +131,7 @@ def transcricao_video(request):
 
     return render(request, 'transcricao_video.html', context)
 
+@login_required
 def transcricao(request):
     context = {}
     arquivo = request.GET.get('arquivo')

@@ -8,6 +8,9 @@ import json
 from django_filters import rest_framework as filters
 from apps.documento.choices import CHAT_AUTOR_IA
 from ..utils import create_questions
+from rest_framework.decorators import action
+import os
+from datetime import datetime
 
 class ChatFilter(filters.FilterSet):
     class Meta:
@@ -51,6 +54,51 @@ class ChatViewSet(ModelViewSet):
     filterset_class = ChatFilter
     http_method_names = ['get', 'patch', 'post', 'delete','put']
 
+    @action(detail=True, methods=['get'])
+    def resetar_chat(self, request, pk=None):
+        chat = Chat.objects.get(id=pk)
+
+        if chat:
+            Mensagem.objects.filter(chat=chat).delete()
+
+            headers = {'x-api-key': 'sec_16KMXQwy0VcwkGz7xYuDY9PxWGGgsHM6'}
+
+            # Remover o chat atigo no Chat PDF
+            try:
+                data = {'sources': [chat.chatpdf_source_id],}
+                
+                response = requests.post('https://api.chatpdf.com/v1/sources/delete', json=data, headers=headers)
+                response.raise_for_status()
+                print('success', response)
+            except Exception as e:
+                return Response({'mensagem': 'Erro ao deletar o documento do ChatPDF'}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Adicionar novo pdf
+            ROOT = os.path.abspath(os.path.dirname(f'media/documento_chat'))
+            file_path = '{}/{}'.format(ROOT, chat.documento)
+
+            try:
+                with open(file_path, 'rb') as file:
+                    files = [('file', ('file', file, 'application/octet-stream'))]
+                    response = requests.post('https://api.chatpdf.com/v1/sources/add-file', headers=headers, files=files)
+
+                    if response.status_code == 200:
+                        chat.chatpdf_source_id = response.json()['sourceId']
+                        chat.save()
+
+                    else:
+                        msg_inicial = 'Houve um erro ao processar o PDF'
+                        nova_mensagem = Mensagem(texto=msg_inicial, chat_id=chat.id, autor=CHAT_AUTOR_IA, criado_em=datetime.now())
+                        nova_mensagem.save()
+
+            except Exception as e:
+                return Response({'mensagem': 'Erro ao reenviar o documento para o ChatPDF'}, status=status.HTTP_400_BAD_REQUEST)
+            
+
+            return Response({'mensagem': 'Chat resetado'}, status=status.HTTP_200_OK)
+        else:
+            return Response({'mensagem': 'Chat não encontrado'}, status=status.HTTP_404_NOT_FOUND)
+
 
 class MensagemViewSet(ModelViewSet):
     queryset = Mensagem.objects.all()
@@ -70,7 +118,7 @@ class MensagemViewSet(ModelViewSet):
         return Response({"id": CQ.id, "texto": CQ.texto, "autor": CQ.autor }, status=status.HTTP_201_CREATED)
 
 class MediaTranscricaoViewSet(ModelViewSet):
-    queryset = MediaTranscricao.objects.all()
+    queryset = MediaTranscricao.objects.all().order_by('-id')
     serializer_class = MediaTranscricaoSerializer
     filterset_class = MediaTranscricaoFilter
     http_method_names = ['get', 'patch', 'post', 'delete','put']

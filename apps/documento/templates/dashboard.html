@@ -139,18 +139,25 @@ body {
         <!-- </div> -->
     </div>
 
-    <div id="perguntas_favoritas">
+    <!-- <div id="perguntas_favoritas">
         <div class="titulo-header">Perguntas Favoritas</div>
         <div class="conteudo-documentos">
         <div id="grid-pergunta-chats">
         </div>
         </div>
-    </div>
+    </div> -->
 
     <div id="meus_documentos">
         <div class="titulo-header">{{titulo_tabela}}</div>
         <div class="conteudo-documentos">
-            <div id="grid-documentos-chats"></div>
+            <table>
+                <thead>
+                    <th></th>
+                    <th style="width: 30%;"></th>
+                    <th style="width: 8%;"></th>
+                </thead>
+                <tbody id="table-documentos-medias"></tbody>
+            </table>
         </div>
     </div> 
     <br>
@@ -185,6 +192,7 @@ body {
     const gridChats = $("#grid-documentos-chats")
     const gridQuestion = $("#grid-pergunta-chats")
     const body = document.querySelector('body')
+    const tableDocumentosMedias = $("#table-documentos-medias")
     const loader = $("#preloader")
     
     fileInput.accept = allowedMedias.join(',')
@@ -196,21 +204,21 @@ body {
         });
 
         body.addEventListener('click', function(event) {
-         if(event.target.classList.contains('btn-remove-chat')) {
-            const chatId = event.target.attributes['data-remove-id'].value
-            deleteChat(chatId)
-            event.target.parentElement.parentElement.remove()
-        }
+            if(event.target.classList.contains('btn-remove-chat')) {
+                const chatId = event.target.attributes['data-remove-id'].value
+                deleteChat(chatId)
+                event.target.parentElement.parentElement.remove()
+            }
 
-        if(event.target.classList.contains('btn-remove-question')) {
-            const chatId = event.target.attributes['data-id'].value
-            deleteQuestion(chatId)
-            event.target.parentElement.parentElement.remove()
-        }        
-    })
+            if(event.target.classList.contains('btn-remove-question')) {
+                const chatId = event.target.attributes['data-id'].value
+                deleteQuestion(chatId)
+                event.target.parentElement.parentElement.remove()
+            }        
+        })
 
 
-    fileInput.addEventListener("change", function (e) {
+        fileInput.addEventListener("change", function (e) {
             const target = e.target;
             if(validateDocument(target)){
                 const isTranscription = getIsTranscription(target)
@@ -221,8 +229,8 @@ body {
             }
         });
         dropArea.onclick = () => {
-                fileInput.click();
-            };
+            fileInput.click();
+        };
 
         dropArea.addEventListener("dragover", (event) => {
             event.preventDefault();
@@ -249,13 +257,17 @@ body {
             }
         });        
 
+        getDocumentsChats()
+        setInterval(() => getDocumentsChats(), 23000)
+    })  
 
+    function getDocumentsChats() {
         if(userId.val()) {
             getUserChats(userId.val(), '{{api}}')
             .then((data) => data.json())
             .then((data) => fillListChats(data.results))
         }
-    })  
+    }
 
     function validateDocument(target){
         const file = target.files[0]
@@ -306,25 +318,51 @@ body {
             contentType: false,
             processData: false,
             success: (data) => {
-                window.location.href = `/documento/transcricao/?arquivo=${data.id}`
+                window.location.reload()
             },
             complete: () => loader.fadeOut()
         })
 
     }
-
     function fillListChats(chats) {
         let list = ''
-        chats.forEach((c) => {
-           list += ` <div class="documento-chat" >
-                        <div style="display: flex;">   
-                            <img src="{% static 'images/icondoc.jpeg' %}" width="50" alt="">
-                            <i style='' data-remove-id='${c.id}' class='fa fa-trash btn-remove-chat'></i>
-                        </div>                            
-                        <a href="/documento/{{redirect}}=${c.id}">${c.titulo}</a>
-                    </div> `
-        })
-        gridChats.html(list)
+
+        if(chats[0] && chats[0].chatpdf_source_id) {
+            chats.forEach((c) => {
+                list += `
+                    <tr>
+                        <td>${c.titulo}</td>
+                        <td></td>
+                        <td>
+                            <a class="btn" href="/documento/{{redirect}}=${c.id}">
+                                <i style="color:#00c0ef" class='fa fa-eye'></i>
+                            </a>
+                            <i data-remove-id='${c.id}' style="color:red" class='fa fa-trash btn-remove-chat'></i>    
+                        </td>
+                    </tr>
+                `
+            })
+        } else {
+            chats.forEach((c) => {
+            list += `
+                <tr>
+                    <td>${c.titulo}</td>
+                    <td>${c.status_str}</td>
+                    <td style="display: flex; justify-content: end; align-items: center;">
+                        ${c.status === 4 ? 
+                            `<a class="btn"  href="/documento/{{redirect}}=${c.id}">
+                                <i style="color:#00c0ef" class='fa fa-eye'></i>
+                            </a>` : ''}
+                        
+                        ${[1, 4].includes(c.status)  ? 
+                            `<i data-remove-id='${c.id}' style="color:red" class='fa fa-trash btn-remove-chat'></i>    
+                            ` : ``}
+                    </td>
+                </tr>
+            `
+            })
+        }
+        tableDocumentosMedias.html(list)
     }
 
     function deleteChat(chatId) {
