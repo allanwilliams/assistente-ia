@@ -92,55 +92,63 @@ def process_audio(audio_path):
     return "audio_temporario.wav"
 
 def get_diarizations(audio):
+    print("<<<<<<<<<<<< PREPARANDO DIARIZAÇAO >>>>>>>>>>>>")
+    try:
+        pipeline = Pipeline.from_pretrained(
+        "pyannote/speaker-diarization-3.1",
+        use_auth_token="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")
 
-    pipeline = Pipeline.from_pretrained(
-    "pyannote/speaker-diarization-3.1",
-    use_auth_token="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")
+        pipeline.to(torch.device("cpu"))
 
-    pipeline.to(torch.device("cpu"))
+        # apply pretrained pipeline
+        diarization = pipeline(audio,num_speakers=2,max_speakers=3)
 
-    # apply pretrained pipeline
-    diarization = pipeline(audio,num_speakers=2,max_speakers=3)
-
-    # print the result
-    result = [{
-        'start': f'{turn.start:.1f}',
-        'stop': f'{turn.end:.1f}',
-        'speaker': speaker
-    } for turn, _, speaker in diarization.itertracks(yield_label=True)]
-    return unify_speakers(result)
+        # print the result
+        result = [{
+            'start': f'{turn.start:.1f}',
+            'stop': f'{turn.end:.1f}',
+            'speaker': speaker
+        } for turn, _, speaker in diarization.itertracks(yield_label=True)]
+        print("<<<<<<<<<<<< DIARIZACAO CONCLUIDA >>>>>>>>>>>>")
+        return unify_speakers(result)
+    except Exception as e:
+        print("<<<<<<<<<<<< ERRO DIARIZACAO >>>>>>>>>>>>", e)
 
 def get_speaker(diarization,start_interval,stop_interval):
     filtered_elements = [element for element in diarization if float(start_interval) >= float(element['start']) and float(stop_interval) <= float(element['stop'])]
     return filtered_elements[0]['speaker'] if filtered_elements else 'Não identificado'
 
 def unify_speakers(data):
-    unified = []
-    current_speaker = None
-    current_start = None
-    current_stop = None
+    print("<<<<<<<<<<<< UNIFY SPEAKERS >>>>>>>>>>>>")
+    try:
+        unified = []
+        current_speaker = None
+        current_start = None
+        current_stop = None
 
-    for item in data:
-        start = float(item['start'])
-        stop = float(item['stop'])
-        speaker = item['speaker']
+        for item in data:
+            start = float(item['start'])
+            stop = float(item['stop'])
+            speaker = item['speaker']
 
-        # Se é o mesmo speaker e o intervalo é contínuo ou se sobrepõe, atualize o 'stop'
-        if speaker == current_speaker:
-            current_stop = max(current_stop, stop)
-        else:
-            if current_speaker is not None:
-                unified.append({'start': str(current_start), 'stop': str(current_stop), 'speaker': current_speaker})
-            
-            current_speaker = speaker
-            current_start = start
-            current_stop = stop
+            # Se é o mesmo speaker e o intervalo é contínuo ou se sobrepõe, atualize o 'stop'
+            if speaker == current_speaker:
+                current_stop = max(current_stop, stop)
+            else:
+                if current_speaker is not None:
+                    unified.append({'start': str(current_start), 'stop': str(current_stop), 'speaker': current_speaker})
+                
+                current_speaker = speaker
+                current_start = start
+                current_stop = stop
 
-    # Não esqueça de adicionar o último intervalo após sair do loop
-    if current_speaker is not None:
-        unified.append({'start': str(current_start), 'stop': str(current_stop), 'speaker': current_speaker})
+        # Não esqueça de adicionar o último intervalo após sair do loop
+        if current_speaker is not None:
+            unified.append({'start': str(current_start), 'stop': str(current_stop), 'speaker': current_speaker})
 
-    return unified
+        return unified
+    except Exception as e:
+         print("<<<<<<<<<<<< UNIFY SPEAKERS ERROR>>>>>>>>>>>>", e)
 
 def convert_to_time(number, microseconds=False):
     delta_tempo = timedelta(seconds=number)
@@ -209,6 +217,7 @@ def preparar_transcricao(media_transcricao_id, audio_file):
         )
 
         if transcricao:
+            print('audio_file.name', audio_file.name)
             diarization = get_diarizations(audio_file.name)
             texto_total = ""
             with open(path_media_legenda, 'w') as vtt:
@@ -233,8 +242,8 @@ def preparar_transcricao(media_transcricao_id, audio_file):
                         'tempo_inicial_segundos': int(t.get('start')),
                         'speaker': get_speaker(diarization,t.get('start'),t.get('end'))
                     }
-                    transcricao = models.Transcricao(**dict_transcricao)
-                    transcricao.save()
+                    transcricao_new = models.Transcricao(**dict_transcricao)
+                    transcricao_new.save()
                 
                 instance.legenda = f'legenda_transcricao/{filename_audio}.vtt'
                 instance.diarizacao = diarization
@@ -252,7 +261,7 @@ def preparar_transcricao(media_transcricao_id, audio_file):
             atualizar_status_transcricao(media_transcricao_id, STATUS_FALHA_TRANSCRICAO)
 
     except Exception as e:
-        print("<<<<<<<<<<<< FALHA NA TRANSCRIÇÃO >>>>>>>>>>>>")
+        print("<<<<<<<<<<<< FALHA NA TRANSCRIÇÃO EXCEPT >>>>>>>>>>>>", e)
         atualizar_status_transcricao(media_transcricao_id, STATUS_FALHA_TRANSCRICAO)
 
 

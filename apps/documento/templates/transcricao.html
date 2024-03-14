@@ -585,7 +585,6 @@
                         <div class="transcricao-message-txt" id="message-${askMsg.id}">
                             <div><strong>${askMsg.speaker}</strong> <i class="fa-solid fa-pen btn btn-edit-speaker" data-id="${askMsg.id}" data-speaker="${askMsg.speaker}"></i></div>
                             <div><i class="fa-solid fa-forward-step pointer btn-go-to-time" data-time=${askMsg.tempo_inicial_segundos} data-toggle="tooltip" data-placement="bottom" title="Ir para"></i> <strong>${askMsg.tempo_inicial} <i class='fa fa-arrow-right'></i> ${askMsg.tempo_final}</strong>: </div>
-                            <div><strong>${askMsg.tempo_inicial} <i class='fa fa-arrow-right'></i> ${askMsg.tempo_final}</strong></div>
                             <div class='text-msg'>${textoFormatado}</div> 
                         </div>
                     </div>
@@ -608,28 +607,28 @@
 
     function getQuestion(id,question){
         if (question.trim().length > 0){
-        fetch(`/documento/api/mensagem/?criado_por=${id}&is_favorito=true&texto__icontains=${question}`)
-        .then(res=>res.json())
-        .then(data=>{
-            const questions = data.results.reduce((acc,d) => {
-                acc += `<li class='question'>${d.texto}</li>`
-                return acc
-            },'')
+            fetch(`/documento/api/mensagem/?criado_por=${id}&is_favorito=true&texto__icontains=${question}`)
+            .then(res=>res.json())
+            .then(data=>{
+                const questions = data.results.reduce((acc,d) => {
+                    acc += `<li class='question'>${d.texto}</li>`
+                    return acc
+                },'')
 
-            if (questions.length > 0){
-                questionBox.classList.remove('hide')
-                listaQuestion.html(questions)
-            }else{
-                listaQuestion.html('')
-                questionBox.classList.add('hide')
-            }
-            
-        })
-    }else{
-        listaQuestion.html('')
-        questionBox.classList.add('hide')
+                if (questions.length > 0){
+                    questionBox.classList.remove('hide')
+                    listaQuestion.html(questions)
+                }else{
+                    listaQuestion.html('')
+                    questionBox.classList.add('hide')
+                }
+                
+            })
+        } else {
+            listaQuestion.html('')
+            questionBox.classList.add('hide')
 
-    }
+        }
     }
 
     function openDialogEditSpeaker(id, speaker) {
@@ -670,7 +669,7 @@
             },
             error: () => {}
         })
-
+    }
 
     function prepareActions () {
        
