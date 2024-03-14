@@ -28,7 +28,7 @@ class MediaTranscricaoAdmin(AuditoriaAdmin):
         'titulo',
     )
 
-    list_display = ('titulo',  'ativo', 'arquivo','legenda')
+    list_display = ('titulo',  'ativo', 'status', 'arquivo','legenda')
 
 
 @admin.register(Transcricao)

@@ -67,6 +67,7 @@ THIRD_PARTY_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     "reversion",
+    'background_task',
 ]
 
 LOCAL_APPS = [

@@ -118,7 +118,7 @@ class MensagemViewSet(ModelViewSet):
         return Response({"id": CQ.id, "texto": CQ.texto, "autor": CQ.autor }, status=status.HTTP_201_CREATED)
 
 class MediaTranscricaoViewSet(ModelViewSet):
-    queryset = MediaTranscricao.objects.all()
+    queryset = MediaTranscricao.objects.all().order_by('-id')
     serializer_class = MediaTranscricaoSerializer
     filterset_class = MediaTranscricaoFilter
     http_method_names = ['get', 'patch', 'post', 'delete','put']
