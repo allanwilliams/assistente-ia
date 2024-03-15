@@ -115,6 +115,17 @@ body {
     color: #fff;
 }
 
+#table-documentos-medias th, #table-documentos-medias td {
+  padding: 10px;
+}
+
+#table-documentos-medias td.td-actions {
+    text-align: right;
+}
+#table-documentos-medias td.td-actions a {
+    margin-right: 5px;
+}
+
 </style>
 {% endblock %}
 
@@ -327,6 +338,20 @@ body {
     function fillListChats(chats) {
         let list = ''
 
+        const getIcon = (status) => {
+            const icons = {
+                1: { icon: '<i class="fa-solid fa-hourglass-half fa-fade" style="color:orange"></i>', color: 'orange'},
+                2: { icon:'<i class="fa-solid fa-circle-notch fa-spin" style="color:orange"></i>', color: 'orange'},
+                3: { icon:'<i class="fa-solid fa-circle-notch fa-spin" style="color:orange"></i>', color: 'orange'},
+                4: { icon:'<i class="fa-regular fa-circle-check" style="color: #5cb85c"></i>', color: '#5cb85c'},
+                5: { icon:'<i class="fa-solid fa-ban"></i>', color: 'orange'},
+                6: { icon:'<i class="fa-solid fa-triangle-exclamation" style="color: #ff0000;"></i>', color: '#ff0000'},
+                7: { icon:'<i class="fa-solid fa-triangle-exclamation" style="color: #ff0000;"></i>', color: '#ff0000'},
+            }
+
+            return icons[status] || icons[1]
+        }
+
         if(chats[0] && chats[0].chatpdf_source_id) {
             chats.forEach((c) => {
                 list += `
@@ -344,22 +369,23 @@ body {
             })
         } else {
             chats.forEach((c) => {
-            list += `
-                <tr>
-                    <td>${c.titulo}</td>
-                    <td>${c.status_str}</td>
-                    <td style="display: flex; justify-content: end; align-items: center;">
-                        ${c.status === 4 ? 
-                            `<a class="btn"  href="/documento/{{redirect}}=${c.id}">
-                                <i style="color:#00c0ef" class='fa fa-eye'></i>
-                            </a>` : ''}
-                        
-                        ${[1, 4].includes(c.status)  ? 
-                            `<i data-remove-id='${c.id}' style="color:red" class='fa fa-trash btn-remove-chat'></i>    
-                            ` : ``}
-                    </td>
-                </tr>
-            `
+                const indicator = getIcon(c.status)
+                list += `
+                    <tr>
+                        <td>${c.titulo}</td>
+                        <td> <b style="color:${indicator.color}">${indicator.icon} ${c.status_str}</b></td>
+                        <td class="td-actions">
+                            ${c.status === 4 ? 
+                                `<a href="/documento/{{redirect}}=${c.id}">
+                                    <i style="color:#00c0ef" class='fa fa-eye'></i>
+                                </a>` : ''}
+                            
+                            ${[1, 4, 6, 7].includes(c.status)  ? 
+                                `<i data-remove-id='${c.id}' style="color:red" class='fa fa-trash btn-remove-chat'></i>    
+                                ` : ``}
+                        </td>
+                    </tr>
+                `
             })
         }
         tableDocumentosMedias.html(list)
