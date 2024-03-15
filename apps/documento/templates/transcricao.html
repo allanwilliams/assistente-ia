@@ -183,10 +183,14 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
+        width: fit-content;
+        box-shadow: 2px 1px 3px gray;
     }
 
     .avatar .fa-user {
+        color: #fff;
         font-size: 1.5em;
+        filter: drop-shadow(3px 2px 2px black);
     }
 
     video{
@@ -460,6 +464,31 @@
                 <i data-remove-id='${id}' class='fa fa-trash btn-remove-transcricao'></i>
             </div>
             ${embed}
+
+            <h2 style="text-align:center;">Falantes</h2>
+            <div style="padding:5px; display: flex; gap: 10px; justify-content: space-around;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <div class="avatar bg-primary">
+                        <i class="fa fa-user"></i>
+                    </div>
+                    <span><b>Speaker 01</b></span>
+                    <i class="fa-solid fa-pen btn btn-edit-speaker" data-id="13002" data-speaker="Allan"></i>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <div class="avatar bg-primary">
+                        <i class="fa fa-user"></i>
+                    </div>
+                    <span><b>Speaker 01</b></span>
+                    <i class="fa-solid fa-pen btn btn-edit-speaker" data-id="13002" data-speaker="Allan"></i>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <div class="avatar bg-primary">
+                        <i class="fa fa-user"></i>
+                    </div>
+                    <span><b>Speaker 01</b></span>
+                    <i class="fa-solid fa-pen btn btn-edit-speaker" data-id="13002" data-speaker="Allan"></i>
+                </div>
+            </div>
         `)
     }
 
@@ -579,7 +608,7 @@
         let row = `
                 <div class="transcricao-message-row">
                     <div class="transcricao-message" style="overflow: hidden;">
-                        <div class='avatar bg-primary'>
+                        <div class='avatar' style="background-color:${askMsg.cor_speaker}">
                             <i class='fa fa-user'></i>
                         </div>
                         <div class="transcricao-message-txt" id="message-${askMsg.id}">
@@ -638,6 +667,10 @@
                 <div class="form-group">
                     <input class="form-control" id='name' type='text' value='${speaker}'>
                 </div>
+                <div class="form-group">
+                    <input type="color" id="color" name="color" value="#cecece" />
+                    <label>Cor do avatar</label>
+                </div>
                 <label>
                     <input id="replace-all" type="checkbox"> Substituir todos
                 </label>
@@ -645,23 +678,25 @@
             showCancelButton: true,
             preConfirm: () => ({
                name: document.getElementById('name').value,
+               color: document.getElementById('color').value,
                replaceAll: document.getElementById('replace-all').checked,
             })
         }).then((result) => {
             if(result.isConfirmed) {
-                const { name , replaceAll } = result.value
-                updateSpeakerName({id, name, replaceAll})
+                const { name , replaceAll, color } = result.value
+                updateSpeakerName({id, name, color, replaceAll})
             }
         })
     }
 
-    function updateSpeakerName({id, name, replaceAll}) {
+    function updateSpeakerName({id, name, color, replaceAll}) {
         console.log(id, name, replaceAll)
         $.ajax({
             type: 'PATCH',
             url: `/documento/api/transcricao/${id}/`,
             data: {
                 speaker: name,
+                cor_speaker: color,
                 replaceAll
             },
             success: (data) => {

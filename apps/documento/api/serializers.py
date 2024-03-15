@@ -20,7 +20,8 @@ class TranscricaoSerializer(ModelSerializer):
         
         if replace_all == 'true':
             speaker = validated_data.get('speaker')
-            Transcricao.objects.filter(media_transcricao_id=instance.media_transcricao.id,speaker=instance.speaker).update(speaker=speaker)
+            cor_speaker = validated_data.get('cor_speaker')
+            Transcricao.objects.filter(media_transcricao_id=instance.media_transcricao.id,speaker=instance.speaker).update(speaker=speaker, cor_speaker=cor_speaker)
         
         return super().update(instance, validated_data)
 
