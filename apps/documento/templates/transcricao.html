@@ -230,25 +230,27 @@
         height: 15px;
     }
 
-    #edit-group-speakers {
-        overflow: scroll;
-        height: 50vh;
-        padding: 8px 15px;
+    #pdf #pdf-obj-container #edit-group-speakers {
+        overflow-y: scroll;
+        height: calc(50vh - 42px);
+        padding: 8px 15px 20px 15px;
     }
-    #edit-group-speakers .edit-group-list {
+    #pdf #pdf-obj-container #edit-group-speakers h3 {
+        margin-top: 10px;
+    }
+    #pdf #pdf-obj-container #edit-group-speakers .edit-group-list {
         padding:5px; 
         display: grid; 
         grid-template-columns: 1fr 1fr;
-        gap: 10px;
+        gap: 20px;
     }
-    #edit-group-speakers .edit-group-item {
+    #pdf #pdf-obj-container #edit-group-speakers .edit-group-item {
         display: flex; 
         align-items: center; 
         gap: 8px;
     }
-    #media-el {
+    #pdf #pdf-obj-container #media-el {
         height:50vh;
-        width: 100%;
     }
 </style>
 {% endblock %}
@@ -775,7 +777,7 @@
 
         $('#edit-group-speakers').html(
             `
-            <h2>Falantes nesta transcrição</h2>
+            <h3>Falantes nesta transcrição</h3>
             <div class="edit-group-list">
                 ${uniqueSpeakers.map((s) => `
                     <div class="edit-group-item">
