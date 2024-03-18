@@ -206,7 +206,29 @@
         font-weight: 800;
     }
 
+    .swal2-container .swal2-html-container {
+        text-align: left !important;
+    }
 
+    .swal2-container .dialog-color-speaker {
+        margin-bottom: 10px;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 10px;
+    }
+    .swal2-container .dialog-color-speaker div {
+        display:flex; 
+        align-items:center; 
+        gap:4px;
+    }
+    .swal2-container .dialog-color-speaker div input {
+        margin: 0;
+    }
+    .swal2-container .dialog-color-speaker div label {
+        width: 30px; 
+        height: 15px;
+    }
     
 </style>
 {% endblock %}
@@ -354,7 +376,8 @@
         if(event.target.classList.contains('btn-edit-speaker')) {
             const msgId = event.target.attributes['data-id'].value
             const speaker = event.target.attributes['data-speaker'].value
-            openDialogEditSpeaker(msgId,speaker)
+            const colorSpeaker = event.target.attributes['data-color-speaker'].value
+            openDialogEditSpeaker(msgId, speaker, colorSpeaker)
         }
     })
     
@@ -612,7 +635,7 @@
                             <i class='fa fa-user'></i>
                         </div>
                         <div class="transcricao-message-txt" id="message-${askMsg.id}">
-                            <div><strong>${askMsg.speaker}</strong> <i class="fa-solid fa-pen btn btn-edit-speaker" data-id="${askMsg.id}" data-speaker="${askMsg.speaker}"></i></div>
+                            <div><strong>${askMsg.speaker}</strong> <i class="fa-solid fa-pen btn btn-edit-speaker" data-id="${askMsg.id}" data-speaker="${askMsg.speaker}" data-color-speaker="${askMsg.cor_speaker}"></i></div>
                             <div><i class="fa-solid fa-forward-step pointer btn-go-to-time" data-time=${askMsg.tempo_inicial_segundos} data-toggle="tooltip" data-placement="bottom" title="Ir para"></i> <strong>${askMsg.tempo_inicial} <i class='fa fa-arrow-right'></i> ${askMsg.tempo_final}</strong>: </div>
                             <div class='text-msg'>${textoFormatado}</div> 
                         </div>
@@ -660,25 +683,38 @@
         }
     }
 
-    function openDialogEditSpeaker(id, speaker) {
+    function openDialogEditSpeaker(id, speaker, colorSpeaker) {
+        const radioChecked = (color) => (colorSpeaker == color ? 'checked' : '' )
+
+        const colors = ['#000000', '#FF0000', '#FF7F00', '#FFFF00', '#00FF00', '#00FFFF', '#0000FF', '#8B00FF']
+
         Swal.fire({
             title: "Editar speaker",
             html: `
                 <div class="form-group">
+                    <label>Nome</label>
                     <input class="form-control" id='name' type='text' value='${speaker}'>
                 </div>
-                <div class="form-group">
-                    <input type="color" id="color" name="color" value="#cecece" />
-                    <label>Cor do avatar</label>
+                <label>Cor do avatar</label>
+                <div class="dialog-color-speaker">
+                    ${colors.map((c) => `
+                        <div>
+                            <input type="radio" name="color" value="${c}" id="${c}"  ${radioChecked(c)} />
+                            <label class="radio-inline" for="${c}" style="background-color:${c};"></label>
+                        </div>
+                    `).join('')}
                 </div>
                 <label>
-                    <input id="replace-all" type="checkbox"> Substituir todos
+                    <input id="replace-all" type="checkbox"> Substituir em todos com o mesmo nome
                 </label>
             `,
             showCancelButton: true,
+            confirmButtonText: "Aplicar",
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#1777ff', 
             preConfirm: () => ({
                name: document.getElementById('name').value,
-               color: document.getElementById('color').value,
+               color: document.querySelector('input[name="color"]:checked').value,
                replaceAll: document.getElementById('replace-all').checked,
             })
         }).then((result) => {
