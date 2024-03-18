@@ -229,7 +229,27 @@
         width: 30px; 
         height: 15px;
     }
-    
+
+    #edit-group-speakers {
+        overflow: scroll;
+        height: 50vh;
+        padding: 8px 15px;
+    }
+    #edit-group-speakers .edit-group-list {
+        padding:5px; 
+        display: grid; 
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+    #edit-group-speakers .edit-group-item {
+        display: flex; 
+        align-items: center; 
+        gap: 8px;
+    }
+    #media-el {
+        height:50vh;
+        width: 100%;
+    }
 </style>
 {% endblock %}
 
@@ -317,6 +337,7 @@
     const loader = $("#preloader")
     const btnFindText = document.querySelector('#btn-find-text')
     const transcricaoInputAsk = document.querySelector('#transcricao-input-ask')
+    const colors = ['#000000', '#FF0000', '#FF7F00', '#FFFF00', '#00FF00', '#00FFFF', '#0000FF', '#8B00FF']
 
     let transcricaoAtual = null
 
@@ -377,7 +398,9 @@
             const msgId = event.target.attributes['data-id'].value
             const speaker = event.target.attributes['data-speaker'].value
             const colorSpeaker = event.target.attributes['data-color-speaker'].value
-            openDialogEditSpeaker(msgId, speaker, colorSpeaker)
+            const replaceAllDefault = event.target.attributes['data-replace-all-default'].value === 'true'
+
+            openDialogEditSpeaker(msgId, speaker, colorSpeaker, replaceAllDefault)
         }
     })
     
@@ -436,7 +459,6 @@
         }
     })
 
-    
     function getUserTranscricoes(userId) {
         return fetch(`/documento/api/media-transcricao/?criado_por=${userId}&ativo=true`)
     }
@@ -450,7 +472,6 @@
 
         listTranscricoesEl.html(list)
     }
-
     
     function filltranscricao(data) {
         const {id, transcricoes, titulo, arquivo, tipo, legenda } = data
@@ -458,8 +479,10 @@
         insertConversation(transcricoes)
         transcricaoAtual = data
         transcricaoIdOpenEl.val(id)
+        getIndividualSpeakers(transcricoes)
         prepareActions()
     }
+
 
     function loadDocumento(titulo, url, id, tipo, legenda) {
         let classe = 'audio'
@@ -488,30 +511,7 @@
             </div>
             ${embed}
 
-            <h2 style="text-align:center;">Falantes</h2>
-            <div style="padding:5px; display: flex; gap: 10px; justify-content: space-around;">
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    <div class="avatar bg-primary">
-                        <i class="fa fa-user"></i>
-                    </div>
-                    <span><b>Speaker 01</b></span>
-                    <i class="fa-solid fa-pen btn btn-edit-speaker" data-id="13002" data-speaker="Allan"></i>
-                </div>
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    <div class="avatar bg-primary">
-                        <i class="fa fa-user"></i>
-                    </div>
-                    <span><b>Speaker 01</b></span>
-                    <i class="fa-solid fa-pen btn btn-edit-speaker" data-id="13002" data-speaker="Allan"></i>
-                </div>
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    <div class="avatar bg-primary">
-                        <i class="fa fa-user"></i>
-                    </div>
-                    <span><b>Speaker 01</b></span>
-                    <i class="fa-solid fa-pen btn btn-edit-speaker" data-id="13002" data-speaker="Allan"></i>
-                </div>
-            </div>
+            <div id="edit-group-speakers"></div>
         `)
     }
 
@@ -635,7 +635,7 @@
                             <i class='fa fa-user'></i>
                         </div>
                         <div class="transcricao-message-txt" id="message-${askMsg.id}">
-                            <div><strong>${askMsg.speaker}</strong> <i class="fa-solid fa-pen btn btn-edit-speaker" data-id="${askMsg.id}" data-speaker="${askMsg.speaker}" data-color-speaker="${askMsg.cor_speaker}"></i></div>
+                            <div><strong style="margin-right:5px;">${askMsg.speaker}</strong> <i class="fa-solid fa-pen-to-square btn-edit-speaker" data-id="${askMsg.id}" data-speaker="${askMsg.speaker}" data-color-speaker="${askMsg.cor_speaker}" data-replace-all-default="" data-toggle="tooltip" data-placement="right" title="Editar falante"></i></div>
                             <div><i class="fa-solid fa-forward-step pointer btn-go-to-time" data-time=${askMsg.tempo_inicial_segundos} data-toggle="tooltip" data-placement="bottom" title="Ir para"></i> <strong>${askMsg.tempo_inicial} <i class='fa fa-arrow-right'></i> ${askMsg.tempo_final}</strong>: </div>
                             <div class='text-msg'>${textoFormatado}</div> 
                         </div>
@@ -683,13 +683,11 @@
         }
     }
 
-    function openDialogEditSpeaker(id, speaker, colorSpeaker) {
+    function openDialogEditSpeaker(id, speaker, colorSpeaker, replaceAllDefault) {
         const radioChecked = (color) => (colorSpeaker == color ? 'checked' : '' )
 
-        const colors = ['#000000', '#FF0000', '#FF7F00', '#FFFF00', '#00FF00', '#00FFFF', '#0000FF', '#8B00FF']
-
         Swal.fire({
-            title: "Editar speaker",
+            title: "Editar falante",
             html: `
                 <div class="form-group">
                     <label>Nome</label>
@@ -705,7 +703,7 @@
                     `).join('')}
                 </div>
                 <label>
-                    <input id="replace-all" type="checkbox"> Substituir em todos com o mesmo nome
+                    <input id="replace-all" type="checkbox" ${replaceAllDefault ? 'disabled checked' : ''}> Substituir em todos com o mesmo nome
                 </label>
             `,
             showCancelButton: true,
@@ -726,7 +724,6 @@
     }
 
     function updateSpeakerName({id, name, color, replaceAll}) {
-        console.log(id, name, replaceAll)
         $.ajax({
             type: 'PATCH',
             url: `/documento/api/transcricao/${id}/`,
@@ -766,5 +763,33 @@
         mediaEl.currentTime = time
     }
 
+    function getIndividualSpeakers(transcricoes) {
+        let uniqueSpeakers = transcricoes.reduce((acc, curr) => {
+            const currExists = acc.find((i) => i.speaker === curr.speaker)
+            if(!currExists) acc.push(curr);
+
+            return acc;
+        },[])
+
+        uniqueSpeakers.sort((a,b) => (a.speaker > b.speaker) ? 1 : ((b.speaker > a.speaker) ? -1 : 0))
+
+        $('#edit-group-speakers').html(
+            `
+            <h2>Falantes nesta transcrição</h2>
+            <div class="edit-group-list">
+                ${uniqueSpeakers.map((s) => `
+                    <div class="edit-group-item">
+                        <div class="avatar" style="background-color:${s.cor_speaker}">
+                            <i class="fa fa-user"></i>
+                        </div>
+                        <span>${s.speaker}</span>
+                        <i class="fa-solid fa-pen-to-square btn-edit-speaker" data-id="${s.id}" data-speaker="${s.speaker}" data-color-speaker="${s.cor_speaker}" data-replace-all-default="true"  data-toggle="tooltip" data-placement="right" title="Editar falante"></i>
+                    </div>
+                `).join('')}
+                
+            </div>
+            `
+        )
+    }
 </script>
 {% endblock %}
