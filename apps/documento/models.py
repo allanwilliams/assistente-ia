@@ -116,7 +116,7 @@ class Transcricao(BaseModel):
     tempo_inicial = models.CharField("Tempo inicial",max_length=12)
     tempo_inicial_segundos = models.IntegerField("Tempo inicial em segundos", default=0)
     tempo_final = models.CharField("Tempo final",max_length=12)
-    speaker = models.CharField("Speaker",max_length=50, blank=True, null=True)
+    speaker = models.CharField("Speaker",max_length=255, blank=True, null=True)
     cor_speaker = models.CharField('Cor do Speaker', max_length=50, default="#0000FF")
 
     class Meta:
