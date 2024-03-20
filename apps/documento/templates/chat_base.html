@@ -13,9 +13,6 @@
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastify-js/1.6.1/toastify.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
         {% block extrastyle %}{% endblock %}
         <style>
-           
-
-
             #preloader {
                 position: fixed; 
                 width: 100%; 
@@ -102,14 +99,15 @@
                 margin-top: 5px;
             }
 
-            #document #pdf {
+            #document #pdf, #document #media {
                 padding-bottom: 42px;
                 flex: 37 1 0px;
                 overflow: hidden;
                 border: 1px solid lightgrey;
             }
 
-            #document #pdf #pdf-obj-container {
+            #document #pdf #pdf-obj-container, 
+            #document #media #media-obj-container {
                 height: 100%;
             }
         </style>
