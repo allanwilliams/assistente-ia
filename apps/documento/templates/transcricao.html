@@ -164,7 +164,7 @@
     .avatar .fa-user {
         color: #fff;
         font-size: 1.5em;
-        filter: drop-shadow(3px 2px 2px black);
+        filter: drop-shadow(2px 1px 1px darkgray);
     }
 
     video{
@@ -222,6 +222,15 @@
         display: flex; 
         align-items: center; 
         gap: 8px;
+        padding: 10px;
+        border-radius: 5px;
+        box-shadow: 2px 1px 4px gray;
+        position: relative;
+    }
+    #media #media-obj-container #edit-group-speakers .edit-group-item  .btn-edit-speaker {
+        position: absolute;
+        top: 4px;
+        right: 4px;
     }
     #media #media-obj-container #media-el {
         height:50vh;
@@ -560,7 +569,7 @@
 
         let row = `
                 <div class="transcricao-message-row">
-                    <div class="transcricao-message" style="overflow: hidden; background-color:${convertHexToRGBA(askMsg.cor_speaker, 0.05)};">
+                    <div class="transcricao-message" style="overflow: hidden; background-color:${convertHexToRGBA(askMsg.cor_speaker, 0.03)};">
                         <div class='avatar' style="background-color:${askMsg.cor_speaker}">
                             <i class='fa fa-user'></i>
                         </div>
@@ -682,7 +691,7 @@
             <h3>Falantes nesta transcrição</h3>
             <div class="edit-group-list">
                 ${uniqueSpeakers.map((s) => `
-                    <div class="edit-group-item">
+                    <div class="edit-group-item" style="background-color:${convertHexToRGBA(s.cor_speaker, 0.03)};">
                         <div class="avatar" style="background-color:${s.cor_speaker}">
                             <i class="fa fa-user"></i>
                         </div>
