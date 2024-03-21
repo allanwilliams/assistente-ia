@@ -109,10 +109,15 @@ body {
     padding: 1em 1em;
     justify-content: flex-end;
     align-items: center;
+    gap: 20px;
 }
 
 .cab a {
     color: #fff;
+    font-weight: bold;
+}
+.cab a i {
+    margin-right: 5px;
 }
 
 #table-documentos-medias th, #table-documentos-medias td {
@@ -131,6 +136,13 @@ body {
 
 {% block conteudo %}
 <div class="cab">
+    {% if api == 'chat' %}
+    <a href="/documento/dashboard-media/"><i class="fa-solid fa-play"></i> Assistente de Transcrição </a>
+    {% endif %}
+    {% if api == 'media-transcricao' %}
+    <a href="/documento/dashboard-documento/"> <i class="fa-solid fa-file-pdf"></i> Assistente de documentos </a>
+    {% endif %}
+    
     <a href="/admin/logout"><i class="fa-solid fa-arrow-right-from-bracket"></i> Sair</a>
 </div>
 <div class="conteudo">

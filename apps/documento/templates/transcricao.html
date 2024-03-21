@@ -1,4 +1,5 @@
 {% extends 'chat_base.html' %}
+{% load static %}
 
 {% block extrastyle %}
 <style>
@@ -211,6 +212,12 @@
     }
     #media #media-obj-container #edit-group-speakers h3 {
         margin-top: 10px;
+        margin-bottom: 20px;
+        box-shadow: 2px 1px 4px gray;
+        padding: 10px;
+        border-radius: 5px;
+        font-size: 18px;
+        font-weight: bold;
     }
     #media #media-obj-container #edit-group-speakers .edit-group-list {
         padding:5px; 
@@ -235,11 +242,45 @@
     #media #media-obj-container #media-el {
         height:50vh;
     }
+    #document-header {
+        background: radial-gradient(circle, rgba(0, 94, 60, 1) 0%, rgba(1, 54, 34, 1) 74%, rgba(0, 54, 34, 1) 100%);
+        color: #fff;
+        padding: 5px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    #document-header img {
+        margin-left: 60px;
+    }
+    #document-header .document-header-links {
+        display: flex;
+        gap: 20px;
+        padding-right: 15px;
+    }
+    #document-header .document-header-links a {
+        color: #fff;
+        font-weight: bold;
+    }
+    #document-header .document-header-links a:hover {
+        text-decoration: none;
+    }
+    #document-header .document-header-links a i {
+        margin-right: 5px;
+    }
 </style>
 {% endblock %}
 
 {% block conteudo %}
 <main>
+    <section id="document-header">
+        <img src="{% static 'logo-defensoria-horizontal-branca.png' %}" alt="">
+        <div class="document-header-links">
+            <a href="/documento/dashboard-media/"><i class="fa-solid fa-house"></i> Dashboard </a>
+            <a href="/admin/logout"><i class="fa-solid fa-arrow-right-from-bracket"></i> Sair</a>
+        </div>
+        </div>
+    </section>
     <section id="document">
         <div id="toolbar">
             <div class="input-file-section">
@@ -688,7 +729,7 @@
 
         $('#edit-group-speakers').html(
             `
-            <h3>Falantes nesta transcrição</h3>
+            <h3>Falantes da Transcrição</h3>
             <div class="edit-group-list">
                 ${uniqueSpeakers.map((s) => `
                     <div class="edit-group-item" style="background-color:${convertHexToRGBA(s.cor_speaker, 0.03)};">
