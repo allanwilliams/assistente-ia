@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.http import HttpResponse
-from apps.documento.models import Chat, MediaTranscricao, Mensagem
+from apps.documento.models import Chat, MediaTranscricao, Transcricao, Mensagem
 from openai import OpenAI
 from pydub import AudioSegment
 import subprocess
@@ -62,75 +62,6 @@ def convert_to_time(number, microseconds=False):
     return time
 
 
-def transcricao_video(request):
-    transcricoes = MediaTranscricao.objects.filter(criado_por=request.user, ativo=True)
-    context = {
-        'transcricoes': transcricoes
-    }
-
-    if request.method == 'POST':
-        audio_file = request.FILES['audio']
-
-        fs = FileSystemStorage()
-        filename = fs.save(f'video/{audio_file.name}', audio_file)
-
-        uploaded_file_url = fs.url(filename)
-        diretorio = os.path.dirname(os.path.dirname(filename))
-        diretorio_arquivo = '{}{}{}'.format(BASE_DIR,diretorio,uploaded_file_url)
-
-        filename_audio = str(audio_file.name).split('.')[-2]
-
-        path_media_audio = f'{BASE_DIR}/media/audio/{filename_audio}.wav'
-
-        path_media_legenda = f'{BASE_DIR}/media/legenda/{filename_audio}.vtt'
-       
-        subprocess.run(['ffmpeg','-y','-i', diretorio_arquivo, '-f', 'wav', '-acodec', 'pcm_s16le', '-ar', '22050', '-ac', '1', 'copy', path_media_audio])
-
-        print('video convertido em audio')
-        
-        convert = AudioSegment.from_wav(path_media_audio)
-        audio_file = convert.export('exemplo.mp3', format="mp3")
-
-        print('audio convertido em mp3', audio_file)
-
-        if audio_file:
-            print('enviando para openia ....')
-            transcricao = client.audio.transcriptions.create(
-                model="whisper-1", 
-                file=audio_file, 
-                response_format="verbose_json"
-            )
-
-            print(transcricao)
-
-            if transcricao:
-                texto_total = []
-                texto_total.append('<ul>')
-                
-                
-                with open(path_media_legenda, 'w') as vtt:
-                    vtt.write('WEBVTT\n')
-
-                    for t in transcricao.segments:
-                        start = convert_to_time(t.get('start'), True)
-                        end = convert_to_time(t.get('end'), True)
-                        text = t.get('text')
-
-                        vtt.write(f'{start} --> {end}\n')
-                        vtt.write(f'{str(text).strip()}\n')
-
-
-                        texto_total.append(f"<li><b>{convert_to_time(t.get('start'))}</b>: {text}</li>")
-                vtt.close()
-                texto_total.append('</ul>')
-                texto_html = ''.join(texto_total)
-
-                context['transcricao'] = format_html(texto_html)
-                context['video_name'] = format_html(filename_audio)
-                context['legenda_name'] = format_html(filename_audio)
-
-    return render(request, 'transcricao_video.html', context)
-
 @login_required
 def transcricao(request):
     context = {}
@@ -159,5 +90,23 @@ def export_chat_txt(request, id=None):
 
         response = HttpResponse(texto, content_type='text/plain;charset=UTF-8')
         response['Content-Disposition'] = f"attachment; filename=chat.txt"
+
+        return response
+
+
+def export_transcricoes_txt(request, id=None):
+    media_transcricao = MediaTranscricao.objects.filter(id=id).first()
+
+    if media_transcricao:
+        transcricoes = Transcricao.objects.filter(media_transcricao=media_transcricao)
+
+        texto = []
+        for t in transcricoes:
+            texto.append(f'{t.speaker}\n{t.tempo_inicial} --> {t.tempo_final}\n{t.texto.strip()}\n\r')
+
+        texto = ''.join(texto) 
+
+        response = HttpResponse(texto, content_type='text/plain;charset=UTF-8') 
+        response['Content-Disposition'] = f"attachment; filename=transcricao.txt"
 
         return response

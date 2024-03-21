@@ -14,6 +14,17 @@ class TranscricaoSerializer(ModelSerializer):
         model = Transcricao
         fields = '__all__'
 
+    def update(self, instance, validated_data):
+        request = self.context.get('request')
+        replace_all = request.POST.get('replaceAll')
+        
+        if replace_all == 'true':
+            speaker = validated_data.get('speaker')
+            cor_speaker = validated_data.get('cor_speaker')
+            Transcricao.objects.filter(media_transcricao_id=instance.media_transcricao.id,speaker=instance.speaker).update(speaker=speaker, cor_speaker=cor_speaker)
+        
+        return super().update(instance, validated_data)
+
 class ChatSerializer(ModelSerializer):
     mensagens = MensagemSerializer(source='mensagem_chat', many=True, read_only=True)
 
@@ -23,6 +34,10 @@ class ChatSerializer(ModelSerializer):
 
 class MediaTranscricaoSerializer(ModelSerializer):
     transcricoes = TranscricaoSerializer(source='transcricao_media_transcricao', many=True, read_only=True)
+    status_str = SerializerMethodField()
+
+    def get_status_str(self, obj):
+        return obj.get_status_display() if obj.status else None
 
     class Meta:
         model = MediaTranscricao

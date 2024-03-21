@@ -67,6 +67,7 @@ THIRD_PARTY_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     "reversion",
+    'background_task',
 ]
 
 LOCAL_APPS = [
@@ -367,3 +368,6 @@ if USE_FUSIONAUTH:
 EMAIL_BACKEND = env("DJANGO_EMAIL_BACKEND", default="django.core.mail.backends.console.EmailBackend")
 EMAIL_HOST = "localhost"
 EMAIL_PORT = 1025
+
+
+MAX_ATTEMPTS = 5

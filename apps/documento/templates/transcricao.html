@@ -1,14 +1,15 @@
 {% extends 'chat_base.html' %}
+{% load static %}
 
 {% block extrastyle %}
 <style>
-    #document #transcricao {
+    #transcricao {
         flex: 37 1 0px;
         overflow: hidden;
         border: 1px solid lightgray;
     }
 
-    #document #transcricao .transcricao-message-row {
+    #transcricao .transcricao-message-row {
         display: flex;
         padding-top: 8px;
         padding-bottom: 8px;
@@ -16,22 +17,22 @@
         position: relative;
     }
 
-    #document #transcricao .transcricao-message-row.ai {
+    #transcricao .transcricao-message-row.ai {
         justify-content: flex-start;
     }
-    #document #transcricao .transcricao-message-row.human {
+    #transcricao .transcricao-message-row.human {
         justify-content: flex-end;
     }
 
-    #document #transcricao .transcricao-message-row.ai .transcricao-message {
+    #transcricao .transcricao-message-row.ai .transcricao-message {
         background-color: #f9f9fe;
     }
 
-    #document #transcricao .transcricao-message-row.human .transcricao-message {
+    #transcricao .transcricao-message-row.human .transcricao-message {
         background-color: #1777ff;
         color: #fff;
     }
-    #document #transcricao .transcricao-message {
+    #transcricao .transcricao-message {
         position: relative;
         border-radius: 8px;
         padding: 6px 12px;
@@ -41,7 +42,7 @@
         gap: 1em;
         width: 100%;
     }
-    #document #transcricao .transcricao-message-row .clipboard-btn-container {
+    #transcricao .transcricao-message-row .clipboard-btn-container {
         right: 5px;
         top: 9px;
         font-size: 14px;
@@ -49,12 +50,12 @@
         position: absolute;
     }
 
-    .transcricao-header, .pdf-header h3 {
+    .transcricao-header, .media-header h3 {
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
     }
-    .transcricao-header, .pdf-header {
+    .transcricao-header, .media-header {
         height: 42px;
         padding: 0px 6px 10px 6px;
         background: rgb(255, 255, 255);
@@ -62,6 +63,17 @@
         align-items: center;
         flex-shrink: 0;
         justify-content: space-between;
+    }
+
+    .transcricao-header, .media-header div {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .transcricao-header, .media-header div i {
+        color: #272e30;
+        cursor: pointer;
     }
 
     #conversation {
@@ -129,47 +141,10 @@
         gap: 5px;
         flex-direction: column;
     }
-
-    .btn-remove-transcricao {
+    .btn-remove-transcricao, .btn-edit-speaker {
         cursor: pointer;
     }
     .pointer {
-        cursor: pointer;
-    }
-    .question-box{
-        position: absolute;
-        bottom: 3em;
-        box-shadow: 0px 0px 4px 0px gray;
-        padding: 1em;
-        font-size: 1.2rem;
-        border-radius: 5px;
-        background-color: white;
-        opacity: .9;
-    }
-    .hide{
-        display: none;
-    }
-    ul {
-        list-style-type: none;
-        margin: 0;
-        padding: 0;
-    }
-
-    li.question {
-        padding: 0.3em;
-        background-color: #1777ff;
-        margin: 0.3em;
-        border-radius: 5px;
-        color: white;
-    }
-
-
-    .question{
-        cursor: pointer;
-    }
-
-    .btn-send-fake {
-        color: #1777ff;
         cursor: pointer;
     }
 
@@ -183,10 +158,14 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
+        width: fit-content;
+        box-shadow: 2px 1px 3px gray;
     }
 
     .avatar .fa-user {
+        color: #fff;
         font-size: 1.5em;
+        filter: drop-shadow(2px 1px 1px darkgray);
     }
 
     video{
@@ -202,13 +181,106 @@
         font-weight: 800;
     }
 
+    .swal2-container .swal2-html-container {
+        text-align: left !important;
+    }
 
-    
+    .swal2-container .dialog-color-speaker {
+        margin-bottom: 10px;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 10px;
+    }
+    .swal2-container .dialog-color-speaker div {
+        display:flex; 
+        align-items:center; 
+        gap:4px;
+    }
+    .swal2-container .dialog-color-speaker div input {
+        margin: 0;
+    }
+    .swal2-container .dialog-color-speaker div label {
+        width: 30px; 
+        height: 15px;
+    }
+
+    #media #media-obj-container #edit-group-speakers {
+        overflow-y: scroll;
+        height: calc(50vh - 42px);
+        padding: 8px 15px 20px 15px;
+    }
+    #media #media-obj-container #edit-group-speakers h3 {
+        margin-top: 10px;
+        margin-bottom: 20px;
+        box-shadow: 2px 1px 4px gray;
+        padding: 10px;
+        border-radius: 5px;
+        font-size: 18px;
+        font-weight: bold;
+    }
+    #media #media-obj-container #edit-group-speakers .edit-group-list {
+        padding:5px; 
+        display: grid; 
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+    #media #media-obj-container #edit-group-speakers .edit-group-item {
+        display: flex; 
+        align-items: center; 
+        gap: 8px;
+        padding: 10px;
+        border-radius: 5px;
+        box-shadow: 2px 1px 4px gray;
+        position: relative;
+    }
+    #media #media-obj-container #edit-group-speakers .edit-group-item  .btn-edit-speaker {
+        position: absolute;
+        top: 4px;
+        right: 4px;
+    }
+    #media #media-obj-container #media-el {
+        height:50vh;
+    }
+    #document-header {
+        background: radial-gradient(circle, rgba(0, 94, 60, 1) 0%, rgba(1, 54, 34, 1) 74%, rgba(0, 54, 34, 1) 100%);
+        color: #fff;
+        padding: 5px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    #document-header img {
+        margin-left: 60px;
+    }
+    #document-header .document-header-links {
+        display: flex;
+        gap: 20px;
+        padding-right: 15px;
+    }
+    #document-header .document-header-links a {
+        color: #fff;
+        font-weight: bold;
+    }
+    #document-header .document-header-links a:hover {
+        text-decoration: none;
+    }
+    #document-header .document-header-links a i {
+        margin-right: 5px;
+    }
 </style>
 {% endblock %}
 
 {% block conteudo %}
 <main>
+    <section id="document-header">
+        <img src="{% static 'logo-defensoria-horizontal-branca.png' %}" alt="">
+        <div class="document-header-links">
+            <a href="/documento/dashboard-media/"><i class="fa-solid fa-house"></i> Dashboard </a>
+            <a href="/admin/logout"><i class="fa-solid fa-arrow-right-from-bracket"></i> Sair</a>
+        </div>
+        </div>
+    </section>
     <section id="document">
         <div id="toolbar">
             <div class="input-file-section">
@@ -243,8 +315,8 @@
                 </div>
             </div>
         </div>
-        <div id="pdf">
-            <div id="pdf-obj-container"></div>
+        <div id="media">
+            <div id="media-obj-container"></div>
         </div>
     </section>
    
@@ -281,7 +353,7 @@
     const transcricaoFormInput = $("#transcricao-form-input")
     const transcricaoIdOpenEl = $('#transcricao-id-open')
     const listTranscricoesEl = $('#list-Transcricoes')
-    const pdfContainer = $('#pdf-obj-container')
+    const mediaContainer = $('#media-obj-container')
     const body = document.querySelector('body')
     const dropArea = document.querySelector(".drag-area")
     const fileInput = dropArea.querySelector(".file-input")
@@ -291,15 +363,12 @@
     const loader = $("#preloader")
     const btnFindText = document.querySelector('#btn-find-text')
     const transcricaoInputAsk = document.querySelector('#transcricao-input-ask')
+    const colors = ['#000000', '#FF0000', '#FF7F00', '#FFFF00', '#00FF00', '#00FFFF', '#0000FF', '#8B00FF']
+    // const colors = ['#E7FFE7', '#E7F0FF', '#FFFFE7', '#D5F5FF']
 
     let transcricaoAtual = null
 
     body.addEventListener('click', function(event) {
-        if(event.target.classList.contains('btn-page') && transcricaoAtual) {
-            const page = event.target.attributes['data-page'].value
-            const url = `${transcricaoAtual.documento}#page=${page}`
-            loadDocumento(transcricaoAtual.titulo, url)
-        }
 
         if(event.target.classList.contains('choice-link-transcricao')) {
             const transcricaoId = event.target.attributes['data-id'].value
@@ -313,50 +382,23 @@
             deletetranscricao(transcricaoId)
         }
 
-        if(event.target.classList.contains('salvar-favoritos')) {
-            const msgID = event.target.attributes['data-id'].value
-            const favorito = event.target.attributes['data-favorito'].value
-            event.target.attributes['data-favorito'].value = !(favorito === 'true')
-            
-            saveQuestion(msgID, favorito)
-            
-            event.target.classList.remove('fa-solid')
-            event.target.classList.remove('fa-regular')
-            
-            const CF = (val) => {
-                event.target.classList.add(val)
-            } 
-
-            (favorito === 'true') ? CF('fa-regular') : CF('fa-solid');
-        }
-
-        if(event.target.classList.contains('question')) {
-            inputTxtAsk.val(event.target.innerText)
-            listaQuestion.html('')
-            questionBox.classList.add('hide')            
-        } 
-
-        if(event.target.classList.contains('btn-send-fake')) {
-            const msgID = event.target.attributes['data-id'].value
-            const text = $(`#${msgID}`).text()
-            showLatestMessage()
-            sendAsk(text)
-        } 
         if(event.target.classList.contains('btn-go-to-time')) {
             const time = event.target.attributes['data-time'].value
             goToTime(time)
+        }
+
+        if(event.target.classList.contains('btn-edit-speaker')) {
+            const msgId = event.target.attributes['data-id'].value
+            const speaker = event.target.attributes['data-speaker'].value
+            const colorSpeaker = event.target.attributes['data-color-speaker'].value
+            const replaceAllDefault = event.target.attributes['data-replace-all-default'].value === 'true'
+
+            openDialogEditSpeaker(msgId, speaker, colorSpeaker, replaceAllDefault)
         }
     })
     
     $(document).ready(() => {
 
-        transcricaoFormInput.submit((e) => {
-            e.preventDefault()
-            const ask = inputTxtAsk.val()
-            inputTxtAsk.val('')
-            sendAsk(ask)
-        })
-        
         dropArea.onclick = () => {
             fileInput.click();
         };
@@ -403,7 +445,6 @@
         }
     })
 
-    
     function getUserTranscricoes(userId) {
         return fetch(`/documento/api/media-transcricao/?criado_por=${userId}&ativo=true`)
     }
@@ -417,7 +458,6 @@
 
         listTranscricoesEl.html(list)
     }
-
     
     function filltranscricao(data) {
         const {id, transcricoes, titulo, arquivo, tipo, legenda } = data
@@ -425,35 +465,29 @@
         insertConversation(transcricoes)
         transcricaoAtual = data
         transcricaoIdOpenEl.val(id)
+        getIndividualSpeakers(transcricoes)
         prepareActions()
     }
 
+
     function loadDocumento(titulo, url, id, tipo, legenda) {
         let classe = 'audio'
-        if (tipo == 1){
-            classe = 'video'
-        }
-        embed = `
-            <video id="media-el"
-                controls 
-                preload="auto"
-                class="${classe}"
-            >
-                <source src="${url}" />
-                <track
-                    label="Português"
-                    kind="subtitles"
-                    srclang="en"
-                    src="${legenda}"
-                    default 
-                />
-            </video>`
-        pdfContainer.html(`
-            <div class="pdf-header">
+        if (tipo == 1) { classe = 'video'}
+      
+        mediaContainer.html(`
+            <div class="media-header">
                 <h3 title="${titulo}">${titulo}</h3> 
-                <i data-remove-id='${id}' class='fa fa-trash btn-remove-transcricao'></i>
+                <div>
+                    <a href="/documento/export-transcricoes-txt/${id}"><i class="fa-solid fa-download" data-toggle="tooltip" data-placement="bottom" title="Exportar transcrição"></i></a>
+                    <i data-remove-id='${id}' class='fa fa-trash btn-remove-transcricao'></i>
+                </div>
             </div>
-            ${embed}
+            <video id="media-el" controls preload="auto" class="${classe}">
+                <source src="${url}" />
+                <track label="Português" kind="subtitles" srclang="en" src="${legenda}" default />
+            </video>
+
+            <div id="edit-group-speakers"></div>
         `)
     }
 
@@ -494,7 +528,7 @@
 
     function cleartranscricao() {
         listMessagesEl.empty()
-        pdfContainer.empty()
+        mediaContainer.empty()
     }
 
     function updatetranscricaoList(data, type) {
@@ -526,8 +560,12 @@
             processData: false,
             beforeSend:() => loader.fadeIn(),
             success: (data) => {
-                updatetranscricaoList(data, 'add')
-                filltranscricao(data)
+                Swal.fire({
+                    title: 'O arquivo foi enviado para processamento e em breve estará pronto.'
+                }).then(() => {
+                    updatetranscricaoList(data, 'add')
+                    filltranscricao(data)
+                })
             },
             complete: () => loader.fadeOut() 
         })
@@ -572,11 +610,12 @@
 
         let row = `
                 <div class="transcricao-message-row">
-                    <div class="transcricao-message" style="overflow: hidden;">
-                        <div class='avatar bg-primary'>
+                    <div class="transcricao-message" style="overflow: hidden; background-color:${convertHexToRGBA(askMsg.cor_speaker, 0.03)};">
+                        <div class='avatar' style="background-color:${askMsg.cor_speaker}">
                             <i class='fa fa-user'></i>
                         </div>
                         <div class="transcricao-message-txt" id="message-${askMsg.id}">
+                            <div><strong style="margin-right:5px;">${askMsg.speaker}</strong> <i class="fa-solid fa-pen-to-square btn-edit-speaker" data-id="${askMsg.id}" data-speaker="${askMsg.speaker}" data-color-speaker="${askMsg.cor_speaker}" data-replace-all-default="" data-toggle="tooltip" data-placement="right" title="Editar falante"></i></div>
                             <div><i class="fa-solid fa-forward-step pointer btn-go-to-time" data-time=${askMsg.tempo_inicial_segundos} data-toggle="tooltip" data-placement="bottom" title="Ir para"></i> <strong>${askMsg.tempo_inicial} <i class='fa fa-arrow-right'></i> ${askMsg.tempo_final}</strong>: </div>
                             <div class='text-msg'>${textoFormatado}</div> 
                         </div>
@@ -598,30 +637,60 @@
         messages[messages.length -1].scrollIntoView()
     }
 
-    function getQuestion(id,question){
-        if (question.trim().length > 0){
-        fetch(`/documento/api/mensagem/?criado_por=${id}&is_favorito=true&texto__icontains=${question}`)
-        .then(res=>res.json())
-        .then(data=>{
-            const questions = data.results.reduce((acc,d) => {
-                acc += `<li class='question'>${d.texto}</li>`
-                return acc
-            },'')
+    function openDialogEditSpeaker(id, speaker, colorSpeaker, replaceAllDefault) {
+        const radioChecked = (color) => (colorSpeaker == color ? 'checked' : '' )
 
-            if (questions.length > 0){
-                questionBox.classList.remove('hide')
-                listaQuestion.html(questions)
-            }else{
-                listaQuestion.html('')
-                questionBox.classList.add('hide')
+        Swal.fire({
+            title: "Editar falante",
+            html: `
+                <div class="form-group">
+                    <label>Nome</label>
+                    <input class="form-control" id='name' type='text' value='${speaker}'>
+                </div>
+                <label>Cor do avatar</label>
+                <div class="dialog-color-speaker">
+                    ${colors.map((c) => `
+                        <div>
+                            <input type="radio" name="color" value="${c}" id="${c}"  ${radioChecked(c)} />
+                            <label class="radio-inline" for="${c}" style="background-color:${c};"></label>
+                        </div>
+                    `).join('')}
+                </div>
+                <label>
+                    <input id="replace-all" type="checkbox" ${replaceAllDefault ? 'disabled checked' : ''}> Substituir em todos com o mesmo nome
+                </label>
+            `,
+            showCancelButton: true,
+            confirmButtonText: "Aplicar",
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#1777ff', 
+            preConfirm: () => ({
+               name: document.getElementById('name').value,
+               color: document.querySelector('input[name="color"]:checked').value,
+               replaceAll: document.getElementById('replace-all').checked,
+            })
+        }).then((result) => {
+            if(result.isConfirmed) {
+                const { name , replaceAll, color } = result.value
+                updateSpeakerName({id, name, color, replaceAll})
             }
-            
         })
-    }else{
-        listaQuestion.html('')
-        questionBox.classList.add('hide')
-
     }
+
+    function updateSpeakerName({id, name, color, replaceAll}) {
+        $.ajax({
+            type: 'PATCH',
+            url: `/documento/api/transcricao/${id}/`,
+            data: {
+                speaker: name,
+                cor_speaker: color,
+                replaceAll
+            },
+            success: (data) => {
+                getTranscricao(transcricaoAtual.id)
+            },
+            error: () => {}
+        })
     }
 
     function prepareActions () {
@@ -648,5 +717,33 @@
         mediaEl.currentTime = time
     }
 
+    function getIndividualSpeakers(transcricoes) {
+        let uniqueSpeakers = transcricoes.reduce((acc, curr) => {
+            const currExists = acc.find((i) => i.speaker === curr.speaker)
+            if(!currExists) acc.push(curr);
+
+            return acc;
+        },[])
+
+        uniqueSpeakers.sort((a,b) => (a.speaker > b.speaker) ? 1 : ((b.speaker > a.speaker) ? -1 : 0))
+
+        $('#edit-group-speakers').html(
+            `
+            <h3>Falantes da Transcrição</h3>
+            <div class="edit-group-list">
+                ${uniqueSpeakers.map((s) => `
+                    <div class="edit-group-item" style="background-color:${convertHexToRGBA(s.cor_speaker, 0.03)};">
+                        <div class="avatar" style="background-color:${s.cor_speaker}">
+                            <i class="fa fa-user"></i>
+                        </div>
+                        <span>${s.speaker}</span>
+                        <i class="fa-solid fa-pen-to-square btn-edit-speaker" data-id="${s.id}" data-speaker="${s.speaker}" data-color-speaker="${s.cor_speaker}" data-replace-all-default="true"  data-toggle="tooltip" data-placement="right" title="Editar falante"></i>
+                    </div>
+                `).join('')}
+                
+            </div>
+            `
+        )
+    }
 </script>
 {% endblock %}

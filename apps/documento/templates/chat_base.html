@@ -5,7 +5,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Document</title>
+        <title>Assistente IA</title>
         <link rel="stylesheet" href="//stackpath.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
         <link rel="stylesheet" href="{% static 'admin/plugins/select2/select2.min.css' %}">
         <link rel="stylesheet" href="{% static 'css/custom_adminlte/base-v4.css' %}?v=1.0">
@@ -13,9 +13,6 @@
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastify-js/1.6.1/toastify.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
         {% block extrastyle %}{% endblock %}
         <style>
-           
-
-
             #preloader {
                 position: fixed; 
                 width: 100%; 
@@ -102,14 +99,15 @@
                 margin-top: 5px;
             }
 
-            #document #pdf {
+            #document #pdf, #document #media {
                 padding-bottom: 42px;
                 flex: 37 1 0px;
                 overflow: hidden;
                 border: 1px solid lightgrey;
             }
 
-            #document #pdf #pdf-obj-container {
+            #document #pdf #pdf-obj-container, 
+            #document #media #media-obj-container {
                 height: 100%;
             }
         </style>
@@ -134,6 +132,7 @@
     <script src="{% static 'admin/bootstrap/js/bootstrap.min.js' %}"></script>
 
     <script src="{% static 'clipboard/clipboard.min.js' %}"></script>
+    <script src="{% static 'sweetalert2_v11/sweetalert2.all.min.js' %}" ></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastify-js/1.6.1/toastify.min.js"crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     
     <script>
@@ -162,6 +161,25 @@
                 onClick: function(){} // Callback after click
             }).showToast();
         }
+        
+        const convertHexToRGBA = (hexCode, opacity = 1) => {  
+            let hex = hexCode.replace('#', '');
+            
+            if (hex.length === 3) {
+                hex = `${hex[0]}${hex[0]}${hex[1]}${hex[1]}${hex[2]}${hex[2]}`;
+            }    
+            
+            const r = parseInt(hex.substring(0, 2), 16);
+            const g = parseInt(hex.substring(2, 4), 16);
+            const b = parseInt(hex.substring(4, 6), 16);
+            
+            if (opacity > 1 && opacity <= 100) {
+                opacity = opacity / 100;   
+            }
+
+            return `rgba(${r},${g},${b},${opacity})`;
+        };
+
     </script>
 
     {% block extrajs %} {% endblock %}
