@@ -218,7 +218,7 @@ def preparar_transcricao(media_transcricao_id, audio_file):
 
         if transcricao:
             print('audio_file.name', audio_file.name)
-            diarization = get_diarizations(audio_file.name)
+            # diarization = get_diarizations(audio_file.name)
             texto_total = ""
             with open(path_media_legenda, 'w') as vtt:
                 vtt.write('WEBVTT\n')
@@ -240,13 +240,14 @@ def preparar_transcricao(media_transcricao_id, audio_file):
                         'tempo_inicial': convert_to_time(t.get('start'), False),
                         'tempo_final': convert_to_time(t.get('end'), False),
                         'tempo_inicial_segundos': int(t.get('start')),
-                        'speaker': get_speaker(diarization,t.get('start'),t.get('end'))
+                        # 'speaker': get_speaker(diarization,t.get('start'),t.get('end'))
+                        'speaker': 'Não identificado'
                     }
                     transcricao_new = models.Transcricao(**dict_transcricao)
                     transcricao_new.save()
                 
                 instance.legenda = f'legenda_transcricao/{filename_audio}.vtt'
-                instance.diarizacao = diarization
+                # instance.diarizacao = diarization
                 transcricao_obj = {
                     "segments": transcricao.segments,
                 }
