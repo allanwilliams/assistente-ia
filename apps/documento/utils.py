@@ -169,7 +169,7 @@ def start_pipeline_transcricao(id):
 
 def preparar_audio(media_transcricao_id):
     instance = models.MediaTranscricao.objects.get(pk=media_transcricao_id)
-    filename_audio = str(instance.arquivo.name).split('.')[-2].split('/')[1]
+    filename_audio = str(instance.arquivo.name).split('/')[1].split('.')[-2]
     path_media_audio = f'{ROOT_MEDIA}/{filename_audio}.wav'
 
     file_path = '{}/{}'.format(ROOT_MEDIA, instance.arquivo)
