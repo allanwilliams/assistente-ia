@@ -202,7 +202,7 @@ def preparar_transcricao(media_transcricao_id, audio_file):
     # envia arquivo para OpenAI
     instance = models.MediaTranscricao.objects.get(pk=media_transcricao_id)
     arquivo_file = instance.arquivo
-    filename_audio = str(arquivo_file.name).split('.')[-2].split('/')[1]
+    filename_audio = str(arquivo_file.name).split('/')[1].split('.')[-2]
     path_media_legenda = f'{ROOT_LEGENDA}/{filename_audio}.vtt'
     
     print("<<<<<<<<<<<< PREPARANDO TRANSCRIÇÃO >>>>>>>>>>>>")
