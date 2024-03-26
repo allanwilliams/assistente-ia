@@ -96,9 +96,13 @@ def export_chat_txt(request, id=None):
 
 def export_transcricoes_txt(request, id=None):
     media_transcricao = MediaTranscricao.objects.filter(id=id).first()
+    favoritos = request.GET.get('favoritos')
 
     if media_transcricao:
         transcricoes = Transcricao.objects.filter(media_transcricao=media_transcricao)
+
+        if favoritos:
+            transcricoes = transcricoes.filter(is_favorito=True)
 
         texto = []
         for t in transcricoes:
