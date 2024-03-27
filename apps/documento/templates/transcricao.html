@@ -50,6 +50,10 @@
         position: absolute;
     }
 
+    #transcricao .transcricao-message-row .clipboard-btn-container > .fa-solid {
+        color: orange;
+    }
+
     .transcricao-header, .media-header h3 {
         overflow: hidden;
         text-overflow: ellipsis;
@@ -108,7 +112,7 @@
     }
 
      #transcricao-form-input button {
-        background-color: #1777ff;
+        background-color: #00c0ef;
         width: 40px;
         height: 32px;
         color: #fff;
@@ -253,6 +257,7 @@
         position: absolute;
         bottom: 5px;
         right: 5px;
+        color: #00c0ef;
     }
 
     #media #media-obj-container #edit-group-speakers .edit-group-list {
@@ -406,7 +411,6 @@
     const btnFindText = document.querySelector('#btn-find-text')
     const transcricaoInputAsk = document.querySelector('#transcricao-input-ask')
     const colors = ['#000000', '#FF0000', '#FF7F00', '#FFFF00', '#00FF00', '#00FFFF', '#0000FF', '#8B00FF']
-    // const colors = ['#E7FFE7', '#E7F0FF', '#FFFFE7', '#D5F5FF']
 
     let transcricaoAtual = null
 
@@ -693,8 +697,8 @@
                         </div>
                     </div>
                     <div class="clipboard-btn-container">
-                        <i class="fa-regular fa-clipboard clipboard-btn" data-clipboard-target="#message-${askMsg.id}" data-toggle="tooltip" data-placement="left" title="Copiar"></i>
                         <i data-id='${askMsg.id}' data-favorito='${(askMsg.is_favorito)}' class='fa-${(askMsg.is_favorito) ?  'solid' : 'regular'}  fa-star salvar-favoritos'></i>
+                        <i class="fa-regular fa-clipboard clipboard-btn" data-clipboard-target="#message-${askMsg.id}" data-toggle="tooltip" data-placement="left" title="Copiar"></i>
                     </div>
                 </div>
             `
@@ -825,19 +829,22 @@
 
     function saveFavorite(id, is_favorito) {
 
-        const data = {
-            is_favorito: !(is_favorito === 'true')
-        }
+        const valueFavorito = !(is_favorito === 'true')
         if(id) {
             $.ajax({
                 type:'PATCH',
                 url: `/documento/api/transcricao/${id}/`,
-                data: data, 
+                data: { is_favorito: valueFavorito }, 
                 success: (response) => {
                     if(transcricaoAtual) {
-                        getTranscricao(transcricaoAtual.id)
+                        const index = transcricaoAtual.transcricoes.findIndex((i) => i.id === parseInt(id))
+
+                        if(index !== -1) {
+                            transcricaoAtual.transcricoes[index].is_favorito = valueFavorito
+                        }
+                        getFavoriteTranscriptions(transcricaoAtual.transcricoes)
+                        $('.text-msg').removeClass('highlight')
                     }
-                    console.log(response)
                 },
                 error: (e) =>  console.log(e),
             })
