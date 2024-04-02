@@ -36,6 +36,9 @@ class TranscricaoAdmin(AuditoriaAdmin):
     search_fields = (
         'texto',
     )
+    list_filter = (
+        'media_transcricao',
+    )
 
     list_display = ('id', 'media_transcricao')
 
