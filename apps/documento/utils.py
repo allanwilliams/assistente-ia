@@ -293,6 +293,7 @@ def preparar_transcricao_deepgram(media_transcricao_id, audio_file):
 
         options = PrerecordedOptions(
             model="nova-2",
+            # model="whisper-large",
             # model="whisper-medium",
             language="pt-BR",
             smart_format=True, 
@@ -301,7 +302,7 @@ def preparar_transcricao_deepgram(media_transcricao_id, audio_file):
             diarize=True, 
         )
 
-        response = deepgram.listen.prerecorded.v("1").transcribe_file(payload, options, timeout = 300)
+        response = deepgram.listen.prerecorded.v("1").transcribe_file(payload, options, timeout = 900)
 
         paragrafos = response.results.channels[0].alternatives[0].paragraphs.paragraphs
 

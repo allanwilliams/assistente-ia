@@ -112,7 +112,7 @@ class Transcricao(BaseModel):
         on_delete=models.DO_NOTHING,
         related_name='%(class)s_media_transcricao',
     )
-    texto = models.CharField("Texto",max_length=500)
+    texto = models.TextField("Texto")
     tempo_inicial = models.CharField("Tempo inicial",max_length=12)
     tempo_inicial_segundos = models.IntegerField("Tempo inicial em segundos", default=0)
     tempo_final = models.CharField("Tempo final",max_length=12)
