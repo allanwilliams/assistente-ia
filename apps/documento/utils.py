@@ -292,8 +292,8 @@ def preparar_transcricao_deepgram(media_transcricao_id, audio_file):
         }
 
         options = PrerecordedOptions(
-            model="nova-2",
-            # model="whisper-large",
+            # model="nova-2",
+            model="whisper-large",
             # model="whisper-medium",
             language="pt-BR",
             smart_format=True, 
