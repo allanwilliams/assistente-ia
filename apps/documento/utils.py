@@ -188,6 +188,14 @@ def preparar_audio(media_transcricao_id):
         # converte arquivo em wav
         subprocess.run(['ffmpeg','-y','-i', file_path, '-f', 'wav', '-acodec', 'pcm_s16le', '-ar', '22050', '-ac', '1', 'copy', path_media_audio])
 
+        # Se o arquivo for .asf transforma em mp4
+        if '.asf' in instance.arquivo.name:
+            path_media_video = f'{ROOT_MEDIA}/arquivo_transcricao/{filename_audio}.mp4'
+            instance.arquivo.name = f'arquivo_transcricao/{filename_audio}.mp4'
+            instance.save()
+            subprocess.run(['ffmpeg','-y','-i', file_path, '-c:v', 'libx264', '-c:a', 'aac', path_media_video])
+            os.remove(file_path)
+
         # converte arquivo wav em mp3
         convert = AudioSegment.from_wav(path_media_audio)
         audio_file = convert.export('temp_audio_file.mp3', format="mp3")
