@@ -48,7 +48,7 @@ def create_questions(*args, **kwargs):
     chatpdf_source_id = models.Chat.objects.get(pk=chat).chatpdf_source_id
 
     headers = {
-        'x-api-key': 'sec_16KMXQwy0VcwkGz7xYuDY9PxWGGgsHM6',
+        'x-api-key': 'sec_Ym330Go8S2k6oDbOSAzGLOAUYuAmNQR2',
         "Content-Type": "application/json",
     }
 

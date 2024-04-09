@@ -61,7 +61,7 @@ class ChatViewSet(ModelViewSet):
         if chat:
             Mensagem.objects.filter(chat=chat).delete()
 
-            headers = {'x-api-key': 'sec_16KMXQwy0VcwkGz7xYuDY9PxWGGgsHM6'}
+            headers = {'x-api-key': 'sec_Ym330Go8S2k6oDbOSAzGLOAUYuAmNQR2'}
 
             # Remover o chat atigo no Chat PDF
             try:
