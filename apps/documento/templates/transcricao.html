@@ -389,7 +389,10 @@
         'video/webm',
         'video/ogg',
         'video/mp4',
-        'video/x-msvideo'
+        'video/x-msvideo',
+        'video/x-ms-asf',
+        'application/vnd.ms-asf',
+        '.asf'
     ]
     const mediaTranscriptionTypes = audioTypes.concat(videoTypes)
     const allowedMedias = mediaTranscriptionTypes.concat(documentType)
@@ -410,7 +413,8 @@
     const loader = $("#preloader")
     const btnFindText = document.querySelector('#btn-find-text')
     const transcricaoInputAsk = document.querySelector('#transcricao-input-ask')
-    const colors = ['#000000', '#FF0000', '#FF7F00', '#FFFF00', '#00FF00', '#00FFFF', '#0000FF', '#8B00FF']
+    // const colors = ['#000000', '#FF0000', '#FF7F00', '#FFFF00', '#00FF00', '#00FFFF', '#0000FF', '#8B00FF']
+    const colors = ['#000000', '#BC1414', '#FA8C0B', '#179B14', '#0DA78B', '#0D6FA7', '#510BAA', '#C20FC6', '#F2E03E']
 
     let transcricaoAtual = null
 

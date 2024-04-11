@@ -1,6 +1,6 @@
 #!/bin/bash
-source /home/defensoria/assistente_ia/venv/bin/activate 
+source /home/desenvolvimento/assistente-ia/venv/bin/activate 
 
-cd /home/defensoria/assistente_ia 
+cd /home/desenvolvimento/assistente-ia 
 
 python manage.py processar_transcricoes
