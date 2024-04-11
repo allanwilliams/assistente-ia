@@ -9,8 +9,6 @@ from openai import OpenAI
 import pdfkit
 from config.settings import ROOT_DIR
 from apps.documento import models
-from background_task import background
-from background_task.models import CompletedTask
 import subprocess
 from scipy.io import wavfile
 import noisereduce as nr
@@ -386,13 +384,3 @@ def preparar_transcricao_deepgram(media_transcricao_id, audio_file):
 #     instance.save()
 
 
-@background(name="Processar Transcrições")
-def processar_transcricoes():
-    ocupado = models.MediaTranscricao.objects.filter(status__in=[STATUS_FAZENDO_TRANSCRICAO, STATUS_PROCESSANDO_ARQUIVO], ativo=True).exists()
-    print('Executando ......')
-    if not ocupado:
-        CompletedTask.objects.all().delete()
-        transcricao = models.MediaTranscricao.objects.filter(status=STATUS_FILA_PROCESSAMENTO).order_by('id').first()
-        if transcricao:
-            print('Processando...')
-            preparar_audio(transcricao.id)

@@ -7,10 +7,8 @@ from django.dispatch import receiver
 import requests
 import os
 from apps.users.models import User
-from apps.documento.utils import processar_transcricoes
 
 
-processar_transcricoes(repeat=20)
 
 class Chat(BaseModel):
     titulo = models.CharField('Titulo', max_length=255)
