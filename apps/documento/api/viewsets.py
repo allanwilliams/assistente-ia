@@ -145,7 +145,7 @@ class MediaTranscricaoViewSet(ModelViewSet):
 
         hoje = date.today()
         total_video_upload_usuario = MediaTranscricao.objects.filter(criado_por=request.user, criado_em__month=hoje.month, criado_em__year=hoje.year).count()
-        tem_processamento_pendente = MediaTranscricao.objects.filter(criado_por=request.user, status__in=[
+        tem_processamento_pendente = MediaTranscricao.objects.filter(criado_por=request.user, ativo=True, status__in=[
             STATUS_FILA_PROCESSAMENTO, STATUS_PROCESSANDO_ARQUIVO, STATUS_FAZENDO_TRANSCRICAO]).exists()
 
         if tem_processamento_pendente:
