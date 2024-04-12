@@ -1,5 +1,5 @@
 {% extends 'chat_base.html' %}
-
+{% load static %}
 {% block extrastyle %}
 <style>
     #document #chat {
@@ -62,6 +62,12 @@
     #document #chat .chat-header #chat-header-actions i {
         color: #272e30;
         cursor: pointer;
+    }
+
+    #document #toolbar {
+        background-image: url("{% static 'imagens/background_azul.jpg' %}");
+        background-size: cover;
+        background-repeat: no-repeat;
     }
 
     .chat-header, .pdf-header {
