@@ -6,14 +6,14 @@ import json
 from pydub import AudioSegment
 from datetime import timedelta
 from openai import OpenAI
-import pdfkit
 from config.settings import ROOT_DIR
 from apps.documento import models
 import subprocess
-from scipy.io import wavfile
-import noisereduce as nr
-import torch
-from pyannote.audio import Pipeline
+# from scipy.io import wavfile
+# import pdfkit
+# import noisereduce as nr
+# import torch
+# from pyannote.audio import Pipeline
 import os
 from deepgram import (
     DeepgramClient,
@@ -37,6 +37,7 @@ ROOT_LEGENDA = f'{ROOT_DIR}/media/legenda_transcricao'
 ROOT_PDF = f'{ROOT_DIR}/media/documento_chat'
 
 DEEPGRAM_API_KEY = "29f98c5edc5065f3f8d644149ba08b38eb942e5c"
+OPEN_IA_API_KEY = "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"
 
 def create_questions(*args, **kwargs):
     from .models import Chat, Mensagem 
@@ -81,79 +82,6 @@ def create_questions(*args, **kwargs):
     resposta_chatpdf.save()
     return resposta_chatpdf
 
-def convert_mp3_to_wav(mp3_path, wav_path):
-    # Comando ffmpeg para converter MP3 para WAV com taxa de amostragem de 16kHz
-    # command = ['ffmpeg','-y','-i', mp3_path, '-f', 'wav', '-acodec', 'pcm_s16le', '-ar', '16000', '-ac', '1', 'copy', wav_path]
-    command = ['ffmpeg','-y', '-i', mp3_path, '-ar', '16000', '-ac', '1', wav_path]
-    subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-
-def process_audio(audio_path):
-    convert_mp3_to_wav(audio_path,'converted_mp3.wav')
-    rate, data = wavfile.read("converted_mp3.wav")
-    # perform noise reduction
-    reduced_noise = nr.reduce_noise(y=data, sr=rate)
-    wavfile.write("audio_temporario.wav", rate, reduced_noise)
-
-    return "audio_temporario.wav"
-
-def get_diarizations(audio):
-    print("<<<<<<<<<<<< PREPARANDO DIARIZAÇAO >>>>>>>>>>>>")
-    try:
-        pipeline = Pipeline.from_pretrained(
-        "pyannote/speaker-diarization-3.1",
-        use_auth_token="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")
-
-        pipeline.to(torch.device("cpu"))
-
-        # apply pretrained pipeline
-        diarization = pipeline(audio,num_speakers=2,max_speakers=3)
-
-        # print the result
-        result = [{
-            'start': f'{turn.start:.1f}',
-            'stop': f'{turn.end:.1f}',
-            'speaker': speaker
-        } for turn, _, speaker in diarization.itertracks(yield_label=True)]
-        print("<<<<<<<<<<<< DIARIZACAO CONCLUIDA >>>>>>>>>>>>")
-        return unify_speakers(result)
-    except Exception as e:
-        print("<<<<<<<<<<<< ERRO DIARIZACAO >>>>>>>>>>>>", e)
-
-def get_speaker(diarization,start_interval,stop_interval):
-    filtered_elements = [element for element in diarization if float(start_interval) >= float(element['start']) and float(stop_interval) <= float(element['stop'])]
-    return filtered_elements[0]['speaker'] if filtered_elements else 'Não identificado'
-
-def unify_speakers(data):
-    print("<<<<<<<<<<<< UNIFY SPEAKERS >>>>>>>>>>>>")
-    try:
-        unified = []
-        current_speaker = None
-        current_start = None
-        current_stop = None
-
-        for item in data:
-            start = float(item['start'])
-            stop = float(item['stop'])
-            speaker = item['speaker']
-
-            # Se é o mesmo speaker e o intervalo é contínuo ou se sobrepõe, atualize o 'stop'
-            if speaker == current_speaker:
-                current_stop = max(current_stop, stop)
-            else:
-                if current_speaker is not None:
-                    unified.append({'start': str(current_start), 'stop': str(current_stop), 'speaker': current_speaker})
-                
-                current_speaker = speaker
-                current_start = start
-                current_stop = stop
-
-        # Não esqueça de adicionar o último intervalo após sair do loop
-        if current_speaker is not None:
-            unified.append({'start': str(current_start), 'stop': str(current_stop), 'speaker': current_speaker})
-
-        return unified
-    except Exception as e:
-         print("<<<<<<<<<<<< UNIFY SPEAKERS ERROR>>>>>>>>>>>>", e)
 
 def convert_to_time(number, microseconds=False):
     delta_tempo = timedelta(seconds=number)
@@ -188,10 +116,10 @@ def preparar_audio(media_transcricao_id):
 
         # Se o arquivo for .asf transforma em mp4
         if '.asf' in instance.arquivo.name:
-            path_media_video = f'{ROOT_MEDIA}/arquivo_transcricao/{filename_audio}.mp4'
-            instance.arquivo.name = f'arquivo_transcricao/{filename_audio}.mp4'
+            path_media_video = f'{ROOT_MEDIA}/arquivo_transcricao/{filename_audio}.webm'
+            instance.arquivo.name = f'arquivo_transcricao/{filename_audio}.webm'
             instance.save()
-            subprocess.run(['ffmpeg','-y','-i', file_path, '-c:v', 'libx264', '-c:a', 'aac', path_media_video])
+            subprocess.run(['ffmpeg','-y','-i', file_path, '-c:v', 'libvpx', '-s', '360x120', path_media_video])
             os.remove(file_path)
 
         # converte arquivo wav em mp3
@@ -202,7 +130,7 @@ def preparar_audio(media_transcricao_id):
 
         if audio_file:
             print("<<<<<<<<<<<< PREPARAÇAO AUDIO CONCLUIDA >>>>>>>>>>>>")
-            # preparar_transcricao(media_transcricao_id, audio_file)
+            # preparar_transcricao_openia(media_transcricao_id, audio_file)
             preparar_transcricao_deepgram(media_transcricao_id, audio_file)
         else:
             print("<<<<<<<<<<<< ERRO AO PREPARAR AUDIO >>>>>>>>>>>>")
@@ -213,7 +141,7 @@ def preparar_audio(media_transcricao_id):
         atualizar_status_transcricao(media_transcricao_id, STATUS_FALHA_PROCESSAMENTO)
 
 
-def preparar_transcricao(media_transcricao_id, audio_file):
+def preparar_transcricao_openia(media_transcricao_id, audio_file):
     try: 
         # envia arquivo para OpenAI
         instance = models.MediaTranscricao.objects.get(pk=media_transcricao_id)
@@ -224,7 +152,7 @@ def preparar_transcricao(media_transcricao_id, audio_file):
         print("<<<<<<<<<<<< PREPARANDO TRANSCRIÇÃO >>>>>>>>>>>>")
         atualizar_status_transcricao(media_transcricao_id, STATUS_FAZENDO_TRANSCRICAO)
 
-        client = OpenAI(api_key="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")
+        client = OpenAI(api_key=OPEN_IA_API_KEY)
         transcricao = client.audio.transcriptions.create(
             model="whisper-1", 
             file=audio_file, 
@@ -298,9 +226,7 @@ def preparar_transcricao_deepgram(media_transcricao_id, audio_file):
         }
 
         options = PrerecordedOptions(
-            # model="nova-2",
             model="whisper-large",
-            # model="whisper-medium",
             language="pt-BR",
             smart_format=True, 
             punctuate=True, 
@@ -314,7 +240,6 @@ def preparar_transcricao_deepgram(media_transcricao_id, audio_file):
 
         if paragrafos:
             texto_total = ""
-            # cores_avatar = ['#0000FF', '#000000', '#FF0000', '#FF7F00', '#FFFF00', '#00FF00', '#00FFFF', '#8B00FF']
             cores_avatar = ['#000000', '#BC1414', '#FA8C0B', '#179B14', '#0DA78B', '#0D6FA7', '#510BAA', '#C20FC6', '#F2E03E']
             with open(path_media_legenda, 'w') as vtt:
                 vtt.write('WEBVTT\n')
@@ -362,6 +287,79 @@ def preparar_transcricao_deepgram(media_transcricao_id, audio_file):
 
 
 
+# def convert_mp3_to_wav(mp3_path, wav_path):
+#     # Comando ffmpeg para converter MP3 para WAV com taxa de amostragem de 16kHz
+#     # command = ['ffmpeg','-y','-i', mp3_path, '-f', 'wav', '-acodec', 'pcm_s16le', '-ar', '16000', '-ac', '1', 'copy', wav_path]
+#     command = ['ffmpeg','-y', '-i', mp3_path, '-ar', '16000', '-ac', '1', wav_path]
+#     subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+# def process_audio(audio_path):
+#     convert_mp3_to_wav(audio_path,'converted_mp3.wav')
+#     rate, data = wavfile.read("converted_mp3.wav")
+#     # perform noise reduction
+#     reduced_noise = nr.reduce_noise(y=data, sr=rate)
+#     wavfile.write("audio_temporario.wav", rate, reduced_noise)
+
+#     return "audio_temporario.wav"
+
+# def get_diarizations(audio):
+#     print("<<<<<<<<<<<< PREPARANDO DIARIZAÇAO >>>>>>>>>>>>")
+#     try:
+#         pipeline = Pipeline.from_pretrained(
+#         "pyannote/speaker-diarization-3.1",
+#         use_auth_token="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")
+
+#         pipeline.to(torch.device("cpu"))
+
+#         # apply pretrained pipeline
+#         diarization = pipeline(audio,num_speakers=2,max_speakers=3)
+
+#         # print the result
+#         result = [{
+#             'start': f'{turn.start:.1f}',
+#             'stop': f'{turn.end:.1f}',
+#             'speaker': speaker
+#         } for turn, _, speaker in diarization.itertracks(yield_label=True)]
+#         print("<<<<<<<<<<<< DIARIZACAO CONCLUIDA >>>>>>>>>>>>")
+#         return unify_speakers(result)
+#     except Exception as e:
+#         print("<<<<<<<<<<<< ERRO DIARIZACAO >>>>>>>>>>>>", e)
+
+# def get_speaker(diarization,start_interval,stop_interval):
+#     filtered_elements = [element for element in diarization if float(start_interval) >= float(element['start']) and float(stop_interval) <= float(element['stop'])]
+#     return filtered_elements[0]['speaker'] if filtered_elements else 'Não identificado'
+
+# def unify_speakers(data):
+#     print("<<<<<<<<<<<< UNIFY SPEAKERS >>>>>>>>>>>>")
+#     try:
+#         unified = []
+#         current_speaker = None
+#         current_start = None
+#         current_stop = None
+
+#         for item in data:
+#             start = float(item['start'])
+#             stop = float(item['stop'])
+#             speaker = item['speaker']
+
+#             # Se é o mesmo speaker e o intervalo é contínuo ou se sobrepõe, atualize o 'stop'
+#             if speaker == current_speaker:
+#                 current_stop = max(current_stop, stop)
+#             else:
+#                 if current_speaker is not None:
+#                     unified.append({'start': str(current_start), 'stop': str(current_stop), 'speaker': current_speaker})
+                
+#                 current_speaker = speaker
+#                 current_start = start
+#                 current_stop = stop
+
+#         # Não esqueça de adicionar o último intervalo após sair do loop
+#         if current_speaker is not None:
+#             unified.append({'start': str(current_start), 'stop': str(current_stop), 'speaker': current_speaker})
+
+#         return unified
+#     except Exception as e:
+#          print("<<<<<<<<<<<< UNIFY SPEAKERS ERROR>>>>>>>>>>>>", e)
 
 
 
