@@ -541,6 +541,12 @@
             `
         
         listMessagesEl.append(row)
+        let cmr = document.querySelectorAll('.chat-message-txt')
+        regex = 
+        cmr.forEach(e=>{
+            e.innerHTML = e.innerHTML.replace(/(\d+\.)\s(.*?:)/g, (match, p1, p2) => `<b>${p1}${p2}</b>`);
+            e.innerHTML = e.innerHTML.replace(/(-+)\s(.*?:)/g, (match, p1, p2) => `${p1}<b>${p2}</b>`);
+        })
     }
 
     function removeLoading() {
@@ -664,6 +670,9 @@
 
         $('[data-toggle="tooltip"]').tooltip()
     }
+
+
+    
 
 </script>
 {% endblock %}
