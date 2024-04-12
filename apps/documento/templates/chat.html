@@ -457,6 +457,13 @@
                 updateChatList(data, 'add')
                 fillChat(data)
             },
+            error: (error) => {
+                const mensagem = (error?.responseJSON?.mensagem) ? error?.responseJSON?.mensagem : "Houve um erro ao fazer o upload."
+                Swal.fire({
+                    icon: "error",
+                    title: mensagem,
+                });
+            },
             complete: () => loader.fadeOut() 
         })
 
@@ -585,7 +592,14 @@
                     appendConversation(response, false)
                     prepareActionsChat() 
                 },
-                error: () =>  removeLoading(),
+                error: (error) => {
+                    const mensagem = (error?.responseJSON?.mensagem) ? error?.responseJSON?.mensagem : "Houve um erro ao fazer o upload."
+                    removeLoading()
+                    Swal.fire({
+                        icon: "error",
+                        title: mensagem,
+                    });
+                },
                 complete: () => {
                     showLatestMessage()
                     btnSendAsk.prop("disabled", false);

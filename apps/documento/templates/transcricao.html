@@ -653,6 +653,13 @@
                     filltranscricao(data)
                 })
             },
+            error: (error) => {
+                const mensagem = (error?.responseJSON?.mensagem) ? error?.responseJSON?.mensagem : "Houve um erro ao fazer o upload."
+                Swal.fire({
+                    icon: "error",
+                    title: mensagem,
+                });
+            },
             complete: () => loader.fadeOut() 
         })
 
