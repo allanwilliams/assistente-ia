@@ -27,6 +27,7 @@ class MediaTranscricaoFilter(filters.FilterSet):
         fields = {
             'criado_por': ['exact'],
             'ativo': ['exact'],
+            'status': ['exact'],
         }
 
 

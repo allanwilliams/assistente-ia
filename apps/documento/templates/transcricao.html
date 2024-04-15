@@ -3,10 +3,16 @@
 
 {% block extrastyle %}
 <style>
+    body {
+        background-image: url("{% static 'imagens/background-green-lines.jpg' %}");
+        background-repeat: no-repeat;
+        background-size: cover;
+    }
     #transcricao {
         flex: 37 1 0px;
         overflow: hidden;
         border: 1px solid lightgray;
+        background: #fff;
     }
 
     #transcricao .transcricao-message-row {
@@ -261,7 +267,6 @@
     }
 
     #document #toolbar {
-        background-image: url("{% static 'imagens/background_verde.jpg' %}");
         background-size: cover;
         background-repeat: no-repeat;
     }
@@ -285,6 +290,9 @@
         position: absolute;
         top: 4px;
         right: 4px;
+    }
+    .choice-link-transcricao {
+        font-weight: bold;
     }
     #media #media-obj-container #media-el {
         height:40vh;
@@ -320,7 +328,7 @@
                 <div class="drag-area">
                     <i class="fa-sharp fa-solid fa-cloud-arrow-up" style="color:#00c0ef; font-size: 20px;"></i><span></span> 
                     <div class="drag-area-content">
-                        <p class="drag-file">Arraste/solte ou clique aqui para adicionar</p> 
+                        <p class="drag-file"><b>Arraste/solte ou clique aqui</b></p> 
                     </div>
                     <input type="file" class="file-input" style="display: none;" />
                 </div>
@@ -406,8 +414,6 @@
 
         if(event.target.classList.contains('choice-link-transcricao')) {
             const transcricaoId = event.target.attributes['data-id'].value
-            $('.choice-link-transcricao').removeClass('btn-info')
-            event.target.classList.add('btn-info')
             getTranscricao(transcricaoId)
         }
 
@@ -493,21 +499,13 @@
                 const urlParams = new URLSearchParams(url);
                 const documento = urlParams.get('arquivo')
                 getTranscricao(documento)
-                    
-                    
-                let links = $('.choice-link-transcricao')
-                links.removeClass('btn-info')
-
-                let link = links.filter((i, e) => e.attributes['data-id'].value === documento)
-                if(link.length > 0) {
-                    link[0].classList.add('btn-info')
-                }
             })
         }
     })
 
     function getUserTranscricoes(userId) {
-        return fetch(`/documento/api/media-transcricao/?criado_por=${userId}&ativo=true`)
+        const STATUS_CONCLUIDO = 4
+        return fetch(`/documento/api/media-transcricao/?criado_por=${userId}&ativo=true&status=${STATUS_CONCLUIDO}`)
     }
 
     function fillListTranscricoes(Transcricoes) {
@@ -529,6 +527,14 @@
         getFavoriteTranscriptions(transcricoes)
         getIndividualSpeakers(transcricoes)
         prepareActions()
+
+        let links = $('.choice-link-transcricao')
+        links.removeClass('btn-info')
+
+        let link = links.filter((i, e) => e.attributes['data-id'].value === id.toString())
+        if(link.length > 0) {
+            link[0].classList.add('btn-info')
+        }
     }
 
 
@@ -652,7 +658,20 @@
                 error: (erro) => console.log(erro)
             })
         } else {
-            cleartranscricao()
+            $.ajax({
+                type: 'GET',
+                url: `/documento/api/media-transcricao/?criado_por=${userId.val()}&ativo=true&status=4`,
+                success: (data) => {
+                    const { results } = data
+                    if(results.length) {
+                        filltranscricao(results[0])
+                    } else {
+                        cleartranscricao()
+                    }
+                },
+                error: (erro) => cleartranscricao()
+            })
+            
         }
     }
 
@@ -805,7 +824,7 @@
 
         $('#edit-group-speakers').html(
             `
-            <h3>Falantes da Transcrição</h3>
+            <h3>Oradores da Transcrição</h3>
             <div class="edit-group-list">
                 ${uniqueSpeakers.map((s) => `
                     <div class="edit-group-item" style="background-color:${convertHexToRGBA(s.cor_speaker, 0.03)};">

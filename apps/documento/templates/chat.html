@@ -2,6 +2,9 @@
 {% load static %}
 {% block extrastyle %}
 <style>
+    body {
+        background-image: url("{% static 'imagens/background_azul.jpg' %}");
+    }
     #document #chat {
         flex: 37 1 0px;
         overflow: hidden;
@@ -65,7 +68,6 @@
     }
 
     #document #toolbar {
-        background-image: url("{% static 'imagens/background_azul.jpg' %}");
         background-size: cover;
         background-repeat: no-repeat;
     }
@@ -126,6 +128,7 @@
         flex-direction: column;
         justify-content: space-around;
         height: calc(100% - 42px);
+        background: #fff;
     }
     #list-messages {
         width: 100%;
@@ -176,6 +179,10 @@
         color: #1777ff;
         cursor: pointer;
     }
+    .choice-link-chat {
+        font-weight: bold;
+    }
+
 </style>
 {% endblock %}
 
@@ -200,7 +207,7 @@
                 <div class="drag-area">
                     <i class="fa-sharp fa-solid fa-cloud-arrow-up" style="color:#00c0ef; font-size: 20px;"></i><span></span> 
                     <div class="drag-area-content">
-                        <p class="drag-file">Arraste/solte ou clique aqui para adicionar</p> 
+                        <p class="drag-file"><b>Arraste/solte ou clique aqui</b></p> 
                     </div>
                     <input type="file" class="file-input" style="display: none;" />
                 </div>
@@ -274,8 +281,6 @@
 
         if(event.target.classList.contains('choice-link-chat')) {
             const chatId = event.target.attributes['data-id'].value
-            $('.choice-link-chat').removeClass('btn-info')
-            event.target.classList.add('btn-info')
             getChat(chatId)
         }
 
@@ -358,15 +363,6 @@
                 const urlParams = new URLSearchParams(url);
                 const documento = urlParams.get('documento')
                 getChat(documento)
-                    
-                    
-                let links = $('.choice-link-chat')
-                links.removeClass('btn-info')
-
-                let link = links.filter((i, e) => e.attributes['data-id'].value === documento)
-                if(link.length > 0) {
-                    link[0].classList.add('btn-info')
-                }
             })
         }
     })
@@ -390,6 +386,15 @@
         chatAtual = data
         chatIdOpenEl.val(id)
         prepareActionsChat() 
+
+        let links = $('.choice-link-chat')
+        links.removeClass('btn-info')
+
+        let link = links.filter((i, e) => e.attributes['data-id'].value === id.toString())
+
+        if(link.length > 0) {
+            link[0].classList.add('btn-info')
+        }
     }
 
     function loadDocumento(titulo, url, id) {
@@ -487,7 +492,20 @@
                 error: (erro) => console.log(erro)
             })
         } else {
-            clearChat()
+            $.ajax({
+                type: 'GET',
+                url: `/documento/api/chat/?criado_por=${userId.val()}&ativo=true`,
+                success: (data) => { 
+                    const { results } = data
+                    if(results.length) {
+                        fillChat(results[0])
+                    } else {
+                        clearChat()
+                    }
+                },
+                error: (erro) => clearChat()
+            })
+            
         }
     }
 

@@ -5,7 +5,7 @@
 
 <style>
 body  {
-    background-image: url("{% if api == 'chat' %}{% static 'imagens/background_azul.jpg' %}{% else %}{% static 'imagens/onda-sonora-2.jpg' %}{% endif %}");
+    background-image: url("{% if api == 'chat' %}{% static 'imagens/background_azul.jpg' %}{% else %}{% static 'imagens/background-green-lines.jpg' %}{% endif %}");
     background-size:cover;
     -webkit-animation: slidein 50s;
     animation: slidein 50s;
@@ -46,7 +46,7 @@ body  {
     border-radius: 10px;
 }
 .conteudo{
-    max-width: 1000px;
+    max-width: 700px;
     height: calc(100vh - 95px);
     justify-content: center;
     margin: 0 auto;
@@ -85,15 +85,20 @@ body  {
     gap: 10px;
 }
 
-.conteudo-documentos{
-    display: flex;
+.conteudo-documentos {
+    /* display: flex;
     flex-direction: column;
-    gap: 1em;
-    box-shadow: 0px 2px 3px 0px gray;
+    gap: 1em; */
+    /* box-shadow: 0px 2px 3px 0px gray; */
+    margin-bottom: 25px;
     padding: 2em;
-    border-radius: 1px 1px 5px 5px;
-    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+    background-color: rgba(0, 0, 0, 0.7);
     color: #fff;
+}
+
+.conteudo-documentos table {
+    width: 100%;
 }
 
 
@@ -185,6 +190,21 @@ body  {
     margin-top: 10px;
     font-size: 12px;
 }
+
+.link-acesso {
+    text-align: center;
+    display: none;
+}
+.link-acesso a {
+    color: #fff;
+    font-weight: bold;
+    border-radius: 10px;
+    border: 2px solid #fff;
+    padding: 10px 15px;
+    font-size: 18px;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
 </style>
 {% endblock %}
 
@@ -247,16 +267,26 @@ body  {
     </div> -->
 
     <div id="meus_documentos">
-        <div class="titulo-header">{{titulo_tabela}}</div>
-        <div class="conteudo-documentos">
+        
+        <!-- <div class="titulo-header">{{titulo_tabela}}</div> -->
+        <div class="conteudo-documentos" style="display: none;">
             <table>
                 <thead>
                     <th></th>
-                    <th style="width: 30%;"></th>
-                    <th style="width: 100px;"></th>
+                    <th></th>
+                    <th></th>
                 </thead>
                 <tbody id="table-documentos-medias"></tbody>
             </table>
+        </div>
+
+        <div class="link-acesso">
+            {% if api == 'chat' %}
+            <a href="/documento/chat/">Acessar meus itens enviados</a>
+            {% endif %}
+            {% if api == 'media-transcricao' %}
+            <a href="/documento/transcricao/">Acessar meus itens enviados</a>
+            {% endif %}
         </div>
     </div> 
     <br>
@@ -371,7 +401,6 @@ body  {
                 });
             }
         });        
-
         getDocumentsChats()
         setInterval(() => getDocumentsChats(), 23000)
     })  
@@ -380,7 +409,23 @@ body  {
         if(userId.val()) {
             getUserChats(userId.val(), '{{api}}')
             .then((data) => data.json())
-            .then((data) => fillListChats(data.results))
+            .then((data) => {
+                const { results } = data;
+                if(dominio === "media-transcricao") {
+                    const status_pendentes = [1,2,3,6,7]
+                    console.log(results)
+                    const pendentes = results.filter(i => status_pendentes.includes(i.status))
+                    const concluido = results.filter(i => i.status === 4)
+
+                    if(pendentes.length) fillListChats(pendentes)
+                    
+                    if(concluido.length) $('.link-acesso').fadeIn()  
+                } else {
+                    if(results.length) {
+                        $('.link-acesso').fadeIn()
+                    }
+                }
+            })
         }
     }
 
@@ -520,6 +565,7 @@ body  {
         }
 
         tableDocumentosMedias.html(list)
+        $(".conteudo-documentos").fadeIn()
     }
 
     function deleteChat(chatId) {
