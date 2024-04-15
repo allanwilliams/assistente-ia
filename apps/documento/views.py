@@ -10,6 +10,7 @@ from config.settings import BASE_DIR
 from django.utils.html import format_html
 import datetime
 from django.contrib.auth.decorators import login_required
+from constance import config
 
 client = OpenAI(api_key="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")
 
@@ -36,7 +37,8 @@ def dashboard(request):
             'api': 'chat',
             'redirect': 'chat/?documento',
             'titulo': 'Assistente de Documento Jurídico',
-            'titulo_tabela': 'Meus Documentos'
+            'titulo_tabela': 'Meus Documentos',
+            'config': config
         }
 
         return render(request, 'dashboard.html', context)

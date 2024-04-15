@@ -289,33 +289,6 @@
     #media #media-obj-container #media-el {
         height:40vh;
     }
-    #document-header {
-        background: radial-gradient(circle, rgba(0, 94, 60, 1) 0%, rgba(1, 54, 34, 1) 74%, rgba(0, 54, 34, 1) 100%);
-        color: #fff;
-        padding: 5px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-    #document-header img {
-        margin-left: 60px;
-    }
-    #document-header .document-header-links {
-        display: flex;
-        gap: 20px;
-        padding-right: 15px;
-    }
-    #document-header .document-header-links a {
-        color: #fff;
-        font-weight: bold;
-    }
-    #document-header .document-header-links a:hover {
-        text-decoration: none;
-    }
-    #document-header .document-header-links a i {
-        margin-right: 5px;
-    }
-
     .favorite-group-list::-webkit-scrollbar-thumb {
         background-color: #284e5045 !important;
     }
@@ -329,7 +302,12 @@
 {% block conteudo %}
 <main>
     <section id="document-header">
-        <img src="{% static 'logo-defensoria-horizontal-branca.png' %}" alt="">
+        <div class="logo-interna-homenagem">
+            <img src="{% static 'imagens/tanaka.png' %}" alt="">
+            <h2>Sr. Tanaka</h2>
+        </div>
+        <!-- <img src="{% static 'imagens/logo_ia_video.png' %}" alt="" width="200"> -->
+        <img style="margin-left: -115px;" src="{% static 'imagens/defensoria_logo_branca.png' %}" alt="" width="200">
         <div class="document-header-links">
             <a href="/documento/dashboard-media/"><i class="fa-solid fa-house"></i> Dashboard </a>
             <a href="/admin/logout"><i class="fa-solid fa-arrow-right-from-bracket"></i> Sair</a>

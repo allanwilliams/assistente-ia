@@ -120,16 +120,15 @@ class MensagemViewSet(ModelViewSet):
 
 
     def create(self, request, *args, **kwargs):
-        hoje = date.today()
-        total_perguntas_chat = Mensagem.objects.filter(criado_por=request.user, criado_em__month=hoje.month, criado_em__year=hoje.year).count()
-
-        if total_perguntas_chat > config.DOCUMENTO_LIMITE_PERGUNTAS_PDF:
-            mensagem = f"Você excedeu o limite máximo de {config.DOCUMENTO_LIMITE_PERGUNTAS_PDF} perguntas a documentos nesse mês." 
-            return Response({"mensagem": mensagem }, status=status.HTTP_400_BAD_REQUEST)
-
         chat = request.POST.get('chat')
         texto = request.POST.get('texto')
         autor = request.POST.get('autor')
+
+        total_perguntas_chat = Mensagem.objects.filter(criado_por=request.user, chat_id=chat).count()
+
+        if total_perguntas_chat > config.DOCUMENTO_LIMITE_PERGUNTAS_PDF:
+            mensagem = f"Você excedeu o limite máximo de {config.DOCUMENTO_LIMITE_PERGUNTAS_PDF} perguntas para este documento." 
+            return Response({"mensagem": mensagem }, status=status.HTTP_400_BAD_REQUEST)
 
         CQ = create_questions(chat=chat,texto=texto,autor=autor)
         
