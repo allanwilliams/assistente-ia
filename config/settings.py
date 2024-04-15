@@ -197,15 +197,24 @@ SIMPLE_JWT = {
 }
 
 DOMINIO_ATUAL = env('DOMINIO_ATUAL', default='localhost:8000')
-DASHBOARD = "/core/dash-blog/"
+DASHBOARD = "/documento/dashboard-documento/"
 CONSTANCE_BACKEND = 'constance.backends.database.DatabaseBackend'
 CONSTANCE_CONFIG = {
-   'DOMINIO_ATUAL': (DOMINIO_ATUAL,
+    'DOMINIO_ATUAL': (DOMINIO_ATUAL,
                 'Dominio atual do sistema',
                 str),
-   'DASHBOARD': (DASHBOARD,
+    'DASHBOARD': (DASHBOARD,
                 'URL homepage',
                 str),
+    'DOCUMENTO_LIMITE_UPLOAD_PDF': (10,
+                'Limite de uploads de pdf do usuário por mês no app de Assistente de Documentos',
+                int),
+    'DOCUMENTO_LIMITE_PERGUNTAS_PDF': (10,
+                'Limite de perguntas por pdf do usuário por mês no app de Assistente de Documentos',
+                int),
+    'DOCUMENTO_LIMITE_UPLOAD_VIDEO': (10,
+                'Limite de uploads de video do usuário por mês no app de transcrição de media',
+                int),
 }
 
 # Password validation

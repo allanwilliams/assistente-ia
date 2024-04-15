@@ -5,7 +5,7 @@
 
 <style>
 body  {
-    background-image: url("{% if api == 'chat' %}{% static 'imagens/background_azul.jpg' %}{% else %}{% static 'imagens/background_verde.jpg' %}{% endif %}");
+    background-image: url("{% if api == 'chat' %}{% static 'imagens/background_azul.jpg' %}{% else %}{% static 'imagens/onda-sonora-2.jpg' %}{% endif %}");
     background-size:cover;
     -webkit-animation: slidein 50s;
     animation: slidein 50s;
@@ -92,7 +92,7 @@ body  {
     box-shadow: 0px 2px 3px 0px gray;
     padding: 2em;
     border-radius: 1px 1px 5px 5px;
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(0, 0, 0, 0.2);
     color: #fff;
 }
 
@@ -127,7 +127,7 @@ body  {
 }
 
 .drag-active {
-    background-color: #e9e9e94b !important;
+    background-color: #dcdcdc !important;
 }
 
 .nova-pergunta-bloco{
@@ -156,6 +156,8 @@ body  {
 
 #table-documentos-medias th, #table-documentos-medias td {
   padding: 10px;
+  font-weight: bold;
+  font-size: 16px;
 }
 
 #table-documentos-medias td.td-actions {
@@ -165,6 +167,24 @@ body  {
     margin-right: 5px;
 }
 
+.homenagem-principal {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.homenagem-principal h2 {
+    color: #fff;
+    font-size: 40px;
+    font-weight: bold;
+}
+.homenagem-principal img {
+    width: 150px;
+}
+.aviso {
+    color: gray;
+    margin-top: 10px;
+    font-size: 12px;
+}
 </style>
 {% endblock %}
 
@@ -177,13 +197,25 @@ body  {
     <img src="{% static 'imagens/logo_ia_video.png' %}" alt="" width="250">
     {% endif %}
 
-    <img style="margin-left: -115px;" src="{% static 'imagens/cropped-LOGO-DEFENSORIA-HORIZONTAL-BRANCA_2023-4.png' %}" alt="" width="240">
+    <img style="margin-left: -115px;" src="{% static 'imagens/defensoria_logo_branca.png' %}" alt="" width="240">
     
     <div>
         <a href="/admin/logout"><i class="fa-solid fa-arrow-right-from-bracket"></i> Sair</a>
     </div>
 </div>
 <div class="conteudo">
+    {% if api == 'media-transcricao' %}
+    <div class="homenagem-principal">
+        <img src="{% static 'imagens/tanaka.png' %}" alt="">
+        <h2>Sr. Tanaka</h2>
+    </div>
+    {% endif %}
+    {% if api == 'chat' %}
+    <div class="homenagem-principal">
+        <img src="{% static 'imagens/martinha.png' %}" alt="">
+        <h2>Martinha</h2>
+    </div>
+    {% endif %}
     <div class="texto-body">
         <!-- <div class="texto-body-input"> -->
             <div class="drag-area">
@@ -191,6 +223,16 @@ body  {
                     <div><i class="fa-sharp fa-solid fa-cloud-arrow-up" style="color:#00c0ef;font-size:3em"></i></div>
                     <div class="drag-file">Arraste e solte ou <span style="color: #00c0ef;text-decoration: underline;cursor: pointer;"> clique aqui!</span></div>
                     <input type="file" class="file-input" style="display: none;" />
+                    {% if api == 'chat' %}
+                    <div class="aviso">
+                        *Limites: {{config.DOCUMENTO_LIMITE_UPLOAD_PDF}} arquivos p/ mês de até 32mb cada e {{config.DOCUMENTO_LIMITE_PERGUNTAS_PDF}} perguntas por arquivo
+                    </div>
+                    {% endif %}
+                    {% if api == 'media-transcricao' %}
+                    <div class="aviso">
+                        *Limites: {{config.DOCUMENTO_LIMITE_UPLOAD_VIDEO}} videos p/ mês de até 100mb cada
+                    </div>
+                    {% endif %}
                 </div>  
             </div>      
         <!-- </div> -->
@@ -254,14 +296,19 @@ body  {
     const body = document.querySelector('body')
     const tableDocumentosMedias = $("#table-documentos-medias")
     const loader = $("#preloader")
-    
-    fileInput.accept = allowedMedias.join(',')
+    const dominio = '{{api}}'
 
     $(document).ready(() => {
-        // loader.fadeIn()
+
         $.ajaxSetup({
             headers: {"X-CSRFToken": '{{ csrf_token }}' },
         });
+
+        if(dominio === 'chat') {
+            fileInput.accept = documentType.join(',')
+        } else {
+            fileInput.accept = mediaTranscriptionTypes.join(',')
+        }
 
         body.addEventListener('click', function(event) {
             if(event.target.classList.contains('btn-remove-chat')) {
@@ -285,7 +332,13 @@ body  {
                 if(isTranscription) newTranscription(target)
                 else newChat(target)
             }else{
-                showMessage('Tipo de arquivo não suportado',3000)
+                Swal.fire({
+                    icon: "error",
+                    title: "Tipo de arquivo não suportado",
+                }).then(() => {
+                    window.location.reload()
+                });
+                // showMessage('Tipo de arquivo não suportado',3000)
             }
         });
         dropArea.onclick = () => {
@@ -295,13 +348,10 @@ body  {
         dropArea.addEventListener("dragover", (event) => {
             event.preventDefault();
             dropArea.classList.add("drag-active");
-            console.log('dragover')
         });
 
         dropArea.addEventListener("dragleave", () => {
             dropArea.classList.remove("drag-active");
-            console.log('dragleave')
-
         });
 
         dropArea.addEventListener("drop", (e) => {
@@ -313,7 +363,12 @@ body  {
                 if(isTranscription) newTranscription(target)
                 else newChat(target)
             }else{
-                showMessage('Tipo de arquivo não suportado',3000)
+                Swal.fire({
+                    icon: "error",
+                    title: "Tipo de arquivo não suportado",
+                }).then(() => {
+                    window.location.reload()
+                });
             }
         });        
 
@@ -331,8 +386,10 @@ body  {
 
     function validateDocument(target){
         const file = target.files[0]
-        console.log(file.type)
-        return allowedMedias.indexOf(file.type) != -1
+        if(dominio === 'chat') {
+            return documentType.indexOf(file.type) != -1
+        } 
+        return mediaTranscriptionTypes.indexOf(file.type) != -1
     }
 
     function getIsTranscription(target){
@@ -363,6 +420,8 @@ body  {
                 Swal.fire({
                     icon: "error",
                     title: mensagem,
+                }).then(() => {
+                    window.location.reload()
                 });
             },
             complete: () => loader.fadeOut()
@@ -395,6 +454,8 @@ body  {
                 Swal.fire({
                     icon: "error",
                     title: mensagem,
+                }).then(() => {
+                    window.location.reload()
                 });
             },
             complete: () => loader.fadeOut()
@@ -454,6 +515,10 @@ body  {
                 `
             })
         }
+        if(chats.length === 0) {
+            list = `<tr><td>Nenhum item encontrado</td></tr>`
+        }
+
         tableDocumentosMedias.html(list)
     }
 

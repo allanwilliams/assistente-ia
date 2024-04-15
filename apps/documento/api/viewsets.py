@@ -6,11 +6,12 @@ from rest_framework.response import Response
 from rest_framework import status
 import json
 from django_filters import rest_framework as filters
-from apps.documento.choices import CHAT_AUTOR_IA
+from apps.documento.choices import CHAT_AUTOR_IA, STATUS_FILA_PROCESSAMENTO, STATUS_PROCESSANDO_ARQUIVO, STATUS_FAZENDO_TRANSCRICAO
 from ..utils import create_questions
 from rest_framework.decorators import action
 import os
-from datetime import datetime
+from datetime import datetime, date
+from constance import config
 
 class ChatFilter(filters.FilterSet):
     class Meta:
@@ -53,6 +54,17 @@ class ChatViewSet(ModelViewSet):
     serializer_class = ChatSerializer
     filterset_class = ChatFilter
     http_method_names = ['get', 'patch', 'post', 'delete','put']
+
+    def create(self, request, *args, **kwargs):
+
+        hoje = date.today()
+        total_video_upload_usuario = Chat.objects.filter(criado_por=request.user, criado_em__month=hoje.month, criado_em__year=hoje.year).count()
+
+        if total_video_upload_usuario > config.DOCUMENTO_LIMITE_UPLOAD_PDF:
+            mensagem = f"Você excedeu o limite máximo de {config.DOCUMENTO_LIMITE_UPLOAD_PDF} documentos analizados esse mês." 
+            return Response({"mensagem": mensagem }, status=status.HTTP_400_BAD_REQUEST)
+
+        return super().create(request, *args, **kwargs)
 
     @action(detail=True, methods=['get'])
     def resetar_chat(self, request, pk=None):
@@ -108,10 +120,15 @@ class MensagemViewSet(ModelViewSet):
 
 
     def create(self, request, *args, **kwargs):
-
         chat = request.POST.get('chat')
         texto = request.POST.get('texto')
         autor = request.POST.get('autor')
+
+        total_perguntas_chat = Mensagem.objects.filter(criado_por=request.user, chat_id=chat).count()
+
+        if total_perguntas_chat > config.DOCUMENTO_LIMITE_PERGUNTAS_PDF:
+            mensagem = f"Você excedeu o limite máximo de {config.DOCUMENTO_LIMITE_PERGUNTAS_PDF} perguntas para este documento." 
+            return Response({"mensagem": mensagem }, status=status.HTTP_400_BAD_REQUEST)
 
         CQ = create_questions(chat=chat,texto=texto,autor=autor)
         
@@ -122,6 +139,24 @@ class MediaTranscricaoViewSet(ModelViewSet):
     serializer_class = MediaTranscricaoSerializer
     filterset_class = MediaTranscricaoFilter
     http_method_names = ['get', 'patch', 'post', 'delete','put']
+
+    def create(self, request, *args, **kwargs):
+
+        hoje = date.today()
+        total_video_upload_usuario = MediaTranscricao.objects.filter(criado_por=request.user, criado_em__month=hoje.month, criado_em__year=hoje.year).count()
+        tem_processamento_pendente = MediaTranscricao.objects.filter(criado_por=request.user, ativo=True, status__in=[
+            STATUS_FILA_PROCESSAMENTO, STATUS_PROCESSANDO_ARQUIVO, STATUS_FAZENDO_TRANSCRICAO]).exists()
+
+        if tem_processamento_pendente:
+            mensagem = f"Você tem um video em processamento no momento. Aguarde a finalização para enviar outro." 
+            return Response({"mensagem": mensagem }, status=status.HTTP_400_BAD_REQUEST)
+
+        if total_video_upload_usuario > config.DOCUMENTO_LIMITE_UPLOAD_VIDEO:
+            mensagem = f"Você excedeu o limite máximo de {config.DOCUMENTO_LIMITE_UPLOAD_VIDEO} videos analisados esse mês." 
+            return Response({"mensagem": mensagem }, status=status.HTTP_400_BAD_REQUEST)
+
+
+        return super().create(request, *args, **kwargs)
 
 class TranscricaoViewSet(ModelViewSet):
     queryset = Transcricao.objects.all()
