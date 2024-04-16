@@ -27,6 +27,7 @@ class AutoLoginMiddleware:
                         'first_name': user['user']['firstName'],
                         'last_name': user['user']['lastName'],
                         'fusionauth_user_id': user['user']['id'],
+                        'name': user['user']['fullName'],
                     }
                     user_login = User(**dict_user)
                     user_login.save()
