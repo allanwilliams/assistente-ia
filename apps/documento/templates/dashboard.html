@@ -91,7 +91,7 @@ body  {
     gap: 1em; */
     /* box-shadow: 0px 2px 3px 0px gray; */
     margin-bottom: 25px;
-    padding: 2em;
+    padding: 10px;
     border-radius: 10px;
     background-color: rgba(0, 0, 0, 0.7);
     color: #fff;
@@ -162,7 +162,7 @@ body  {
 #table-documentos-medias th, #table-documentos-medias td {
   padding: 10px;
   font-weight: bold;
-  font-size: 16px;
+  text-align: center;
 }
 
 #table-documentos-medias td.td-actions {
@@ -272,8 +272,8 @@ body  {
         <div class="conteudo-documentos" style="display: none;">
             <table>
                 <thead>
-                    <th style="width: 60%;"></th>
-                    <th></th>
+                    <th style="width: 44%;"></th>
+                    <th style="width: 44%;"></th>
                     <th style="width: 12%;"></th>
                 </thead>
                 <tbody id="table-documentos-medias"></tbody>
@@ -323,7 +323,7 @@ body  {
             if(event.target.classList.contains('btn-remove-chat')) {
                 const chatId = event.target.attributes['data-remove-id'].value
                 deleteChat(chatId)
-                event.target.parentElement.parentElement.remove()
+                // event.target.parentElement.parentElement.remove()
             }
 
             if(event.target.classList.contains('btn-remove-question')) {
@@ -384,7 +384,7 @@ body  {
     })  
 
     function getDocumentsChats() {
-        $(".conteudo-documentos").fadeOut()
+        
         if(userId.val()) {
             getUserChats(userId.val(), '{{api}}')
             .then((data) => data.json())
@@ -395,6 +395,8 @@ body  {
                         const ultimo = results.filter(i => i.visualizado === false)[0]
                         if (ultimo) {
                             fillListChats([ultimo])
+                        } else {
+                            $(".conteudo-documentos").fadeOut()
                         }
                     }
 
@@ -525,7 +527,7 @@ body  {
                 list += `
                     <tr>
                         <td>${c.titulo}</td>
-                        <td> <b style="color:${indicator.color}">${indicator.icon} ${c.status_str}</b></td>
+                        <td> <b style="color:${indicator.color}">${indicator.icon}&nbsp; ${c.status_str}</b></td>
                         <td class="td-actions">
                             ${c.status === 4 ? 
                                 `<a href="/documento/{{redirect}}=${c.id}">
@@ -539,13 +541,10 @@ body  {
                     </tr>
                 `
             })
-        }
-        if(chats.length === 0) {
-            list = `<tr><td>Nenhum item encontrado</td></tr>`
+            $(".conteudo-documentos").fadeIn()
         }
 
         tableDocumentosMedias.html(list)
-        $(".conteudo-documentos").fadeIn()
     }
 
     function deleteChat(chatId) {
