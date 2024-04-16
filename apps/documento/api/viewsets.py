@@ -6,12 +6,27 @@ from rest_framework.response import Response
 from rest_framework import status
 import json
 from django_filters import rest_framework as filters
-from apps.documento.choices import CHAT_AUTOR_IA, STATUS_FILA_PROCESSAMENTO, STATUS_PROCESSANDO_ARQUIVO, STATUS_FAZENDO_TRANSCRICAO
+from apps.documento.choices import (
+    CHAT_AUTOR_IA, 
+    STATUS_FILA_PROCESSAMENTO, 
+    STATUS_PROCESSANDO_ARQUIVO, 
+    STATUS_FAZENDO_TRANSCRICAO, 
+    STATUS_FALHA_PROCESSAMENTO, 
+    STATUS_FALHA_TRANSCRICAO,
+    STATUS_CONCLUIDO
+)
 from ..utils import create_questions
 from rest_framework.decorators import action
 import os
 from datetime import datetime, date
 from constance import config
+from rest_framework.pagination import PageNumberPagination
+
+class ResultsSetPagination(PageNumberPagination):
+    page_size = 100
+    page_size_query_param = 'page_size'
+    max_page_size = 100
+
 
 class ChatFilter(filters.FilterSet):
     class Meta:
@@ -27,6 +42,7 @@ class MediaTranscricaoFilter(filters.FilterSet):
         fields = {
             'criado_por': ['exact'],
             'ativo': ['exact'],
+            'status': ['exact'],
         }
 
 
@@ -53,6 +69,7 @@ class ChatViewSet(ModelViewSet):
     queryset = Chat.objects.all()
     serializer_class = ChatSerializer
     filterset_class = ChatFilter
+    pagination_class = ResultsSetPagination
     http_method_names = ['get', 'patch', 'post', 'delete','put']
 
     def create(self, request, *args, **kwargs):
@@ -138,9 +155,13 @@ class MediaTranscricaoViewSet(ModelViewSet):
     queryset = MediaTranscricao.objects.all().order_by('-id')
     serializer_class = MediaTranscricaoSerializer
     filterset_class = MediaTranscricaoFilter
+    pagination_class = ResultsSetPagination
     http_method_names = ['get', 'patch', 'post', 'delete','put']
 
     def create(self, request, *args, **kwargs):
+
+        MediaTranscricao.objects.filter(criado_por=request.user, ativo=True, status__in=[STATUS_FALHA_PROCESSAMENTO, STATUS_FALHA_TRANSCRICAO]).update(ativo=False)
+        MediaTranscricao.objects.filter(criado_por=request.user, visualizado=False, status=STATUS_CONCLUIDO).update(visualizado=True)
 
         hoje = date.today()
         total_video_upload_usuario = MediaTranscricao.objects.filter(criado_por=request.user, criado_em__month=hoje.month, criado_em__year=hoje.year).count()

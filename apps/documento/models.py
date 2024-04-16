@@ -99,6 +99,7 @@ class MediaTranscricao(BaseModel):
     diarizacao = models.TextField("Diarização",blank=True,null=True)
     transcricao = models.TextField("Transcrição",blank=True,null=True)
     status = models.IntegerField('Status', choices=CHOICES_STATUS_TRANSCRICAO, default=STATUS_FILA_PROCESSAMENTO)
+    visualizado = models.BooleanField('Visualizado', default=False)
 
     def __str__(self):
         return f'{self.titulo}'
