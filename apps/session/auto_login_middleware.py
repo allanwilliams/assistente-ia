@@ -16,6 +16,7 @@ class AutoLoginMiddleware:
         response = self.get_response(request)
             
         if email and is_dialog and settings.USE_FUSIONAUTH:
+            email = base64.b64decode(email).decode("utf-8")
             user = search_user(email)
             if user:
                 claims = self.get_user_claims(user)
@@ -33,7 +34,6 @@ class AutoLoginMiddleware:
 
                 MyAuthenticationBackend.handle_flags(MyAuthenticationBackend,user_login,roles)
                 user_login.save()
-                email = base64.b64decode(email).decode("utf-8")
                 user_login = User.objects.filter(email=email).first()
                 if user_login and not request.user.is_authenticated or user_login != request.user:
                     login(request,user_login,backend='apps.django_sso_app.MyAuthenticationBackend.MyAuthenticationBackend')
