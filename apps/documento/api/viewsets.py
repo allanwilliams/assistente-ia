@@ -12,7 +12,8 @@ from rest_framework.decorators import action
 import os
 from datetime import datetime, date
 from constance import config
-
+from ..utils import get_md5File
+from django.utils.html import format_html
 class ChatFilter(filters.FilterSet):
     class Meta:
         model = Chat
@@ -56,7 +57,12 @@ class ChatViewSet(ModelViewSet):
     http_method_names = ['get', 'patch', 'post', 'delete','put']
 
     def create(self, request, *args, **kwargs):
+        string_md5 = get_md5File(request.FILES.get('documento'),fileopen=True)
+        search_md5 = Chat.objects.filter(criado_por=request.user,md5_hexdigit=string_md5,ativo=True)
 
+        if search_md5:
+            return Response({'mensagem': format_html(f"Foi identificado que o arquivo já foi pré processado, clique <a href='/documento/chat/?documento={search_md5.first().id}'>aqui!</a> para acessar")}, status=status.HTTP_400_BAD_REQUEST)
+        
         hoje = date.today()
         total_video_upload_usuario = Chat.objects.filter(criado_por=request.user, criado_em__month=hoje.month, criado_em__year=hoje.year).count()
 
@@ -88,7 +94,6 @@ class ChatViewSet(ModelViewSet):
             # Adicionar novo pdf
             ROOT = os.path.abspath(os.path.dirname(f'media/documento_chat'))
             file_path = '{}/{}'.format(ROOT, chat.documento)
-
             try:
                 with open(file_path, 'rb') as file:
                     files = [('file', ('file', file, 'application/octet-stream'))]
@@ -141,6 +146,12 @@ class MediaTranscricaoViewSet(ModelViewSet):
     http_method_names = ['get', 'patch', 'post', 'delete','put']
 
     def create(self, request, *args, **kwargs):
+        string_md5 = get_md5File(request.FILES.get('arquivo'),fileopen=True)
+        search_md5 = MediaTranscricao.objects.filter(criado_por=request.user,md5_hexdigit=string_md5,ativo=True)
+
+        if search_md5:
+            return Response({'mensagem': format_html(f"Foi identificado que o arquivo já foi pré processado, clique <a href='/documento/transcricao/?arquivo={search_md5.first().id}'>aqui!</a> para acessar")}, status=status.HTTP_400_BAD_REQUEST)
+        
 
         hoje = date.today()
         total_video_upload_usuario = MediaTranscricao.objects.filter(criado_por=request.user, criado_em__month=hoje.month, criado_em__year=hoje.year).count()

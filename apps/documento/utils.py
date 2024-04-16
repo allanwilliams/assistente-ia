@@ -31,6 +31,7 @@ from apps.documento.choices import (
     STATUS_FILA_PROCESSAMENTO
 )
 
+from hashlib import md5
 
 ROOT_MEDIA = f'{ROOT_DIR}/media'
 ROOT_LEGENDA = f'{ROOT_DIR}/media/legenda_transcricao'
@@ -285,8 +286,23 @@ def preparar_transcricao_deepgram(media_transcricao_id, audio_file):
         atualizar_status_transcricao(media_transcricao_id, STATUS_FALHA_TRANSCRICAO)
 
 
-
-
+def get_md5File(filepath,fileopen=False):
+    BUF_SIZE = 65536
+    md5_hexdigits = md5()
+    if fileopen == False:
+        with open(filepath, 'rb') as f:
+            while True:
+                data = f.read(BUF_SIZE)
+                if not data:
+                    break
+                md5_hexdigits.update(data)
+    else:
+        while True:
+            data = filepath.read(BUF_SIZE)
+            if not data:
+                break
+            md5_hexdigits.update(data)
+    return f'{md5_hexdigits.hexdigest()}'
 # def convert_mp3_to_wav(mp3_path, wav_path):
 #     # Comando ffmpeg para converter MP3 para WAV com taxa de amostragem de 16kHz
 #     # command = ['ffmpeg','-y','-i', mp3_path, '-f', 'wav', '-acodec', 'pcm_s16le', '-ar', '16000', '-ac', '1', 'copy', wav_path]
