@@ -25,6 +25,9 @@ class MyAuthenticationBackend(OIDCAuthenticationBackend):  # pragma: no cover
         if roles:
             user.is_superuser = 'FLAG[IS_ADMIN]' in roles
             user.is_staff = 'FLAG[IS_STAFF]' in roles
+        else:
+            user.is_superuser = False
+            user.is_staff = False
 
     # Usa as roles de grupos para determinar os grupos do usuário
     def handle_groups(self,user,roles):
