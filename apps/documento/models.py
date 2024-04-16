@@ -111,7 +111,7 @@ class MediaTranscricao(BaseModel):
         return f'{self.titulo}'
 
 @receiver(post_save, sender=MediaTranscricao)
-def criar_mensagens_chat(sender, instance, created, **kwargs):
+def criar_transcricao(sender, instance, created, **kwargs):
     
     ROOT = os.path.abspath(os.path.dirname(f'media/arquivo_transcricao'))
     file_path = '{}/{}'.format(ROOT, instance.arquivo)
