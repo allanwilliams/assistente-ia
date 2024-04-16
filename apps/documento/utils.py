@@ -117,9 +117,13 @@ def preparar_audio(media_transcricao_id):
         # Se o arquivo for .asf transforma em mp4
         if '.asf' in instance.arquivo.name:
             path_media_video = f'{ROOT_MEDIA}/arquivo_transcricao/{filename_audio}.webm'
+            
+            subprocess.run(['ffmpeg','-y','-i', file_path, '-c:v', 'libvpx', '-s', '426x240', path_media_video])
+            
+            instance = models.MediaTranscricao.objects.get(pk=media_transcricao_id)
             instance.arquivo.name = f'arquivo_transcricao/{filename_audio}.webm'
             instance.save()
-            subprocess.run(['ffmpeg','-y','-i', file_path, '-c:v', 'libvpx', '-s', '426x240', path_media_video])
+            
             os.remove(file_path)
 
         # converte arquivo wav em mp3

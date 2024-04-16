@@ -269,7 +269,6 @@
     const questionBox = document.querySelector('#questionBox')
     const loader = $("#preloader")
     const chatHeaderActions = $("#chat-header-actions")
-
     let chatAtual = null
 
     body.addEventListener('click', function(event) {
@@ -316,6 +315,8 @@
     })
 
     $(document).ready(() => {
+
+        fileInput.accept = documentType.join(',')
 
         chatFormInput.submit((e) => {
             e.preventDefault()
@@ -458,29 +459,37 @@
         formData.append('documento', file)
         formData.append('ativo', true)
 
-        $.ajax({
-            type:'POST',
-            url: `/documento/api/chat/`,
-            data: formData,
-            contentType: false,
-            processData: false,
-            beforeSend:() => loader.fadeIn(),
-            success: (data) => {
-                updateChatList(data, 'add')
-                fillChat(data)
-            },
-            error: (error) => {
-                const mensagem = (error?.responseJSON?.mensagem) ? error?.responseJSON?.mensagem : "Houve um erro ao fazer a solicitação."
-                Swal.fire({
-                    icon: "error",
-                    title: mensagem,
-                }).then(() => {
-                    window.location.reload()
-                });
-            },
-            complete: () => loader.fadeOut() 
-        })
-
+        if(validateDocument(documentType, target)) {
+            $.ajax({
+                type:'POST',
+                url: `/documento/api/chat/`,
+                data: formData,
+                contentType: false,
+                processData: false,
+                beforeSend:() => loader.fadeIn(),
+                success: (data) => {
+                    updateChatList(data, 'add')
+                    fillChat(data)
+                },
+                error: (error) => {
+                    const mensagem = (error?.responseJSON?.mensagem) ? error?.responseJSON?.mensagem : "Houve um erro ao fazer a solicitação."
+                    Swal.fire({
+                        icon: "error",
+                        title: mensagem,
+                    }).then(() => {
+                        window.location.reload()
+                    });
+                },
+                complete: () => loader.fadeOut() 
+            })
+        } else {
+            Swal.fire({
+                icon: "error",
+                title: "Tipo de arquivo não suportado",
+            }).then(() => {
+                window.location.reload()
+            });
+        }
     }
 
     function getChat(chatId) {
@@ -717,9 +726,6 @@
 
         $('[data-toggle="tooltip"]').tooltip()
     }
-
-
-    
 
 </script>
 {% endblock %}

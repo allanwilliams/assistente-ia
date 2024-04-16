@@ -367,28 +367,6 @@
 
 {% block extrajs %}
 <script>
-    const documentType = [
-        'application/pdf'
-    ]
-    const audioTypes = [
-        'audio/midi',
-        'audio/mpeg',
-        'audio/webm',
-        'audio/ogg',
-        'audio/wav',    
-    ]
-    const videoTypes = [
-        'video/webm',
-        'video/ogg',
-        'video/mp4',
-        'video/x-msvideo',
-        'video/x-ms-asf',
-        'application/vnd.ms-asf',
-        '.asf'
-    ]
-    const mediaTranscriptionTypes = audioTypes.concat(videoTypes)
-    const allowedMedias = mediaTranscriptionTypes.concat(documentType)
-
     const inputTxtAsk = $('#transcricao-input-ask')
     const btnSendAsk = $("#btn-send-ask")
     const listMessagesEl = $("#list-messages")
@@ -405,7 +383,6 @@
     const loader = $("#preloader")
     const btnFindText = document.querySelector('#btn-find-text')
     const transcricaoInputAsk = document.querySelector('#transcricao-input-ask')
-    // const colors = ['#000000', '#FF0000', '#FF7F00', '#FFFF00', '#00FF00', '#00FFFF', '#0000FF', '#8B00FF']
     const colors = ['#000000', '#BC1414', '#FA8C0B', '#179B14', '#0DA78B', '#0D6FA7', '#510BAA', '#C20FC6', '#F2E03E']
 
     let transcricaoAtual = null
@@ -465,6 +442,7 @@
     })
     
     $(document).ready(() => {
+        fileInput.accept = mediaTranscriptionTypes.join(',')
 
         dropArea.onclick = () => {
             fileInput.click();
@@ -519,7 +497,7 @@
     }
     
     function filltranscricao(data) {
-        const {id, transcricoes, titulo, arquivo, tipo, legenda } = data
+        const {id, transcricoes, titulo, arquivo, tipo, legenda, visualizado, status } = data
         loadDocumento(titulo, arquivo, id,tipo,legenda)
         insertConversation(transcricoes)
         transcricaoAtual = data
@@ -527,6 +505,10 @@
         getFavoriteTranscriptions(transcricoes)
         getIndividualSpeakers(transcricoes)
         prepareActions()
+
+        if(!visualizado && status === 4 ) {
+            updateVisualizado(id)
+        }
 
         let links = $('.choice-link-transcricao')
         links.removeClass('btn-info')
@@ -622,31 +604,39 @@
         formData.append('ativo', true)
         formData.append('tipo', tipo)
 
-        $.ajax({
-            type:'POST',
-            url: `/documento/api/media-transcricao/`,
-            data: formData,
-            contentType: false,
-            processData: false,
-            beforeSend:() => loader.fadeIn(),
-            success: (data) => {
-                Swal.fire({
-                    title: 'O arquivo foi enviado para processamento e em breve estará pronto.'
-                }).then(() => {
-                    updatetranscricaoList(data, 'add')
-                    filltranscricao(data)
-                })
-            },
-            error: (error) => {
-                const mensagem = (error?.responseJSON?.mensagem) ? error?.responseJSON?.mensagem : "Houve um erro ao fazer o upload."
-                Swal.fire({
-                    icon: "error",
-                    title: mensagem,
-                });
-            },
-            complete: () => loader.fadeOut() 
-        })
-
+        if(validateDocument(mediaTranscriptionTypes, target)) {
+            $.ajax({
+                type:'POST',
+                url: `/documento/api/media-transcricao/`,
+                data: formData,
+                contentType: false,
+                processData: false,
+                beforeSend:() => loader.fadeIn(),
+                success: (data) => {
+                    Swal.fire({
+                        title: 'O arquivo foi enviado para processamento e em breve estará pronto.'
+                    }).then(() => {
+                        updatetranscricaoList(data, 'add')
+                        filltranscricao(data)
+                    })
+                },
+                error: (error) => {
+                    const mensagem = (error?.responseJSON?.mensagem) ? error?.responseJSON?.mensagem : "Houve um erro ao fazer o upload."
+                    Swal.fire({
+                        icon: "error",
+                        title: mensagem,
+                    });
+                },
+                complete: () => loader.fadeOut() 
+            })
+        } else {
+            Swal.fire({
+                icon: "error",
+                title: "Tipo de arquivo não suportado",
+            }).then(() => {
+                window.location.reload()
+            });
+        }
     }
 
     function getTranscricao(transcricaoId) {
@@ -886,6 +876,18 @@
         }
 
         $('#favorite-transcriptions').html(`<h3>Transcrições Favoritas <a href="/documento/export-transcricoes-txt/${transcricaoAtual.id}?favoritos=true"><i class="fa-solid fa-download" data-toggle="tooltip" data-placement="bottom" title="Exportar favoritos"></i></a></h3>${getItems()}`)
+    }
+
+    function updateVisualizado(id) {
+        if(id) {
+            $.ajax({
+                type: 'PATCH',
+                url: `/documento/api/media-transcricao/${id}/`,
+                data: {
+                    visualizado: true
+                },
+            })
+        }
     }
 </script>
 {% endblock %}

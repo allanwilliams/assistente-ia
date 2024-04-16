@@ -63,7 +63,7 @@
                 position: relative;
                 overflow: hidden;
                 display: flex;
-                height: 100vh;
+                height: calc(100vh - 72px);
                 width: 100%;
                 
             }
@@ -177,6 +177,28 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastify-js/1.6.1/toastify.min.js"crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     
     <script>
+        const documentType = [
+            'application/pdf'
+        ]
+        const audioTypes = [
+            'audio/midi',
+            'audio/mpeg',
+            'audio/webm',
+            'audio/ogg',
+            'audio/wav',    
+        ]
+        const videoTypes = [
+            'video/webm',
+            'video/ogg',
+            'video/mp4',
+            'video/x-msvideo',
+            'video/x-ms-asf',
+            'application/vnd.ms-asf',
+            '.asf'
+        ]
+        const mediaTranscriptionTypes = audioTypes.concat(videoTypes)
+
+
         $(document).ready(() =>{
             $.ajaxSetup({
                 headers: {"X-CSRFToken": '{{ csrf_token }}' },
@@ -221,6 +243,10 @@
             return `rgba(${r},${g},${b},${opacity})`;
         };
 
+        function validateDocument(allowedTypes, target){
+            const file = target.files[0]
+            return allowedTypes.indexOf(file.type) != -1
+        }
     </script>
 
     {% block extrajs %} {% endblock %}

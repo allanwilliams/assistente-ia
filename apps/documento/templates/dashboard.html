@@ -296,27 +296,6 @@ body  {
 
 {% block extrajs %}
 <script>
-    const documentType = [
-        'application/pdf'
-    ]
-    const audioTypes = [
-        'audio/midi',
-        'audio/mpeg',
-        'audio/webm',
-        'audio/ogg',
-        'audio/wav',    
-    ]
-    const videoTypes = [
-        'video/webm',
-        'video/ogg',
-        'video/mp4',
-        'video/x-msvideo',
-        'video/x-ms-asf',
-        'application/vnd.ms-asf',
-        '.asf'
-    ]
-    const mediaTranscriptionTypes = audioTypes.concat(videoTypes)
-    const allowedMedias = mediaTranscriptionTypes.concat(documentType)
 
     const dropArea = document.querySelector(".drag-area")
     const fileInput = dropArea.querySelector(".file-input")
@@ -368,7 +347,6 @@ body  {
                 }).then(() => {
                     window.location.reload()
                 });
-                // showMessage('Tipo de arquivo não suportado',3000)
             }
         });
         dropArea.onclick = () => {
@@ -402,23 +380,25 @@ body  {
             }
         });        
         getDocumentsChats()
-        setInterval(() => getDocumentsChats(), 23000)
+        setInterval(() => getDocumentsChats(), 13000)
     })  
 
     function getDocumentsChats() {
+        $(".conteudo-documentos").fadeOut()
         if(userId.val()) {
             getUserChats(userId.val(), '{{api}}')
             .then((data) => data.json())
             .then((data) => {
                 const { results } = data;
                 if(dominio === "media-transcricao") {
-                    const status_pendentes = [1,2,3,6,7]
-                    console.log(results)
-                    const pendentes = results.filter(i => status_pendentes.includes(i.status))
-                    const concluido = results.filter(i => i.status === 4)
+                    if(results.length) {
+                        const ultimo = results.filter(i => i.visualizado === false)[0]
+                        if (ultimo) {
+                            fillListChats([ultimo])
+                        }
+                    }
 
-                    if(pendentes.length) fillListChats(pendentes)
-                    
+                    const concluido = results.filter(i => i.status === 4)
                     if(concluido.length) $('.link-acesso').fadeIn()  
                 } else {
                     if(results.length) {
@@ -576,10 +556,9 @@ body  {
                 data: {
                     ativo: false
                 },
-                success: (data) => {
-                    
+                complete: () => {
+                    getDocumentsChats()
                 },
-                error: () => {}
             })
         } 
     }
