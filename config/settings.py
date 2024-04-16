@@ -93,6 +93,7 @@ MIDDLEWARE = [
     "django_currentuser.middleware.ThreadLocalUserMiddleware",
     'DjangoRangeMiddleware.middleware.RangesMiddleware',
     "apps.session.middleware.SessionMiddleware",
+    "apps.session.auto_login_middleware.AutoLoginMiddleware",
 ]
 
 ROOT_URLCONF = 'config.urls'

@@ -63,8 +63,9 @@
                 position: relative;
                 overflow: hidden;
                 display: flex;
-                height: 100vh;
+                height: calc(100vh - 72px);
                 width: 100%;
+                
             }
             #document #toolbar {
                 flex: 13 1 0px;
@@ -98,6 +99,7 @@
             }
 
             #document #pdf, #document #media {
+                background: rgb(255, 255, 255);
                 padding-bottom: 42px;
                 flex: 37 1 0px;
                 overflow: hidden;
@@ -106,6 +108,7 @@
 
             #document #pdf #pdf-obj-container, 
             #document #media #media-obj-container {
+                
                 height: 100%;
             }
             .logo-interna-homenagem  {
@@ -125,7 +128,8 @@
                 font-weight: bold;
             }
             #document-header {
-                background: radial-gradient(circle, rgba(0, 94, 60, 1) 0%, rgba(1, 54, 34, 1) 74%, rgba(0, 54, 34, 1) 100%);
+                /* background: #000; */
+                /* background: radial-gradient(circle, rgba(0, 94, 60, 1) 0%, rgba(1, 54, 34, 1) 74%, rgba(0, 54, 34, 1) 100%); */
                 color: #fff;
                 padding: 5px;
                 display: flex;
@@ -173,6 +177,28 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastify-js/1.6.1/toastify.min.js"crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     
     <script>
+        const documentType = [
+            'application/pdf'
+        ]
+        const audioTypes = [
+            'audio/midi',
+            'audio/mpeg',
+            'audio/webm',
+            'audio/ogg',
+            'audio/wav',    
+        ]
+        const videoTypes = [
+            'video/webm',
+            'video/ogg',
+            'video/mp4',
+            'video/x-msvideo',
+            'video/x-ms-asf',
+            'application/vnd.ms-asf',
+            '.asf'
+        ]
+        const mediaTranscriptionTypes = audioTypes.concat(videoTypes)
+
+
         $(document).ready(() =>{
             $.ajaxSetup({
                 headers: {"X-CSRFToken": '{{ csrf_token }}' },
@@ -217,6 +243,10 @@
             return `rgba(${r},${g},${b},${opacity})`;
         };
 
+        function validateDocument(allowedTypes, target){
+            const file = target.files[0]
+            return allowedTypes.indexOf(file.type) != -1
+        }
     </script>
 
     {% block extrajs %} {% endblock %}

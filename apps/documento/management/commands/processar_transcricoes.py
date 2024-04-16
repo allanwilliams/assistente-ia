@@ -7,7 +7,7 @@ def processar_transcricoes():
     ocupado = MediaTranscricao.objects.filter(status__in=[STATUS_FAZENDO_TRANSCRICAO, STATUS_PROCESSANDO_ARQUIVO], ativo=True).exists()
     print('Executando ......')
     if not ocupado:
-        transcricao = MediaTranscricao.objects.filter(status=STATUS_FILA_PROCESSAMENTO).order_by('id').first()
+        transcricao = MediaTranscricao.objects.filter(status=STATUS_FILA_PROCESSAMENTO, ativo=True).order_by('id').first()
         if transcricao:
             print('Processando...')
             preparar_audio(transcricao.id)

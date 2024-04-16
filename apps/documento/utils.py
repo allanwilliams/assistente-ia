@@ -28,7 +28,8 @@ from apps.documento.choices import (
     STATUS_FAZENDO_TRANSCRICAO,
     STATUS_FALHA_TRANSCRICAO,
     STATUS_CONCLUIDO,
-    STATUS_FILA_PROCESSAMENTO
+    STATUS_FILA_PROCESSAMENTO,
+    TRANSCRICAO_TIPO_VIDEO
 )
 
 from hashlib import md5
@@ -115,12 +116,16 @@ def preparar_audio(media_transcricao_id):
         # converte arquivo em wav
         subprocess.run(['ffmpeg','-y','-i', file_path, '-f', 'wav', '-acodec', 'pcm_s16le', '-ar', '22050', '-ac', '1', 'copy', path_media_audio])
 
-        # Se o arquivo for .asf transforma em mp4
-        if '.asf' in instance.arquivo.name:
+        # Se o arquivo for de video transforma em webm
+        if instance.tipo == TRANSCRICAO_TIPO_VIDEO:
             path_media_video = f'{ROOT_MEDIA}/arquivo_transcricao/{filename_audio}.webm'
+            
+            subprocess.run(['ffmpeg','-y','-i', file_path, '-c:v', 'libvpx', '-s', '426x240', path_media_video])
+            
+            instance = models.MediaTranscricao.objects.get(pk=media_transcricao_id)
             instance.arquivo.name = f'arquivo_transcricao/{filename_audio}.webm'
             instance.save()
-            subprocess.run(['ffmpeg','-y','-i', file_path, '-c:v', 'libvpx', '-s', '426x240', path_media_video])
+            
             os.remove(file_path)
 
         # converte arquivo wav em mp3

@@ -105,6 +105,7 @@ class MediaTranscricao(BaseModel):
     transcricao = models.TextField("Transcrição",blank=True,null=True)
     status = models.IntegerField('Status', choices=CHOICES_STATUS_TRANSCRICAO, default=STATUS_FILA_PROCESSAMENTO)
     md5_hexdigit = models.CharField(max_length=64, blank=True, null=True,unique=True)
+    visualizado = models.BooleanField('Visualizado', default=False)
 
     def __str__(self):
         return f'{self.titulo}'
