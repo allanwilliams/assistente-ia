@@ -20,6 +20,8 @@ from rest_framework.decorators import action
 import os
 from datetime import datetime, date
 from constance import config
+from ..utils import get_md5File
+from django.utils.html import format_html
 from rest_framework.pagination import PageNumberPagination
 
 class ResultsSetPagination(PageNumberPagination):
@@ -73,7 +75,12 @@ class ChatViewSet(ModelViewSet):
     http_method_names = ['get', 'patch', 'post', 'delete','put']
 
     def create(self, request, *args, **kwargs):
+        string_md5 = get_md5File(request.FILES.get('documento'),fileopen=True)
+        search_md5 = Chat.objects.filter(criado_por=request.user,md5_hexdigit=string_md5,ativo=True)
 
+        if search_md5:
+            return Response({'mensagem': format_html(f"Foi identificado que o arquivo já foi pré processado, clique <a href='/documento/chat/?documento={search_md5.first().id}'>aqui!</a> para acessar")}, status=status.HTTP_400_BAD_REQUEST)
+        
         hoje = date.today()
         total_video_upload_usuario = Chat.objects.filter(criado_por=request.user, criado_em__month=hoje.month, criado_em__year=hoje.year).count()
 
@@ -105,7 +112,6 @@ class ChatViewSet(ModelViewSet):
             # Adicionar novo pdf
             ROOT = os.path.abspath(os.path.dirname(f'media/documento_chat'))
             file_path = '{}/{}'.format(ROOT, chat.documento)
-
             try:
                 with open(file_path, 'rb') as file:
                     files = [('file', ('file', file, 'application/octet-stream'))]
@@ -159,6 +165,12 @@ class MediaTranscricaoViewSet(ModelViewSet):
     http_method_names = ['get', 'patch', 'post', 'delete','put']
 
     def create(self, request, *args, **kwargs):
+        string_md5 = get_md5File(request.FILES.get('arquivo'),fileopen=True)
+        search_md5 = MediaTranscricao.objects.filter(criado_por=request.user,md5_hexdigit=string_md5,ativo=True)
+
+        if search_md5:
+            return Response({'mensagem': format_html(f"Foi identificado que o arquivo já foi pré processado, clique <a href='/documento/transcricao/?arquivo={search_md5.first().id}'>aqui!</a> para acessar")}, status=status.HTTP_400_BAD_REQUEST)
+        
 
         MediaTranscricao.objects.filter(criado_por=request.user, ativo=True, status__in=[STATUS_FALHA_PROCESSAMENTO, STATUS_FALHA_TRANSCRICAO]).update(ativo=False)
         MediaTranscricao.objects.filter(criado_por=request.user, visualizado=False, status=STATUS_CONCLUIDO).update(visualizado=True)

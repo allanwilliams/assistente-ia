@@ -2,13 +2,12 @@ from django.db import models, transaction
 from apps.core.mixins import BaseModel
 from apps.documento.choices import CHOICES_CHAT_AUTOR, CHAT_AUTOR_IA, CHOICES_TRANSCRICAO_TIPO, CHOICES_STATUS_TRANSCRICAO, STATUS_FILA_PROCESSAMENTO
 from datetime import datetime
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 import requests
 import os
 from apps.users.models import User
-
-
+from .utils import get_md5File
 
 class Chat(BaseModel):
     titulo = models.CharField('Titulo', max_length=255)
@@ -21,18 +20,24 @@ class Chat(BaseModel):
         related_name='%(class)s_usuario',
         blank=True, null=True
     )
+
+    md5_hexdigit = models.CharField(max_length=64, blank=True, null=True,unique=True)
     
     def __str__(self) -> str:
         return f'{self.id}'
-
-
+            
 @receiver(post_save, sender=Chat)
-def criar_mensagens_chat(sender, instance, **kwargs):
-
-    if instance and not instance.chatpdf_source_id:
-        ROOT = os.path.abspath(os.path.dirname(f'media/documento_chat'))
-        file_path = '{}/{}'.format(ROOT, instance.documento)
+def criar_mensagens_chat(sender, instance, created, **kwargs):
     
+    ROOT = os.path.abspath(os.path.dirname(f'media/documento_chat'))
+    file_path = '{}/{}'.format(ROOT, instance.documento)
+    string_md5 = get_md5File(file_path)
+    search_md5 = sender.objects.filter(criado_por=instance.criado_por,md5_hexdigit=string_md5,ativo=True)
+    if instance and not instance.md5_hexdigit:
+        if not search_md5:
+            instance.md5_hexdigit = string_md5    
+            instance.save()
+    if instance and not instance.chatpdf_source_id:
         try:
             with open(file_path, 'rb') as file:
             
@@ -99,12 +104,23 @@ class MediaTranscricao(BaseModel):
     diarizacao = models.TextField("Diarização",blank=True,null=True)
     transcricao = models.TextField("Transcrição",blank=True,null=True)
     status = models.IntegerField('Status', choices=CHOICES_STATUS_TRANSCRICAO, default=STATUS_FILA_PROCESSAMENTO)
+    md5_hexdigit = models.CharField(max_length=64, blank=True, null=True,unique=True)
     visualizado = models.BooleanField('Visualizado', default=False)
 
     def __str__(self):
         return f'{self.titulo}'
 
-
+@receiver(post_save, sender=MediaTranscricao)
+def criar_transcricao(sender, instance, created, **kwargs):
+    
+    ROOT = os.path.abspath(os.path.dirname(f'media/arquivo_transcricao'))
+    file_path = '{}/{}'.format(ROOT, instance.arquivo)
+    string_md5 = get_md5File(file_path)
+    search_md5 = sender.objects.filter(criado_por=instance.criado_por,md5_hexdigit=string_md5,ativo=True)
+    if instance and not instance.md5_hexdigit:
+        if not search_md5:
+            instance.md5_hexdigit = string_md5    
+            instance.save()
 class Transcricao(BaseModel):
     media_transcricao = models.ForeignKey(
         MediaTranscricao,
