@@ -168,9 +168,6 @@ class MediaTranscricaoViewSet(ModelViewSet):
         string_md5 = get_md5File(request.FILES.get('arquivo'),fileopen=True)
         search_md5 = MediaTranscricao.objects.filter(criado_por=request.user,md5_hexdigit=string_md5,ativo=True)
 
-        if search_md5:
-            return Response({'mensagem': format_html(f"Foi identificado que o arquivo já foi pré processado, clique <a href='/documento/transcricao/?arquivo={search_md5.first().id}'>aqui!</a> para acessar")}, status=status.HTTP_400_BAD_REQUEST)
-        
 
         MediaTranscricao.objects.filter(criado_por=request.user, ativo=True, status__in=[STATUS_FALHA_PROCESSAMENTO, STATUS_FALHA_TRANSCRICAO]).update(ativo=False)
         MediaTranscricao.objects.filter(criado_por=request.user, visualizado=False, status=STATUS_CONCLUIDO).update(visualizado=True)
@@ -188,6 +185,9 @@ class MediaTranscricaoViewSet(ModelViewSet):
             mensagem = f"Você excedeu o limite máximo de {config.DOCUMENTO_LIMITE_UPLOAD_VIDEO} videos analisados esse mês." 
             return Response({"mensagem": mensagem }, status=status.HTTP_400_BAD_REQUEST)
 
+        if search_md5:
+            return Response({'mensagem': format_html(f"Foi identificado que o arquivo já foi pré processado, clique <a href='/documento/transcricao/?arquivo={search_md5.first().id}'>aqui!</a> para acessar")}, status=status.HTTP_400_BAD_REQUEST)
+        
 
         return super().create(request, *args, **kwargs)
 
