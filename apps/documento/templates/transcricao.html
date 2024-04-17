@@ -603,32 +603,34 @@
         formData.append('arquivo', file)
         formData.append('ativo', true)
         formData.append('tipo', tipo)
-
+        
         if(validateDocument(mediaTranscriptionTypes, target)) {
-            $.ajax({
-                type:'POST',
-                url: `/documento/api/media-transcricao/`,
-                data: formData,
-                contentType: false,
-                processData: false,
-                beforeSend:() => loader.fadeIn(),
-                success: (data) => {
-                    Swal.fire({
-                        title: 'O arquivo foi enviado para processamento e em breve estará pronto.'
-                    }).then(() => {
-                        updatetranscricaoList(data, 'add')
-                        filltranscricao(data)
-                    })
-                },
-                error: (error) => {
-                    const mensagem = (error?.responseJSON?.mensagem) ? error?.responseJSON?.mensagem : "Houve um erro ao fazer o upload."
-                    Swal.fire({
-                        icon: "error",
-                        title: mensagem,
-                    });
-                },
-                complete: () => loader.fadeOut() 
-            })
+            if(isValidSizes(maxFileSizeMedia, file)) {
+                $.ajax({
+                    type:'POST',
+                    url: `/documento/api/media-transcricao/`,
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    beforeSend:() => loader.fadeIn(),
+                    success: (data) => {
+                        Swal.fire({
+                            title: 'O arquivo foi enviado para processamento e em breve estará pronto.'
+                        }).then(() => {
+                            updatetranscricaoList(data, 'add')
+                            filltranscricao(data)
+                        })
+                    },
+                    error: (error) => {
+                        const mensagem = (error?.responseJSON?.mensagem) ? error?.responseJSON?.mensagem : "Houve um erro ao fazer o upload."
+                        Swal.fire({
+                            icon: "error",
+                            title: mensagem,
+                        });
+                    },
+                    complete: () => loader.fadeOut() 
+                })
+            }
         } else {
             Swal.fire({
                 icon: "error",

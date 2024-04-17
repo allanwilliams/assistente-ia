@@ -431,28 +431,30 @@ body  {
         formData.append('documento', file)
         formData.append('ativo', true)
 
-        $.ajax({
-            type:'POST',
-            url: `/documento/api/chat/`,
-            beforeSend: () => loader.fadeIn(),
-            data: formData,
-            contentType: false,
-            processData: false,
-            success: (data) => {
-                window.location.href = `/documento/chat/?documento=${data.id}`
-            },
-            error: (error) => {
-                const mensagem = (error?.responseJSON?.mensagem) ? error?.responseJSON?.mensagem : "Houve um erro ao fazer o upload."
+        if(isValidSizes(maxFileSizePdf, file)) {
+            $.ajax({
+                type:'POST',
+                url: `/documento/api/chat/`,
+                beforeSend: () => loader.fadeIn(),
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: (data) => {
+                    window.location.href = `/documento/chat/?documento=${data.id}`
+                },
+                error: (error) => {
+                    const mensagem = (error?.responseJSON?.mensagem) ? error?.responseJSON?.mensagem : "Houve um erro ao fazer o upload."
 
-                Swal.fire({
-                    icon: "error",
-                    title: mensagem,
-                }).then(() => {
-                    window.location.reload()
-                });
-            },
-            complete: () => loader.fadeOut()
-        })
+                    Swal.fire({
+                        icon: "error",
+                        title: mensagem,
+                    }).then(() => {
+                        window.location.reload()
+                    });
+                },
+                complete: () => loader.fadeOut()
+            })
+        }
 
     }
 
@@ -465,30 +467,32 @@ body  {
         formData.append('ativo', true)
         formData.append('tipo', tipo)
 
-        $.ajax({
-            type:'POST',
-            url: `/documento/api/media-transcricao/`,
-            beforeSend: () => loader.fadeIn(),
-            data: formData,
-            contentType: false,
-            processData: false,
-            success: (data) => {
-                window.location.reload()
-            },
-            error: (error) => {
-                const mensagem = (error?.responseJSON?.mensagem) ? error?.responseJSON?.mensagem : "Houve um erro ao fazer o upload."
-
-                Swal.fire({
-                    icon: "error",
-                    title: mensagem,
-                }).then(() => {
+        if(isValidSizes(maxFileSizeMedia, file)) {
+            $.ajax({
+                type:'POST',
+                url: `/documento/api/media-transcricao/`,
+                beforeSend: () => loader.fadeIn(),
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: (data) => {
                     window.location.reload()
-                });
-            },
-            complete: () => loader.fadeOut()
-        })
+                },
+                error: (error) => {
+                    const mensagem = (error?.responseJSON?.mensagem) ? error?.responseJSON?.mensagem : "Houve um erro ao fazer o upload."
 
+                    Swal.fire({
+                        icon: "error",
+                        title: mensagem,
+                    }).then(() => {
+                        window.location.reload()
+                    });
+                },
+                complete: () => loader.fadeOut()
+            })
+        }
     }
+    
     function fillListChats(chats) {
         let list = ''
 
