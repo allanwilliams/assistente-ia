@@ -116,3 +116,10 @@ def export_transcricoes_txt(request, id=None):
         response['Content-Disposition'] = f"attachment; filename=transcricao.txt"
 
         return response
+    
+
+
+@login_required
+def assistente(request):
+    context = {}
+    return render(request, 'assistente.html',context=context)

@@ -1,0 +1,546 @@
+{% extends 'chat_base.html' %}
+{% load static %}
+{% block extrastyle %}
+<style>
+    body {
+        background-image: url("{% static 'imagens/background_azul.jpg' %}");
+    }
+    #document #chat {
+        flex: 57 1 0px;
+        overflow: hidden;
+        border: 1px solid lightgray;
+    }
+
+    #document #chat .chat-message-row {
+        display: flex;
+        padding-top: 8px;
+        padding-bottom: 8px;
+        width: 100%;
+    }
+
+    #document #chat .chat-message-row.ai {
+        justify-content: flex-start;
+    }
+    #document #chat .chat-message-row.human {
+        justify-content: flex-end;
+    }
+
+    #document #chat .chat-message-row.ai .chat-message {
+        background-color: #f9f9fe;
+    }
+
+    #document #chat .chat-message-row.human .chat-message {
+        background-color: #1777ff;
+        color: #fff;
+    }
+    #document #chat .chat-message-row .btn-page {
+        border-radius: 24px;
+        cursor: pointer;
+        color: rgb(255, 255, 255);
+        background: rgb(156, 182, 218);
+        padding: 2px 6px;
+        font-size: 12px;
+        user-select: none;
+    }
+    #document #chat .chat-message {
+        position: relative;
+        max-width: 500px;
+        border-radius: 8px;
+        padding: 6px 12px;
+        box-shadow: 0 0 3px #d1d2da;
+    }
+    #document #chat .chat-message .clipboard-btn-container {
+        float: right;
+        font-size: 16px;
+        margin-right: -6px;
+        padding-left: 3px;
+        cursor: pointer;
+    }
+    #document #chat .chat-header #chat-header-actions {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        padding-right: 5px;
+    }
+    #document #chat .chat-header #chat-header-actions i {
+        color: #272e30;
+        cursor: pointer;
+    }
+
+    #document #toolbar {
+        background-size: cover;
+        background-repeat: no-repeat;
+    }
+
+    .chat-header, .pdf-header {
+        height: 42px;
+        padding: 0px 6px 10px 6px;
+        background: rgb(255, 255, 255);
+        display: flex;
+        align-items: center;
+        flex-shrink: 0;
+        justify-content: space-between;
+    }
+
+    #conversation {
+        flex-grow: 1;
+        overflow: auto;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+    }
+    #chat-footer {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 10px;
+    }
+
+    #chat-form-input {
+        width: 100%;
+        padding: 0px 10px;
+        display: flex;
+    }
+     #chat-form-input input[type=text] {
+        padding: 0 5px;
+        width: 100%;
+        height: 32px;
+        margin: 0;
+        box-sizing: border-box;
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+        border-top-left-radius: 5px;
+        border-bottom-left-radius: 5px;
+    }
+
+     #chat-form-input button {
+        background-color: #1777ff;
+        width: 40px;
+        height: 32px;
+        color: #fff;
+        border-top-left-radius: 0px;
+        border-bottom-left-radius: 0px;
+        border-top-right-radius: 5px;
+        border-bottom-right-radius: 5px;
+    }
+    .conversation-container {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around;
+        height: calc(100% - 42px);
+        background: #fff;
+    }
+    #list-messages {
+        width: 100%;
+        padding: 0 10px;
+    }
+    .choice-link-chat {
+        width: 100%;
+    }
+    .choice-link-chat:hover { 
+        color: rgba(255, 255, 255, 0.55);
+    }
+    #list-chats {
+        display: flex;
+        gap: 5px;
+        flex-direction: column;
+    }
+
+    .question-box{
+        position: absolute;
+        bottom: 3em;
+        box-shadow: 0px 0px 4px 0px gray;
+        padding: 1em;
+        font-size: 1.2rem;
+        border-radius: 5px;
+        background-color: white;
+        opacity: .9;
+    }
+    .hide{
+        display: none;
+    }
+    ul {
+        list-style-type: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    li.question {
+        padding: 0.3em;
+        background-color: #1777ff;
+        margin: 0.3em;
+        border-radius: 5px;
+        color: white;
+    }
+    .question{
+        cursor: pointer;
+    }
+    .btn-send-fake {
+        color: #1777ff;
+        cursor: pointer;
+    }
+    .choice-link-chat {
+        font-weight: bold;
+    }
+
+</style>
+{% endblock %}
+
+{% block conteudo %}
+<main>
+    <section id="document-header">
+        <div class="logo-interna-homenagem">
+            <img src="{% static 'imagens/martinha.png' %}" alt="">
+            <h2 style="margin-top: 5px;">Amélia</h2>
+        </div>
+        <img style="margin-left: -115px;" src="{% static 'imagens/defensoria_logo_branca.png' %}" alt="" width="200">
+        <div class="document-header-links">
+            <a href="/admin/logout"><i class="fa-solid fa-arrow-right-from-bracket"></i> Sair</a>
+        </div>
+        </div>
+    </section>
+    <section id="document">
+        <div id="toolbar">
+            <div>
+                <button class="btn btn-info" onclick="newThread()">Novo Chat</button>
+            </div>
+            <div class="select-chat-section">
+                <div id="list-chats"></div>
+            </div>
+        </div>
+        <div id="chat">
+            <div class="chat-header">
+                <h3>Chat</h3>
+                <div id="chat-header-actions"></div>
+            </div>
+            <div class="conversation-container">
+                <div id="conversation">
+                    <div id="list-messages"></div>
+                </div>
+                <div id="chat-footer">
+                    <form id="chat-form-input">
+                        <div id="questionBox" class="hide question-box">
+                            <ul id="lista-question">
+                            </ul>
+                        </div>
+                        <input autocomplete="off" type="text" id="chat-input-ask" />
+                        <button type="submit" class="btn" id="btn-send-ask">
+                            <i class="fa-solid fa-paper-plane"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+   
+    <input type="hidden" id="chat-id-open">
+    <input type="hidden"  id="user-id" value="{{request.user.id}}">
+</main>
+
+{% endblock %}
+
+{% block extrajs %}
+<script>
+    const inputTxtAsk = $('#chat-input-ask')
+    const btnSendAsk = $("#btn-send-ask")
+    const listMessagesEl = $("#list-messages")
+    const chatFormInput = $("#chat-form-input")
+    const threadIdOpenEl = $('#chat-id-open')
+    const listChatsEl = $('#list-chats')
+    const body = document.querySelector('body')
+    const userId = $("#user-id")
+    const listaQuestion = $('#lista-question')
+    const inputask = document.querySelector('#chat-input-ask')
+    const questionBox = document.querySelector('#questionBox')
+    const loader = $("#preloader")
+    const chatHeaderActions = $("#chat-header-actions")
+    let threadAtual = null
+
+    body.addEventListener('click', function(event) {
+        if(event.target.classList.contains('choice-link-chat')) {
+            const id = event.target.attributes['data-id'].value
+            getThread(id)
+        }
+
+        if(event.target.classList.contains('question')) {
+            inputTxtAsk.val(event.target.innerText)
+            listaQuestion.html('')
+            questionBox.classList.add('hide')            
+        } 
+
+        if(event.target.classList.contains('btn-send-fake')) {
+            const msgID = event.target.attributes['data-id'].value
+            const text = $(`#${msgID}`).text()
+            showLatestMessage()
+            sendAsk(text)
+        }
+    })
+
+    $(document).ready(() => {
+        chatFormInput.submit((e) => {
+            e.preventDefault()
+            const ask = inputTxtAsk.val()
+            inputTxtAsk.val('')
+            sendAsk(ask)
+        })
+
+        if(userId.val()) {
+            getUserThreads(userId.val())
+            .then((data) => data.json())
+            .then((data) => {
+                console.log(data)
+                fillListThreads(data.results)
+            })
+            // .then(() => {
+            //     const url = window.location.search
+            //     const urlParams = new URLSearchParams(url);
+            //     const documento = urlParams.get('documento')
+            //     getChat(documento)
+            // })
+        }
+    })
+
+    function getUserThreads(userId, api) {
+        return fetch(`/documento/api/assistente-topico/?criado_por=${userId}`)
+    }
+
+    function fillListThreads(chats) {
+        let list = ''
+
+        chats.forEach((c) => {
+           list += `<div class="choice-link-chat btn" data-id="${c.id}">${c.openia_thread_id}</div>`
+        })
+
+        listChatsEl.html(list)
+    }
+
+    
+    function fillThread(data) {
+        const {id, mensagens } = data
+        insertConversation(mensagens)
+        threadAtual = data
+        threadIdOpenEl.val(id)
+        // prepareActionsChat() 
+
+        let links = $('.choice-link-chat')
+        links.removeClass('btn-info')
+
+        let link = links.filter((i, e) => e.attributes['data-id'].value === id.toString())
+
+        if(link.length > 0) {
+            link[0].classList.add('btn-info')
+        }
+    }
+
+
+    function insertConversation(mensagens) {
+        listMessagesEl.empty()
+        mensagens.forEach((e) => appendConversation(e))
+        showLatestMessage()
+    }
+
+    function clearThread() {
+        listMessagesEl.empty()
+    }
+
+    function updateChatList(data, type) {
+        if(type === 'add') {
+            $('.choice-link-chat').removeClass('btn-info')
+            listChatsEl.append(`<div class="choice-link-chat btn btn-info" data-id="${data.id}">${data.titulo}</div>`)
+        }
+        if(type === 'remove') {
+            const option = listChatsEl.find(`div[data-id='${data}']`)
+            option.remove()
+            clearThread()
+        }
+    }
+
+    function newThread() {
+        $.ajax({
+            type:'POST',
+            url: `/documento/api/assistente-topico/`,
+            data: {},
+            success: (data) => {
+                console.log(data)
+                // updateChatList(data, 'add')
+                // fillThread(data)
+            },
+            error: (error) => {
+                
+            },
+            complete: () => loader.fadeOut() 
+        })
+
+    }
+
+    function getThread(id) {
+        if(id) {
+            $.ajax({
+                type: 'GET',
+                url: `/documento/api/assistente-topico/${id}/?criado_por=${userId.val()}`,
+                success: (data) => fillThread(data),
+                error: (erro) => console.log(erro)
+            })
+        } else {
+            $.ajax({
+                type: 'GET',
+                url: `/documento/api/assistente-topico/?criado_por=${userId.val()}`,
+                success: (data) => { 
+                    const { results } = data
+                    if(results.length) {
+                        fillThread(results[0])
+                    } else {
+                        clearThread()
+                    }
+                },
+                error: (erro) => clearThread()
+            })
+            
+        }
+    }
+
+    function deleteChat(chatId) {
+        if(chatId) {
+            $.ajax({
+                type: 'PATCH',
+                url: `/documento/api/chat/${chatId}/`,
+                data: {
+                    ativo: false
+                },
+                success: (data) => {
+                    updateChatList(chatId, 'remove')
+                },
+                error: () => {}
+            })
+        }
+    }
+
+
+    function appendConversation(askMsg, loading=true) {
+        const getAutor = (autor) => {
+            const autores = { 1: 'human', 2: 'ai' }
+            return autores[autor] 
+        }
+       
+
+        const getClipboardAction = (askMsg) => {
+            if(askMsg.id && askMsg.autor === 2) {
+                return `<div class="clipboard-btn-container" data-toggle="tooltip" data-placement="left" title="Copiar" ><i class="fa-regular fa-clipboard clipboard-btn" data-clipboard-target="#message-${askMsg.id}"></i></div>`
+            }
+            return ''
+        }
+
+        var regex = /\[P(\d+)\]/g;
+
+        let textoFormatado = askMsg.texto.replaceAll('\n', '<br>')
+
+        textoFormatado = textoFormatado.replace(regex, function(match, numero) {
+            return `<span class="btn-page" data-page="${numero}">${numero}</span>`;
+        });
+
+        let row = `
+                <div class="chat-message-row ${getAutor(askMsg.autor)}">
+                    <div class="chat-message" style="overflow: hidden;">
+                        ${getClipboardAction(askMsg)}
+                        <div class="chat-message-txt" id="message-${askMsg.id}"><div> ${textoFormatado}</div> </div>
+                    </div>
+                </div>
+            `
+        
+        listMessagesEl.append(row)
+        let cmr = document.querySelectorAll('.chat-message-txt')
+        regex = 
+        cmr.forEach(e=>{
+            e.innerHTML = e.innerHTML.replace(/(\d+\.)\s(.*?:)/g, (match, p1, p2) => `<b>${p1}${p2}</b>`);
+            e.innerHTML = e.innerHTML.replace(/(-+)\s(.*?:)/g, (match, p1, p2) => `${p1}<b>${p2}</b>`);
+        })
+    }
+
+    function removeLoading() {
+        $('#list-messages .fa-spinner').parent().parent().parent().remove()
+    }
+
+    function showLatestMessage() {
+        const conversation = document.querySelector('#conversation')
+        const messages = conversation.querySelectorAll('.chat-message-row')
+        if(messages.length) {
+            messages[messages.length -1].scrollIntoView()
+        }
+    }
+
+    function sendAsk(texto) {
+        const data = {
+            topico: threadIdOpenEl.val(),
+            texto: texto,
+            autor: 1
+        }
+
+        if(texto) {
+            $.ajax({
+                type:'POST',
+                url: `/documento/api/assistente-mensagem/`,
+                data: data, 
+                beforeSend:() => {
+                    btnSendAsk.prop("disabled", true);
+                    appendConversation(data)
+                    appendConversation({
+                        autor: 2,
+                        texto: "<i class='fa-solid fa-spinner fa-spin'></i>"
+                    })
+                    showLatestMessage()
+                },
+                success: (response) => {
+                    removeLoading()
+                    appendConversation(response, false)
+                    prepareActionsChat() 
+                },
+                error: (error) => {
+                    const mensagem = (error?.responseJSON?.mensagem) ? error?.responseJSON?.mensagem : "Houve um erro ao enviar a pergunta."
+                    removeLoading()
+                    Swal.fire({
+                        icon: "error",
+                        title: mensagem,
+                    });
+                },
+                complete: () => {
+                    showLatestMessage()
+                    btnSendAsk.prop("disabled", false);
+                }
+            })
+        }
+    }
+
+   
+
+    function prepareActionsChat () {
+        const menuActions = `
+            <div id="chat-header-actions">
+                <a href="/documento/export-chat-txt/${threadAtual.id}"><i class="fa-solid fa-download" data-toggle="tooltip" data-placement="bottom" title="Exportar chat"></i></a>
+                <i id="reset-conversation" class="fa-solid fa-rotate-left" data-toggle="tooltip" data-placement="bottom" title="Resetar Chat"></i>
+                <i id="remove-conversation" class="fa-solid fa-trash" data-toggle="tooltip" data-placement="bottom" title="Deletar Chat"></i>
+            </div>
+        `
+        chatHeaderActions.html(menuActions)
+        
+        $("#remove-conversation").click(() => deleteChat(threadAtual.id))
+        $("#reset-conversation").click(() => resetChat(threadAtual.id))
+
+        const clipboard = new ClipboardJS('.clipboard-btn');
+
+        clipboard.on('success', function(e) {
+            const el = e.trigger
+            e.clearSelection();
+            el.classList.remove('fa-clipboard')
+            el.classList.add('fa-square-check')
+
+            setTimeout(() => {
+                el.classList.remove('fa-square-check')
+                el.classList.add('fa-clipboard')
+            }, 2000)
+        });
+
+        $('[data-toggle="tooltip"]').tooltip()
+    }
+
+</script>
+{% endblock %}

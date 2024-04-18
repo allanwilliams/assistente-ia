@@ -1,6 +1,6 @@
 from django.contrib import admin
 from apps.core.mixins import AuditoriaAdmin
-from apps.documento.models import Mensagem, Chat, MediaTranscricao, Transcricao
+from apps.documento.models import Mensagem, Chat, MediaTranscricao, Transcricao, AssistenteMensagem, AssistenteTopico
 
 # Register your models here.
 
@@ -42,3 +42,18 @@ class TranscricaoAdmin(AuditoriaAdmin):
 
     list_display = ('id', 'media_transcricao')
 
+
+@admin.register(AssistenteMensagem)
+class AssistenteMensagemAdmin(AuditoriaAdmin):
+    search_fields = (
+        'texto',
+    )
+    list_filter = (
+        'topico',
+    )
+    list_display = ('id', 'topico', 'texto')
+
+
+@admin.register(AssistenteTopico)
+class AssistenteTopicoAdmin(AuditoriaAdmin):
+    list_display = ('id', 'openia_thread_id')
