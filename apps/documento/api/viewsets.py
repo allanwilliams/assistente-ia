@@ -224,8 +224,6 @@ class AssistenteMensagemViewSet(ModelViewSet):
         topico = request.POST.get('topico')
         texto = request.POST.get('texto')
         autor = request.POST.get('autor')
-
-
         CQ = criar_pergunta(topico=topico,texto=texto,autor=autor)
 
         if CQ:
@@ -243,18 +241,19 @@ class AssistenteTopicoViewSet(ModelViewSet):
     def create(self, request, *args, **kwargs):
 
         try:
+            AssistenteTopico.objects.filter(criado_por=request.user, ativo=True).update(ativo=False)
             topico = criar_topico()
 
             if topico and topico.id:
                 assistente_topico = AssistenteTopico(openia_thread_id=topico.id)
                 assistente_topico.save()
 
-                return Response({}, status=status.HTTP_201_CREATED)
+                return Response({"id": assistente_topico.id, "mensagens": []}, status=status.HTTP_201_CREATED)
             else:
-                return Response({"mensagem": "Não foi possivel criar o tópico"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"mensagem": "Não foi possivel criar o chat"}, status=status.HTTP_400_BAD_REQUEST)
 
         except Exception as e:
             print(e)
-            return Response({{"mensagem": "Erro interno ao gerar o tópico"}}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({{"mensagem": "Erro interno ao criar o chat"}}, status=status.HTTP_400_BAD_REQUEST)
 
 

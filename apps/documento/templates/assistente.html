@@ -2,185 +2,226 @@
 {% load static %}
 {% block extrastyle %}
 <style>
-    body {
-        background-image: url("{% static 'imagens/background_azul.jpg' %}");
+    main {
+        height: 100vh;
+        background-image: url("{% static 'imagens/background-lines-blue.jpg' %}");
+        background-size: cover;
+        background-position: center center;
     }
-    #document #chat {
-        flex: 57 1 0px;
-        overflow: hidden;
-        border: 1px solid lightgray;
+    #container-chat {
+        position: relative;
+        width: 100%;
+        padding: 15px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: calc(100vh - 100px);
+    }
+    #container-header {
+        position: relative;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        padding: 10px;
+    }
+    #container-chat #chat {
+        position: relative;
+        border-radius: 20px;
+        width: 100%;
+        max-width: 600px;
+        display: none;
     }
 
-    #document #chat .chat-message-row {
+    #container-chat #chat .chat-header {
+        padding: 10px;
+        background: rgb(255, 255, 255);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-top-left-radius: 20px;
+        border-top-right-radius: 20px;
+        background-color: #272e30;
+        color: #fff;
+        font-weight: bold;
+        gap: 10px;
+    }
+
+    #container-chat #chat .chat-header .chat-header-main {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    #container-chat #chat .chat-header #close-chat {
+        position: absolute;
+        cursor: pointer;
+        top: -5px;
+        right: -5px;
+        border: 2px solid #fff;
+        background-color: #000;
+        border-radius: 50%;
+        display: block;
+        width: 25px;
+        height: 25px;
+        text-align: center;
+    }
+    
+    #container-chat #chat .chat-header #close-chat i {
+        font-size: 20px;
+    }
+
+    #container-chat #chat .chat-header img {
+        width: 65px;
+        height: 65px;
+        border-radius: 50%;
+        border: 2px solid #fff;
+        background: #fff;
+    }
+
+    #container-chat #chat .chat-message-row {
         display: flex;
         padding-top: 8px;
         padding-bottom: 8px;
         width: 100%;
     }
 
-    #document #chat .chat-message-row.ai {
+    #container-chat #chat .chat-message-row.ai {
         justify-content: flex-start;
     }
-    #document #chat .chat-message-row.human {
+    #container-chat #chat .chat-message-row.human {
         justify-content: flex-end;
     }
 
-    #document #chat .chat-message-row.ai .chat-message {
+    #container-chat #chat .chat-message-row.ai .chat-message {
         background-color: #f9f9fe;
     }
 
-    #document #chat .chat-message-row.human .chat-message {
+    #container-chat #chat .chat-message-row.human .chat-message {
         background-color: #1777ff;
         color: #fff;
     }
-    #document #chat .chat-message-row .btn-page {
-        border-radius: 24px;
-        cursor: pointer;
-        color: rgb(255, 255, 255);
-        background: rgb(156, 182, 218);
-        padding: 2px 6px;
-        font-size: 12px;
-        user-select: none;
-    }
-    #document #chat .chat-message {
+    
+    #container-chat #chat .chat-message {
         position: relative;
         max-width: 500px;
         border-radius: 8px;
         padding: 6px 12px;
         box-shadow: 0 0 3px #d1d2da;
     }
-    #document #chat .chat-message .clipboard-btn-container {
+    #container-chat #chat .chat-message .clipboard-btn-container {
         float: right;
         font-size: 16px;
         margin-right: -6px;
         padding-left: 3px;
         cursor: pointer;
     }
-    #document #chat .chat-header #chat-header-actions {
-        display: flex;
-        gap: 10px;
-        align-items: center;
-        padding-right: 5px;
-    }
-    #document #chat .chat-header #chat-header-actions i {
-        color: #272e30;
-        cursor: pointer;
-    }
 
-    #document #toolbar {
-        background-size: cover;
-        background-repeat: no-repeat;
+    .conversation-container {
+        background-color: #fff;
+        border-bottom-left-radius: 20px;
+        border-bottom-right-radius: 20px;
     }
-
-    .chat-header, .pdf-header {
-        height: 42px;
-        padding: 0px 6px 10px 6px;
-        background: rgb(255, 255, 255);
-        display: flex;
-        align-items: center;
-        flex-shrink: 0;
-        justify-content: space-between;
-    }
-
+   
     #conversation {
-        flex-grow: 1;
         overflow: auto;
         width: 100%;
         display: flex;
         justify-content: center;
+        max-height: 500px;
+    }
+    #list-messages {
+        width: 100%;
+        padding: 15px 10px;
+
+    }
+    #conversation::-webkit-scrollbar {
+        width: 10px !important;
+    }
+    #conversation::-webkit-scrollbar-thumb {
+        border-radius: 5px;
     }
     #chat-footer {
         display: flex;
         justify-content: center;
-        margin-bottom: 10px;
+        border-top: 1px solid gray;
+        padding: 8px;
+        gap: 5px;
     }
 
     #chat-form-input {
         width: 100%;
-        padding: 0px 10px;
+        padding: 5px;
         display: flex;
+        align-items: center;
     }
-     #chat-form-input input[type=text] {
+    #chat-form-input input:focus-visible {
+        border: none !important;
+        outline: none;
+    }
+     #chat-form-input input {
         padding: 0 5px;
         width: 100%;
         height: 32px;
         margin: 0;
-        box-sizing: border-box;
-        border-top-right-radius: 0;
-        border-bottom-right-radius: 0;
-        border-top-left-radius: 5px;
-        border-bottom-left-radius: 5px;
+        border: none;
     }
 
      #chat-form-input button {
-        background-color: #1777ff;
-        width: 40px;
-        height: 32px;
-        color: #fff;
-        border-top-left-radius: 0px;
-        border-bottom-left-radius: 0px;
-        border-top-right-radius: 5px;
-        border-bottom-right-radius: 5px;
-    }
-    .conversation-container {
-        position: relative;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-around;
-        height: calc(100% - 42px);
-        background: #fff;
-    }
-    #list-messages {
-        width: 100%;
-        padding: 0 10px;
-    }
-    .choice-link-chat {
-        width: 100%;
-    }
-    .choice-link-chat:hover { 
-        color: rgba(255, 255, 255, 0.55);
-    }
-    #list-chats {
-        display: flex;
-        gap: 5px;
-        flex-direction: column;
+        background-color: #fff;
+        background-image: url("{% static 'imagens/send-icon.png' %}");
+        background-size: contain;
+        background-repeat: no-repeat;
+        height: 30px;
+        width: 30px;
     }
 
-    .question-box{
+    .escrevendo:after {
+        overflow: hidden;
+        display: inline-block;
+        vertical-align: bottom;
+        -webkit-animation: ellipsis steps(4,end) 900ms infinite;      
+        animation: ellipsis steps(4,end) 900ms infinite;
+        content: "\2026";
+        width: 0px;
+    }
+
+    @keyframes ellipsis {
+        to {
+            width: 1.25em;    
+        }
+    }
+
+    @-webkit-keyframes ellipsis {
+        to {
+            width: 1.25em;    
+        }
+    }
+
+    #fab_assistente { 
         position: absolute;
-        bottom: 3em;
-        box-shadow: 0px 0px 4px 0px gray;
-        padding: 1em;
-        font-size: 1.2rem;
-        border-radius: 5px;
-        background-color: white;
-        opacity: .9;
+        bottom: 25px;
+        right: 25px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        color: #fff;
+        font-weight: bold;
+        cursor: pointer;
     }
-    .hide{
-        display: none;
-    }
-    ul {
-        list-style-type: none;
-        margin: 0;
-        padding: 0;
+    #fab_assistente img {
+        cursor: pointer;
+        width: 65px;
+        height: 65px;
+        border: 2px solid #fff;
+        background: #fff;
+        border-radius: 50%;
     }
 
-    li.question {
-        padding: 0.3em;
+    #start-chat {
         background-color: #1777ff;
-        margin: 0.3em;
-        border-radius: 5px;
-        color: white;
-    }
-    .question{
-        cursor: pointer;
-    }
-    .btn-send-fake {
-        color: #1777ff;
-        cursor: pointer;
-    }
-    .choice-link-chat {
-        font-weight: bold;
+        color: #fff;
+        font-weight: bold;        
     }
 
 </style>
@@ -188,30 +229,17 @@
 
 {% block conteudo %}
 <main>
-    <section id="document-header">
-        <div class="logo-interna-homenagem">
-            <img src="{% static 'imagens/martinha.png' %}" alt="">
-            <h2 style="margin-top: 5px;">Amélia</h2>
-        </div>
-        <img style="margin-left: -115px;" src="{% static 'imagens/defensoria_logo_branca.png' %}" alt="" width="200">
-        <div class="document-header-links">
-            <a href="/admin/logout"><i class="fa-solid fa-arrow-right-from-bracket"></i> Sair</a>
-        </div>
-        </div>
+    <section id="container-header">
+        <img src="{% static 'imagens/defensoria_logo_branca.png' %}"  width="250">
     </section>
-    <section id="document">
-        <div id="toolbar">
-            <div>
-                <button class="btn btn-info" onclick="newThread()">Novo Chat</button>
-            </div>
-            <div class="select-chat-section">
-                <div id="list-chats"></div>
-            </div>
-        </div>
+    <section id="container-chat">
         <div id="chat">
             <div class="chat-header">
-                <h3>Chat</h3>
-                <div id="chat-header-actions"></div>
+                <div class="chat-header-main">
+                    <img src="{% static 'imagens/amelia.png' %}" alt="">
+                    <h3>Amélia</h3>
+                </div>
+                <span id="close-chat"><i class="fa fa-close"></i></span>
             </div>
             <div class="conversation-container">
                 <div id="conversation">
@@ -219,20 +247,18 @@
                 </div>
                 <div id="chat-footer">
                     <form id="chat-form-input">
-                        <div id="questionBox" class="hide question-box">
-                            <ul id="lista-question">
-                            </ul>
-                        </div>
-                        <input autocomplete="off" type="text" id="chat-input-ask" />
-                        <button type="submit" class="btn" id="btn-send-ask">
-                            <i class="fa-solid fa-paper-plane"></i>
-                        </button>
+                        <input placeholder="Escreva sua dúvida aqui" autocomplete="off" type="text" id="chat-input-ask" />
+                        <button type="submit" class="btn" id="btn-send-ask"></button>
                     </form>
+                    <button id="start-chat" class="btn">iniciar conversa</button>
                 </div>
             </div>
         </div>
     </section>
-   
+    <div id="fab_assistente">
+        <img src="{% static 'imagens/amelia.png' %}" alt="">
+        <span>Amélia</span>
+    </div>
     <input type="hidden" id="chat-id-open">
     <input type="hidden"  id="user-id" value="{{request.user.id}}">
 </main>
@@ -246,28 +272,19 @@
     const listMessagesEl = $("#list-messages")
     const chatFormInput = $("#chat-form-input")
     const threadIdOpenEl = $('#chat-id-open')
-    const listChatsEl = $('#list-chats')
     const body = document.querySelector('body')
     const userId = $("#user-id")
     const listaQuestion = $('#lista-question')
     const inputask = document.querySelector('#chat-input-ask')
-    const questionBox = document.querySelector('#questionBox')
     const loader = $("#preloader")
-    const chatHeaderActions = $("#chat-header-actions")
+    const chatEl = $("#chat")
+    const fabAssistenteEl = $("#fab_assistente")
+    const closeChatEl = $("#close-chat")
+    const startChatEl = $("#start-chat")
     let threadAtual = null
 
     body.addEventListener('click', function(event) {
-        if(event.target.classList.contains('choice-link-chat')) {
-            const id = event.target.attributes['data-id'].value
-            getThread(id)
-        }
-
-        if(event.target.classList.contains('question')) {
-            inputTxtAsk.val(event.target.innerText)
-            listaQuestion.html('')
-            questionBox.classList.add('hide')            
-        } 
-
+       
         if(event.target.classList.contains('btn-send-fake')) {
             const msgID = event.target.attributes['data-id'].value
             const text = $(`#${msgID}`).text()
@@ -277,6 +294,7 @@
     })
 
     $(document).ready(() => {
+
         chatFormInput.submit((e) => {
             e.preventDefault()
             const ask = inputTxtAsk.val()
@@ -284,75 +302,60 @@
             sendAsk(ask)
         })
 
+        fabAssistenteEl.click(() => {
+            chatEl.fadeIn()
+            chatFormInput.hide()
+            insertConversation([])
+        })
+        closeChatEl.click(() => {
+            chatEl.fadeOut()
+        })
+
+        startChatEl.click(() => {
+            newThread()
+        })
+
+
         if(userId.val()) {
-            getUserThreads(userId.val())
-            .then((data) => data.json())
-            .then((data) => {
-                console.log(data)
-                fillListThreads(data.results)
-            })
-            // .then(() => {
-            //     const url = window.location.search
-            //     const urlParams = new URLSearchParams(url);
-            //     const documento = urlParams.get('documento')
-            //     getChat(documento)
-            // })
+            // getThread()
         }
     })
 
+
+
     function getUserThreads(userId, api) {
         return fetch(`/documento/api/assistente-topico/?criado_por=${userId}`)
-    }
-
-    function fillListThreads(chats) {
-        let list = ''
-
-        chats.forEach((c) => {
-           list += `<div class="choice-link-chat btn" data-id="${c.id}">${c.openia_thread_id}</div>`
-        })
-
-        listChatsEl.html(list)
     }
 
     
     function fillThread(data) {
         const {id, mensagens } = data
         insertConversation(mensagens)
+        chatFormInput.show()
+        startChatEl.hide()
         threadAtual = data
         threadIdOpenEl.val(id)
-        // prepareActionsChat() 
-
-        let links = $('.choice-link-chat')
-        links.removeClass('btn-info')
-
-        let link = links.filter((i, e) => e.attributes['data-id'].value === id.toString())
-
-        if(link.length > 0) {
-            link[0].classList.add('btn-info')
-        }
+        prepareActionsChat()
     }
 
 
     function insertConversation(mensagens) {
         listMessagesEl.empty()
+
+        const fakeConversation = `
+            <div class="chat-message-row ai">
+                <div class="chat-message" style="overflow: hidden;">
+                    <div class="chat-message-txt">
+                        <p>Bem vindo! Sou uma assistente virtual especializada em responder dúvidas sobre direitos do consumidor e estou aqui para ajudá-lo com questões relacionadas à Defensoria Pública do Estado do Ceará. Como posso ajudar você hoje?</p>
+                    </div>
+                </div>
+            </div>
+        `
+        listMessagesEl.append(fakeConversation)
+
+
         mensagens.forEach((e) => appendConversation(e))
         showLatestMessage()
-    }
-
-    function clearThread() {
-        listMessagesEl.empty()
-    }
-
-    function updateChatList(data, type) {
-        if(type === 'add') {
-            $('.choice-link-chat').removeClass('btn-info')
-            listChatsEl.append(`<div class="choice-link-chat btn btn-info" data-id="${data.id}">${data.titulo}</div>`)
-        }
-        if(type === 'remove') {
-            const option = listChatsEl.find(`div[data-id='${data}']`)
-            option.remove()
-            clearThread()
-        }
     }
 
     function newThread() {
@@ -361,9 +364,7 @@
             url: `/documento/api/assistente-topico/`,
             data: {},
             success: (data) => {
-                console.log(data)
-                // updateChatList(data, 'add')
-                // fillThread(data)
+                fillThread(data)
             },
             error: (error) => {
                 
@@ -399,29 +400,12 @@
         }
     }
 
-    function deleteChat(chatId) {
-        if(chatId) {
-            $.ajax({
-                type: 'PATCH',
-                url: `/documento/api/chat/${chatId}/`,
-                data: {
-                    ativo: false
-                },
-                success: (data) => {
-                    updateChatList(chatId, 'remove')
-                },
-                error: () => {}
-            })
-        }
-    }
-
 
     function appendConversation(askMsg, loading=true) {
         const getAutor = (autor) => {
             const autores = { 1: 'human', 2: 'ai' }
             return autores[autor] 
         }
-       
 
         const getClipboardAction = (askMsg) => {
             if(askMsg.id && askMsg.autor === 2) {
@@ -430,34 +414,21 @@
             return ''
         }
 
-        var regex = /\[P(\d+)\]/g;
-
         let textoFormatado = askMsg.texto.replaceAll('\n', '<br>')
-
-        textoFormatado = textoFormatado.replace(regex, function(match, numero) {
-            return `<span class="btn-page" data-page="${numero}">${numero}</span>`;
-        });
 
         let row = `
                 <div class="chat-message-row ${getAutor(askMsg.autor)}">
                     <div class="chat-message" style="overflow: hidden;">
-                        ${getClipboardAction(askMsg)}
                         <div class="chat-message-txt" id="message-${askMsg.id}"><div> ${textoFormatado}</div> </div>
                     </div>
                 </div>
             `
         
         listMessagesEl.append(row)
-        let cmr = document.querySelectorAll('.chat-message-txt')
-        regex = 
-        cmr.forEach(e=>{
-            e.innerHTML = e.innerHTML.replace(/(\d+\.)\s(.*?:)/g, (match, p1, p2) => `<b>${p1}${p2}</b>`);
-            e.innerHTML = e.innerHTML.replace(/(-+)\s(.*?:)/g, (match, p1, p2) => `${p1}<b>${p2}</b>`);
-        })
     }
 
     function removeLoading() {
-        $('#list-messages .fa-spinner').parent().parent().parent().remove()
+        $('#list-messages .escrevendo').parent().parent().parent().remove()
     }
 
     function showLatestMessage() {
@@ -485,7 +456,7 @@
                     appendConversation(data)
                     appendConversation({
                         autor: 2,
-                        texto: "<i class='fa-solid fa-spinner fa-spin'></i>"
+                        texto: "<span class='escrevendo'>Digitando</span>"
                     })
                     showLatestMessage()
                 },
@@ -510,21 +481,7 @@
         }
     }
 
-   
-
     function prepareActionsChat () {
-        const menuActions = `
-            <div id="chat-header-actions">
-                <a href="/documento/export-chat-txt/${threadAtual.id}"><i class="fa-solid fa-download" data-toggle="tooltip" data-placement="bottom" title="Exportar chat"></i></a>
-                <i id="reset-conversation" class="fa-solid fa-rotate-left" data-toggle="tooltip" data-placement="bottom" title="Resetar Chat"></i>
-                <i id="remove-conversation" class="fa-solid fa-trash" data-toggle="tooltip" data-placement="bottom" title="Deletar Chat"></i>
-            </div>
-        `
-        chatHeaderActions.html(menuActions)
-        
-        $("#remove-conversation").click(() => deleteChat(threadAtual.id))
-        $("#reset-conversation").click(() => resetChat(threadAtual.id))
-
         const clipboard = new ClipboardJS('.clipboard-btn');
 
         clipboard.on('success', function(e) {
