@@ -1,5 +1,13 @@
 from rest_framework.serializers import ModelSerializer, SerializerMethodField
-from apps.documento.models import Chat, Mensagem, MediaTranscricao, Transcricao, AssistenteMensagem, AssistenteTopico
+from apps.documento.models import (
+  Chat, 
+  Mensagem, 
+  MediaTranscricao, 
+  Transcricao, 
+  AssistenteMensagem, 
+  AssistenteTopico,
+  AssistentePerfil
+)
 
 
 class MensagemSerializer(ModelSerializer):
@@ -54,5 +62,11 @@ class AssistenteTopicoSerializer(ModelSerializer):
     class Meta:
         model = AssistenteTopico
         fields = '__all__'
+
+
+class AssistentePerfilSerializer(ModelSerializer):
+    class Meta:
+        model = AssistentePerfil
+        fields = ('id', 'nome', 'avatar', 'apresentacao', 'ativo')
 
 

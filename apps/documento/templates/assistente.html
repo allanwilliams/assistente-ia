@@ -127,7 +127,8 @@
         width: 100%;
         display: flex;
         justify-content: center;
-        max-height: 500px;
+        max-height: 400px;
+        min-height: 400px;
     }
     #list-messages {
         width: 100%;
@@ -197,10 +198,13 @@
         }
     }
 
-    #fab_assistente { 
+    #container-assistentes {
         position: absolute;
         bottom: 25px;
         right: 25px;
+    }
+
+    .fab-assistente { 
         display: flex;
         justify-content: center;
         align-items: center;
@@ -208,8 +212,9 @@
         color: #fff;
         font-weight: bold;
         cursor: pointer;
+        margin: 15px 0;
     }
-    #fab_assistente img {
+    .fab-assistente img {
         cursor: pointer;
         width: 65px;
         height: 65px;
@@ -236,8 +241,8 @@
         <div id="chat">
             <div class="chat-header">
                 <div class="chat-header-main">
-                    <img src="{% static 'imagens/amelia.png' %}" alt="">
-                    <h3>Amélia</h3>
+                    <img id="chat-assistant-avatar" src="{% static 'imagens/amelia.png' %}" alt="">
+                    <h3 id="chat-assistant-name">Amélia</h3>
                 </div>
                 <span id="close-chat"><i class="fa fa-close"></i></span>
             </div>
@@ -250,16 +255,17 @@
                         <input placeholder="Escreva sua dúvida aqui" autocomplete="off" type="text" id="chat-input-ask" />
                         <button type="submit" class="btn" id="btn-send-ask"></button>
                     </form>
-                    <button id="start-chat" class="btn">iniciar conversa</button>
+                    <button id="start-chat" class="btn">
+                        <i style="display: none;" class="fa-solid fa-circle-notch fa-spin load-start-chat"></i>
+                         iniciar conversa
+                    </button>
                 </div>
             </div>
         </div>
     </section>
-    <div id="fab_assistente">
-        <img src="{% static 'imagens/amelia.png' %}" alt="">
-        <span>Amélia</span>
+    <div id="container-assistentes">
     </div>
-    <input type="hidden" id="chat-id-open">
+   
     <input type="hidden"  id="user-id" value="{{request.user.id}}">
 </main>
 
@@ -271,29 +277,26 @@
     const btnSendAsk = $("#btn-send-ask")
     const listMessagesEl = $("#list-messages")
     const chatFormInput = $("#chat-form-input")
-    const threadIdOpenEl = $('#chat-id-open')
     const body = document.querySelector('body')
     const userId = $("#user-id")
     const listaQuestion = $('#lista-question')
     const inputask = document.querySelector('#chat-input-ask')
     const loader = $("#preloader")
     const chatEl = $("#chat")
-    const fabAssistenteEl = $("#fab_assistente")
     const closeChatEl = $("#close-chat")
     const startChatEl = $("#start-chat")
-    let threadAtual = null
+    const containerAssistentesEl = $("#container-assistentes")
+    const chatAssistantAvatarEl = $("#chat-assistant-avatar")
+    const chatAssistantNameEl = $("#chat-assistant-name")
 
-    body.addEventListener('click', function(event) {
-       
-        if(event.target.classList.contains('btn-send-fake')) {
-            const msgID = event.target.attributes['data-id'].value
-            const text = $(`#${msgID}`).text()
-            showLatestMessage()
-            sendAsk(text)
-        }
-    })
+    let threadAtual = null
+    let assistantsList = []
+    let assistantAtualId = null
+
 
     $(document).ready(() => {
+        
+        getAssistants()
 
         chatFormInput.submit((e) => {
             e.preventDefault()
@@ -302,57 +305,78 @@
             sendAsk(ask)
         })
 
-        fabAssistenteEl.click(() => {
-            chatEl.fadeIn()
-            chatFormInput.hide()
-            insertConversation([])
-        })
-        closeChatEl.click(() => {
-            chatEl.fadeOut()
-        })
-
-        startChatEl.click(() => {
-            newThread()
-        })
-
-
-        if(userId.val()) {
-            // getThread()
-        }
+        closeChatEl.click(clearChat)
+        startChatEl.click(newThread)
     })
 
 
-
-    function getUserThreads(userId, api) {
-        return fetch(`/documento/api/assistente-topico/?criado_por=${userId}`)
+    function getAssistants() {
+        $.ajax({
+            type:'GET',
+            url: `/documento/api/assistente-perfil/`,
+            success: (data) => {
+                const { results } = data
+                listAssistants(results)
+            },
+            error: (error) => {
+                
+            },
+        })
     }
 
-    
+    function listAssistants(assistants) {
+        assistantsList = assistants
+        const htmlAssistants = assistants.map((a) => `
+            <div class="fab-assistente" onClick="openChat(${a.id})" >
+                <img src="${a.avatar}" alt="">
+                <span>${a.nome}</span>
+            </div>
+        `)
+            
+        containerAssistentesEl.html(htmlAssistants.join(''))
+    }
+
+    function clearChat() {
+        chatEl.fadeOut()
+        threadAtual = null
+    }
+
+    function openChat(assistantId) {
+        const assist = assistantsList.filter(e => e.id === assistantId)[0]
+        assistantAtualId = assist.id
+        chatAssistantAvatarEl.attr('src', assist.avatar)
+        chatAssistantNameEl.text(assist.nome)
+        chatEl.fadeIn()
+        chatFormInput.hide()
+        startChatEl.show()
+        insertConversation([], assist.apresentacao)
+    }
+
     function fillThread(data) {
         const {id, mensagens } = data
-        insertConversation(mensagens)
+        const initialMsg = "Bem vindo! Sou uma assistente virtual especializada em responder dúvidas sobre direitos do consumidor e estou aqui para ajudá-lo com questões relacionadas à Defensoria Pública do Estado do Ceará. Como posso ajudar você hoje?"
+        insertConversation(mensagens, initialMsg)
         chatFormInput.show()
         startChatEl.hide()
         threadAtual = data
-        threadIdOpenEl.val(id)
-        prepareActionsChat()
     }
 
 
-    function insertConversation(mensagens) {
+    function insertConversation(mensagens, initialMsg) {
         listMessagesEl.empty()
-
-        const fakeConversation = `
-            <div class="chat-message-row ai">
-                <div class="chat-message" style="overflow: hidden;">
-                    <div class="chat-message-txt">
-                        <p>Bem vindo! Sou uma assistente virtual especializada em responder dúvidas sobre direitos do consumidor e estou aqui para ajudá-lo com questões relacionadas à Defensoria Pública do Estado do Ceará. Como posso ajudar você hoje?</p>
+        
+        if(initialMsg) {
+            const fakeConversation = `
+                <div class="chat-message-row ai">
+                    <div class="chat-message" style="overflow: hidden;">
+                        <div class="chat-message-txt">
+                            <p>${initialMsg}</p>
+                        </div>
                     </div>
                 </div>
-            </div>
-        `
-        listMessagesEl.append(fakeConversation)
-
+            `
+            listMessagesEl.append(fakeConversation)
+        }
 
         mensagens.forEach((e) => appendConversation(e))
         showLatestMessage()
@@ -362,14 +386,23 @@
         $.ajax({
             type:'POST',
             url: `/documento/api/assistente-topico/`,
-            data: {},
+            data: {
+                assistenteId: assistantAtualId 
+            },
+            beforeSend: () => {
+                startChatEl.prop("disabled", true)
+                $('.load-start-chat').fadeIn()
+            },
             success: (data) => {
                 fillThread(data)
             },
             error: (error) => {
                 
             },
-            complete: () => loader.fadeOut() 
+            complete: () => {
+                $('.load-start-chat').fadeOut()
+                startChatEl.prop("disabled", false)
+            } 
         })
 
     }
@@ -441,7 +474,7 @@
 
     function sendAsk(texto) {
         const data = {
-            topico: threadIdOpenEl.val(),
+            topico: threadAtual.id,
             texto: texto,
             autor: 1
         }

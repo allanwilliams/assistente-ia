@@ -30,8 +30,11 @@ def criar_pergunta(*args, **kwargs):
     autor = kwargs['autor']
 
     try:
-        assistente = client.beta.assistants.retrieve(ASSISTENTE_ID)
         topico = AssistenteTopico.objects.get(id=topico)
+
+        assistente_id = topico.assistente.openia_assistente_id if topico.assistente else ASSISTENTE_ID
+
+        assistente = client.beta.assistants.retrieve(assistente_id)
         thread = client.beta.threads.retrieve(topico.openia_thread_id)
 
         pergunta = AssistenteMensagem(topico=topico, texto=texto, autor=autor)

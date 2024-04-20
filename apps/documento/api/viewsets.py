@@ -1,6 +1,22 @@
 from rest_framework.viewsets import ModelViewSet
-from apps.documento.models import Chat, Mensagem, MediaTranscricao, Transcricao, AssistenteTopico, AssistenteMensagem
-from apps.documento.api.serializers import ChatSerializer, MensagemSerializer, MediaTranscricaoSerializer, TranscricaoSerializer, AssistenteMensagemSerializer, AssistenteTopicoSerializer
+from apps.documento.models import (
+    Chat, 
+    Mensagem, 
+    MediaTranscricao, 
+    Transcricao, 
+    AssistenteTopico, 
+    AssistenteMensagem,
+    AssistentePerfil
+)
+from apps.documento.api.serializers import (
+    ChatSerializer, 
+    MensagemSerializer, 
+    MediaTranscricaoSerializer, 
+    TranscricaoSerializer, 
+    AssistenteMensagemSerializer, 
+    AssistenteTopicoSerializer,
+    AssistentePerfilSerializer
+)
 import requests
 from rest_framework.response import Response
 from rest_framework import status
@@ -241,11 +257,11 @@ class AssistenteTopicoViewSet(ModelViewSet):
     def create(self, request, *args, **kwargs):
 
         try:
-            AssistenteTopico.objects.filter(criado_por=request.user, ativo=True).update(ativo=False)
+            assistente_id = request.POST.get('assistenteId') if request.POST.get('assistenteId') else None
             topico = criar_topico()
 
             if topico and topico.id:
-                assistente_topico = AssistenteTopico(openia_thread_id=topico.id)
+                assistente_topico = AssistenteTopico(openia_thread_id=topico.id, assistente_id=assistente_id)
                 assistente_topico.save()
 
                 return Response({"id": assistente_topico.id, "mensagens": []}, status=status.HTTP_201_CREATED)
@@ -257,3 +273,8 @@ class AssistenteTopicoViewSet(ModelViewSet):
             return Response({{"mensagem": "Erro interno ao criar o chat"}}, status=status.HTTP_400_BAD_REQUEST)
 
 
+
+class AssistentePerfilViewSet(ModelViewSet):
+    queryset = AssistentePerfil.objects.all()
+    serializer_class = AssistentePerfilSerializer
+    http_method_names = ['get', 'patch', 'post', 'delete','put']
