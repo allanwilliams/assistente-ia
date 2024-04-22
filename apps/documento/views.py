@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.http import HttpResponse
-from apps.documento.models import Chat, MediaTranscricao, Transcricao, Mensagem
+from apps.documento.models import Chat, MediaTranscricao, Transcricao, Mensagem, AssistentePerfil
 from openai import OpenAI
 from pydub import AudioSegment
 import subprocess
@@ -116,3 +116,15 @@ def export_transcricoes_txt(request, id=None):
         response['Content-Disposition'] = f"attachment; filename=transcricao.txt"
 
         return response
+    
+
+
+def assistente(request, id=None):
+
+    assistente = AssistentePerfil.objects.filter(id=id).first()
+
+    context = {
+        "assistente": assistente
+    }
+    
+    return render(request, 'assistente.html',context=context)

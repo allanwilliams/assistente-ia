@@ -140,3 +140,38 @@ class Transcricao(BaseModel):
 
     def __str__(self):
         return f'{self.media_transcricao.titulo}'
+    
+
+class AssistentePerfil(BaseModel):
+    openia_assistente_id = models.CharField('Openia assistente id', max_length=255, blank=True, null=True)
+    nome = models.CharField('Nome', max_length=255, blank=True, null=True)
+    apresentacao = models.TextField('Apresentação', blank=True, null=True)
+    avatar = models.FileField('Avatar', upload_to='assistente_avatar', null=True, blank=True)
+    ativo = models.BooleanField('Ativo', default=True)
+
+    def __str__(self):
+        return f'{self.nome}'
+
+class AssistenteTopico(BaseModel):
+    openia_thread_id = models.CharField('Thread id', max_length=255, blank=True, null=True)
+    ativo = models.BooleanField('Ativo', default=True)
+    assistente = models.ForeignKey(
+        AssistentePerfil,
+        on_delete=models.CASCADE,
+        related_name='%(class)s_assistente',
+        null=True, blank=True
+    )
+
+    def __str__(self):
+        return f'{self.openia_thread_id}'
+
+
+class AssistenteMensagem(BaseModel):
+    texto = models.TextField('mensagem')
+
+    topico = models.ForeignKey(
+        AssistenteTopico,
+        on_delete=models.CASCADE,
+        related_name='%(class)s_topico',
+    )
+    autor = models.IntegerField('Autor', choices=CHOICES_CHAT_AUTOR)

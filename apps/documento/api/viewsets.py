@@ -1,6 +1,22 @@
 from rest_framework.viewsets import ModelViewSet
-from apps.documento.models import Chat, Mensagem, MediaTranscricao, Transcricao
-from apps.documento.api.serializers import ChatSerializer, MensagemSerializer, MediaTranscricaoSerializer, TranscricaoSerializer
+from apps.documento.models import (
+    Chat, 
+    Mensagem, 
+    MediaTranscricao, 
+    Transcricao, 
+    AssistenteTopico, 
+    AssistenteMensagem,
+    AssistentePerfil
+)
+from apps.documento.api.serializers import (
+    ChatSerializer, 
+    MensagemSerializer, 
+    MediaTranscricaoSerializer, 
+    TranscricaoSerializer, 
+    AssistenteMensagemSerializer, 
+    AssistenteTopicoSerializer,
+    AssistentePerfilSerializer
+)
 import requests
 from rest_framework.response import Response
 from rest_framework import status
@@ -21,6 +37,7 @@ import os
 from datetime import datetime, date
 from constance import config
 from ..utils import get_md5File
+from ..assistente import criar_topico, criar_pergunta
 from django.utils.html import format_html
 from rest_framework.pagination import PageNumberPagination
 
@@ -66,6 +83,21 @@ class TranscricaoFilter(filters.FilterSet):
             'texto':['icontains'],
         }
 
+
+class AssistenteMensagemFilter(filters.FilterSet):
+    class Meta:
+        model = AssistenteMensagem
+        fields = {
+            'criado_por': ['exact'],
+        }
+
+
+class AssistenteTopicoFilter(filters.FilterSet):
+    class Meta:
+        model = AssistenteTopico
+        fields = {
+            'criado_por': ['exact'],
+        }
 
 class ChatViewSet(ModelViewSet):
     queryset = Chat.objects.all()
@@ -196,4 +228,56 @@ class TranscricaoViewSet(ModelViewSet):
     serializer_class = TranscricaoSerializer
     http_method_names = ['get', 'patch', 'post', 'delete','put']
 
-    
+
+class AssistenteMensagemViewSet(ModelViewSet):
+    queryset = AssistenteMensagem.objects.all()
+    serializer_class = AssistenteMensagemSerializer
+    filterset_class = AssistenteMensagemFilter
+    http_method_names = ['get', 'patch', 'post', 'delete','put']
+    permission_classes = []
+
+
+    def create(self, request, *args, **kwargs):
+        topico = request.POST.get('topico')
+        texto = request.POST.get('texto')
+        autor = request.POST.get('autor')
+        CQ = criar_pergunta(topico=topico,texto=texto,autor=autor)
+
+        if CQ:
+            return Response({"id": CQ.id, "texto": CQ.texto, "autor": CQ.autor }, status=status.HTTP_201_CREATED)
+        else:
+            return Response({}, status=status.HTTP_201_CREATED)
+
+
+class AssistenteTopicoViewSet(ModelViewSet):
+    queryset = AssistenteTopico.objects.all()
+    serializer_class = AssistenteTopicoSerializer
+    filterset_class = AssistenteTopicoFilter
+    http_method_names = ['get', 'patch', 'post', 'delete','put']
+    permission_classes = []
+
+    def create(self, request, *args, **kwargs):
+
+        try:
+            assistente_id = request.POST.get('assistenteId') if request.POST.get('assistenteId') else None
+            topico = criar_topico()
+
+            if topico and topico.id:
+                assistente_topico = AssistenteTopico(openia_thread_id=topico.id, assistente_id=assistente_id)
+                assistente_topico.save()
+
+                return Response({"id": assistente_topico.id, "mensagens": []}, status=status.HTTP_201_CREATED)
+            else:
+                return Response({"mensagem": "Não foi possivel criar o chat"}, status=status.HTTP_400_BAD_REQUEST)
+
+        except Exception as e:
+            print(e)
+            return Response({{"mensagem": "Erro interno ao criar o chat"}}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+class AssistentePerfilViewSet(ModelViewSet):
+    queryset = AssistentePerfil.objects.all()
+    serializer_class = AssistentePerfilSerializer
+    http_method_names = ['get', 'patch', 'post', 'delete','put']
+    permission_classes = []

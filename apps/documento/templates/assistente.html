@@ -1,0 +1,405 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Assistente Virtual</title>
+        <link rel="stylesheet" href="//stackpath.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastify-js/1.6.1/toastify.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+        <style>
+            main {
+                display: flex;
+                justify-content: center;
+            }
+            #chat {
+                border-radius: 15px;
+                height: 100vh;
+                width: 450px;
+                border: 1px solid gray;
+                display: flex;
+                flex-direction: column;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.005);
+            }
+            #chat .chat-header {
+                height: 10%;
+                padding: 10px;
+                background: rgb(255, 255, 255);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-top-left-radius: 15px;
+                border-top-right-radius: 15px;
+                background-color: #272e30;
+                color: #fff;
+                font-weight: bold;
+                gap: 10px;
+            }
+            #chat .chat-header .chat-header-main {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+            #chat .chat-header #close-chat {
+                position: absolute;
+                cursor: pointer;
+                top: -10px;
+                right: -10px;
+                border: 2px solid #fff;
+                background-color: #000;
+                border-radius: 50%;
+                display: block;
+                width: 25px;
+                height: 25px;
+                text-align: center;
+            }
+            #chat .chat-header #close-chat i {
+                font-size: 20px;
+            }
+            #chat .chat-header img {
+                width: 65px;
+                height: 65px;
+                border-radius: 50%;
+                border: 2px solid #fff;
+                background: #fff;
+            }
+            #chat #chat-body {
+                height: 82%;
+                overflow-y: scroll;
+                padding: 15px 10px;
+            }
+            #chat-body::-webkit-scrollbar {
+                width: 10px !important;
+            }
+            #chat-body::-webkit-scrollbar-thumb {
+                border-radius: 5px;
+            }
+            #chat #chat-body .chat-message-row {
+                display: flex;
+                padding-top: 8px;
+                padding-bottom: 8px;
+                width: 100%;
+            }
+            #chat #chat-body .chat-message-row.ai {
+                justify-content: flex-start;
+            }
+            #chat #chat-body .chat-message-row.human {
+                justify-content: flex-end;
+            }
+            #chat #chat-body .chat-message-row.ai .chat-message {
+                background-color: #f9f9fe;
+            }
+            #chat #chat-body .chat-message-row.human .chat-message {
+                background-color: #1777ff;
+                color: #fff;
+            }
+            #chat #chat-body .chat-message {
+                position: relative;
+                max-width: 500px;
+                border-radius: 8px;
+                padding: 6px 12px;
+                box-shadow: 0 0 3px #d1d2da;
+            }
+            #chat #chat-body .chat-message .clipboard-btn-container {
+                float: right;
+                font-size: 16px;
+                margin-right: -6px;
+                padding-left: 3px;
+                cursor: pointer;
+            }
+            #chat #chat-body .escrevendo:after {
+                overflow: hidden;
+                display: inline-block;
+                vertical-align: bottom;
+                -webkit-animation: ellipsis steps(4,end) 900ms infinite;      
+                animation: ellipsis steps(4,end) 900ms infinite;
+                content: "\2026";
+                width: 0px;
+            }
+            @keyframes ellipsis {
+                to {
+                    width: 1.25em;    
+                }
+            }
+
+            @-webkit-keyframes ellipsis {
+                to {
+                    width: 1.25em;    
+                }
+            }
+            #chat #chat-footer {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                border-top: 1px solid gray;
+                padding: 8px;
+                gap: 5px;
+                height: 8%;
+            }
+
+            #chat #chat-footer #chat-form-input {
+                width: 100%;
+                padding: 5px;
+                display: flex;
+                align-items: center;
+            }
+            #chat #chat-footer #chat-form-input input:focus-visible {
+                border: none !important;
+                outline: none;
+            }
+            #chat #chat-footer #chat-form-input input {
+                padding: 0 5px;
+                width: 100%;
+                height: 32px;
+                margin: 0;
+                border: none;
+            }
+
+            #chat #chat-footer #chat-form-input button {
+                background-color: #fff;
+                background-image: url("{% static 'imagens/send-icon.png' %}");
+                background-size: contain;
+                background-repeat: no-repeat;
+                height: 30px;
+                width: 30px;
+            }
+            #chat #chat-footer #chat-form-input button:focus {
+                outline: none;
+            }
+            #chat #chat-footer #chat-form-input button:active {
+                box-shadow: none;
+            }
+            #chat #chat-footer #start-chat {
+                background-color: #1777ff;
+                color: #fff;
+                font-weight: bold;      
+                border-radius: 15px;  
+            }
+            #container-assistentes {
+                position: absolute;
+                bottom: 25px;
+                right: 25px;
+            }
+            .fab-assistente { 
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                flex-direction: column;
+                font-weight: bold;
+                cursor: pointer;
+                margin-top: 15px;
+            }
+            .fab-assistente img {
+                cursor: pointer;
+                width: 65px;
+                height: 65px;
+                border: 2px solid #fff;
+                background: #fff;
+                border-radius: 50%;
+            }
+        </style>
+    </head>
+    <body>
+        <main>
+            <div id="chat">
+                <div class="chat-header">
+                    <div class="chat-header-main">
+                        <img id="chat-assistant-avatar" src="{{ assistente.avatar.url }}" >
+                        <h3 id="chat-assistant-name">{{ assistente.nome }}</h3>
+                    </div>
+                    <!-- <span id="close-chat"><i class="fa fa-close"></i></span> -->
+                </div>
+                <div id="chat-body"></div>
+                <div id="chat-footer">
+                    <form id="chat-form-input">
+                        <input placeholder="Escreva sua dúvida aqui" autocomplete="off" type="text" id="chat-input-ask" />
+                        <button type="submit" class="btn" id="btn-send-ask"></button>
+                    </form>
+                    <button id="start-chat" class="btn">
+                        <i style="display: none;" class="fa-solid fa-circle-notch fa-spin load-start-chat"></i>
+                            Iniciar conversa
+                    </button>
+                </div>
+            </div>
+            <div id="container-assistentes"></div>
+            <input type="hidden"  id="user-id" value="{{request.user.id}}">
+            <input type="hidden"  id="assistant-id" value="{{assistente.id}}">
+            <input type="hidden"  id="assistant-description" value="{{assistente.apresentacao}}">
+        </main>
+
+        <script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
+
+        <script>
+            const inputTxtAsk = $('#chat-input-ask')
+            const btnSendAsk = $("#btn-send-ask")
+            const listMessagesEl = $("#chat-body")
+            const chatFormInput = $("#chat-form-input")
+            const body = document.querySelector('body')
+            const userId = $("#user-id")
+            const listaQuestion = $('#lista-question')
+            const inputask = document.querySelector('#chat-input-ask')
+            const loader = $("#preloader")
+            const chatEl = $("#chat")
+            const closeChatEl = $("#close-chat")
+            const startChatEl = $("#start-chat")
+            const containerAssistentesEl = $("#container-assistentes")
+            const chatAssistantAvatarEl = $("#chat-assistant-avatar")
+            const chatAssistantNameEl = $("#chat-assistant-name")
+
+            let threadAtual = null
+            let assistantsList = []
+            let assistantAtualId = $("#assistant-id").val()
+            let assistantDescription = $("#assistant-description").val()
+
+
+            $(document).ready(() => {
+                $.ajaxSetup({
+                    headers: {"X-CSRFToken": '{{ csrf_token }}' },
+                });
+
+                chatFormInput.submit((e) => {
+                    e.preventDefault()
+                    const ask = inputTxtAsk.val()
+                    inputTxtAsk.val('')
+                    sendAsk(ask)
+                })
+                insertConversation([], assistantDescription)
+                
+                startChatEl.click(newThread)
+                chatFormInput.hide()
+                startChatEl.show()
+            })
+
+            function fillThread(data) {
+                const {id, mensagens } = data
+                const initialMsg = "Bem vindo! Sou uma assistente virtual especializada em responder dúvidas sobre direitos do consumidor e estou aqui para ajudá-lo com questões relacionadas à Defensoria Pública do Estado do Ceará. Como posso ajudar você hoje?"
+                insertConversation(mensagens, initialMsg)
+                chatFormInput.show()
+                startChatEl.hide()
+                threadAtual = data
+            }
+
+
+            function insertConversation(mensagens, initialMsg) {
+                listMessagesEl.empty()
+                
+                if(initialMsg) {
+                    const fakeConversation = `
+                        <div class="chat-message-row ai">
+                            <div class="chat-message" style="overflow: hidden;">
+                                <div class="chat-message-txt">
+                                    <p>${initialMsg}</p>
+                                </div>
+                            </div>
+                        </div>
+                    `
+                    listMessagesEl.append(fakeConversation)
+                }
+
+                mensagens.forEach((e) => appendConversation(e))
+                showLatestMessage()
+            }
+
+            function newThread() {
+                $.ajax({
+                    type:'POST',
+                    url: `/documento/api/assistente-topico/`,
+                    data: {
+                        assistenteId: assistantAtualId 
+                    },
+                    beforeSend: () => {
+                        startChatEl.prop("disabled", true)
+                        $('.load-start-chat').fadeIn()
+                    },
+                    success: (data) => {
+                        fillThread(data)
+                    },
+                    error: (error) => {
+                        
+                    },
+                    complete: () => {
+                        $('.load-start-chat').fadeOut()
+                        startChatEl.prop("disabled", false)
+                    } 
+                })
+
+            }
+
+
+            function appendConversation(askMsg, loading=true) {
+                const getAutor = (autor) => {
+                    const autores = { 1: 'human', 2: 'ai' }
+                    return autores[autor] 
+                }
+
+
+                let textoFormatado = askMsg.texto.replaceAll('\n', '<br>')
+
+                let row = `
+                        <div class="chat-message-row ${getAutor(askMsg.autor)}">
+                            <div class="chat-message" style="overflow: hidden;">
+                                <div class="chat-message-txt" id="message-${askMsg.id}"><div> ${textoFormatado}</div> </div>
+                            </div>
+                        </div>
+                    `
+                
+                listMessagesEl.append(row)
+            }
+
+            function removeLoading() {
+                $('#chat-body .escrevendo').parent().parent().parent().remove()
+            }
+
+            function showLatestMessage() {
+                const conversation = document.querySelector('#chat-body')
+                const messages = conversation.querySelectorAll('.chat-message-row')
+                if(messages.length) {
+                    messages[messages.length -1].scrollIntoView()
+                }
+            }
+
+            function sendAsk(texto) {
+                const data = {
+                    topico: threadAtual.id,
+                    texto: texto,
+                    autor: 1
+                }
+
+                if(texto) {
+                    $.ajax({
+                        type:'POST',
+                        url: `/documento/api/assistente-mensagem/`,
+                        data: data, 
+                        beforeSend:() => {
+                            btnSendAsk.prop("disabled", true);
+                            appendConversation(data)
+                            appendConversation({
+                                autor: 2,
+                                texto: "<span class='escrevendo'>Digitando</span>"
+                            })
+                            showLatestMessage()
+                        },
+                        success: (response) => {
+                            removeLoading()
+                            appendConversation(response, false)
+                        },
+                        error: (error) => {
+                            const mensagem = (error?.responseJSON?.mensagem) ? error?.responseJSON?.mensagem : "Houve um erro ao enviar a pergunta."
+                            removeLoading()
+                            Swal.fire({
+                                icon: "error",
+                                title: mensagem,
+                            });
+                        },
+                        complete: () => {
+                            showLatestMessage()
+                            btnSendAsk.prop("disabled", false);
+                        }
+                    })
+                }
+            }
+        </script>
+    </body>
+</html>
