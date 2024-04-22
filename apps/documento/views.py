@@ -119,7 +119,6 @@ def export_transcricoes_txt(request, id=None):
     
 
 
-@login_required
 def assistente(request):
     context = {}
     return render(request, 'assistente.html',context=context)
