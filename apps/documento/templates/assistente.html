@@ -10,18 +10,17 @@
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastify-js/1.6.1/toastify.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
         <style>
+            main {
+                display: flex;
+                justify-content: center;
+            }
             #chat {
-                position: absolute;
-                bottom: 25px;
-                right: 100px;
                 border-radius: 15px;
-                height: 80%;
-                width: 400px;
+                height: 100vh;
+                width: 450px;
                 border: 1px solid gray;
                 display: flex;
                 flex-direction: column;
-                display: none;
-                z-index: 15;
                 box-shadow: 0 0 10px rgba(0, 0, 0, 0.005);
             }
             #chat .chat-header {
@@ -207,10 +206,10 @@
             <div id="chat">
                 <div class="chat-header">
                     <div class="chat-header-main">
-                        <img id="chat-assistant-avatar">
-                        <h3 id="chat-assistant-name"></h3>
+                        <img id="chat-assistant-avatar" src="{{ assistente.avatar.url }}" >
+                        <h3 id="chat-assistant-name">{{ assistente.nome }}</h3>
                     </div>
-                    <span id="close-chat"><i class="fa fa-close"></i></span>
+                    <!-- <span id="close-chat"><i class="fa fa-close"></i></span> -->
                 </div>
                 <div id="chat-body"></div>
                 <div id="chat-footer">
@@ -226,6 +225,8 @@
             </div>
             <div id="container-assistentes"></div>
             <input type="hidden"  id="user-id" value="{{request.user.id}}">
+            <input type="hidden"  id="assistant-id" value="{{assistente.id}}">
+            <input type="hidden"  id="assistant-description" value="{{assistente.apresentacao}}">
         </main>
 
         <script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
@@ -249,14 +250,14 @@
 
             let threadAtual = null
             let assistantsList = []
-            let assistantAtualId = null
+            let assistantAtualId = $("#assistant-id").val()
+            let assistantDescription = $("#assistant-description").val()
 
 
             $(document).ready(() => {
                 $.ajaxSetup({
                     headers: {"X-CSRFToken": '{{ csrf_token }}' },
                 });
-                getAssistants()
 
                 chatFormInput.submit((e) => {
                     e.preventDefault()
@@ -264,53 +265,12 @@
                     inputTxtAsk.val('')
                     sendAsk(ask)
                 })
-
-                closeChatEl.click(clearChat)
+                insertConversation([], assistantDescription)
+                
                 startChatEl.click(newThread)
-            })
-
-
-            function getAssistants() {
-                $.ajax({
-                    type:'GET',
-                    url: `/documento/api/assistente-perfil/`,
-                    success: (data) => {
-                        const { results } = data
-                        listAssistants(results)
-                    },
-                    error: (error) => {
-                        
-                    },
-                })
-            }
-
-            function listAssistants(assistants) {
-                assistantsList = assistants
-                const htmlAssistants = assistants.map((a) => `
-                    <div class="fab-assistente" onClick="openChat(${a.id})" >
-                        <img src="${a.avatar}" alt="">
-                        <span>${a.nome}</span>
-                    </div>
-                `)
-                    
-                containerAssistentesEl.html(htmlAssistants.join(''))
-            }
-
-            function clearChat() {
-                chatEl.fadeOut()
-                threadAtual = null
-            }
-
-            function openChat(assistantId) {
-                const assist = assistantsList.filter(e => e.id === assistantId)[0]
-                assistantAtualId = assist.id
-                chatAssistantAvatarEl.attr('src', assist.avatar)
-                chatAssistantNameEl.text(assist.nome)
-                chatEl.fadeIn()
                 chatFormInput.hide()
                 startChatEl.show()
-                insertConversation([], assist.apresentacao)
-            }
+            })
 
             function fillThread(data) {
                 const {id, mensagens } = data
@@ -365,32 +325,6 @@
                     } 
                 })
 
-            }
-
-            function getThread(id) {
-                if(id) {
-                    $.ajax({
-                        type: 'GET',
-                        url: `/documento/api/assistente-topico/${id}/?criado_por=${userId.val()}`,
-                        success: (data) => fillThread(data),
-                        error: (erro) => console.log(erro)
-                    })
-                } else {
-                    $.ajax({
-                        type: 'GET',
-                        url: `/documento/api/assistente-topico/?criado_por=${userId.val()}`,
-                        success: (data) => { 
-                            const { results } = data
-                            if(results.length) {
-                                fillThread(results[0])
-                            } else {
-                                clearThread()
-                            }
-                        },
-                        error: (erro) => clearThread()
-                    })
-                    
-                }
             }
 
 

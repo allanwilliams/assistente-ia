@@ -234,6 +234,7 @@ class AssistenteMensagemViewSet(ModelViewSet):
     serializer_class = AssistenteMensagemSerializer
     filterset_class = AssistenteMensagemFilter
     http_method_names = ['get', 'patch', 'post', 'delete','put']
+    permission_classes = []
 
 
     def create(self, request, *args, **kwargs):
@@ -253,6 +254,7 @@ class AssistenteTopicoViewSet(ModelViewSet):
     serializer_class = AssistenteTopicoSerializer
     filterset_class = AssistenteTopicoFilter
     http_method_names = ['get', 'patch', 'post', 'delete','put']
+    permission_classes = []
 
     def create(self, request, *args, **kwargs):
 
@@ -278,3 +280,4 @@ class AssistentePerfilViewSet(ModelViewSet):
     queryset = AssistentePerfil.objects.all()
     serializer_class = AssistentePerfilSerializer
     http_method_names = ['get', 'patch', 'post', 'delete','put']
+    permission_classes = []

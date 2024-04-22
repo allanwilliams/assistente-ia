@@ -10,5 +10,5 @@ urlpatterns = [
     path('transcricao/', transcricao, name='transcricao'),
     path('dashboard-media/', dashboard, name='dashboard_media'),
     path('dashboard-documento/', dashboard, name='dashboard_documento'),
-    path('assistente/', assistente, name='assistente'),
+    path('assistente/<id>', assistente, name='assistente'),
 ]
