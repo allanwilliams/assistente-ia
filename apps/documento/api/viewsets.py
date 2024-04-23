@@ -99,6 +99,14 @@ class AssistenteTopicoFilter(filters.FilterSet):
             'criado_por': ['exact'],
         }
 
+class AssistentePerfilFilter(filters.FilterSet):
+    class Meta:
+        model = AssistentePerfil
+        fields = {
+            'criado_por': ['exact'],
+            'ativo': ['exact'],
+        }
+
 class ChatViewSet(ModelViewSet):
     queryset = Chat.objects.all()
     serializer_class = ChatSerializer
@@ -279,5 +287,6 @@ class AssistenteTopicoViewSet(ModelViewSet):
 class AssistentePerfilViewSet(ModelViewSet):
     queryset = AssistentePerfil.objects.all()
     serializer_class = AssistentePerfilSerializer
+    filterset_class = AssistentePerfilFilter
     http_method_names = ['get', 'patch', 'post', 'delete','put']
     permission_classes = []
