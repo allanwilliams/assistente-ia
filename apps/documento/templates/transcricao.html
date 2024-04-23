@@ -573,7 +573,9 @@
 
         const conversation = document.querySelector('#conversation')
         const messages = conversation.querySelectorAll('.highlight')
-        messages[messages.length -1].scrollIntoView({ block: "center", behavior: "smooth" })
+        if(messages.length) {
+            messages[0].scrollIntoView({ block: "center", behavior: "smooth" })
+        }
     }
 
     function insertConversation(transcricoes) {
