@@ -13,8 +13,12 @@ class EventHandler(AssistantEventHandler):
     @override
     def on_message_done(self, message: Message):
         from .models import AssistenteMensagem, AssistenteTopico
+        import re
         topico = AssistenteTopico.objects.get(openia_thread_id=message.thread_id)
-        resposta_openia = AssistenteMensagem(topico_id=topico.id, texto=message.content[0].text.value, autor=CHAT_AUTOR_IA)
+        
+        texto = re.sub(r'(【+.+】)','', message.content[0].text.value)
+
+        resposta_openia = AssistenteMensagem(topico_id=topico.id, texto=texto, autor=CHAT_AUTOR_IA)
         resposta_openia.save()
 
 
