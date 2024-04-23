@@ -29,13 +29,12 @@
             #chat .chat-header {
                 height: 10%;
                 padding: 10px;
-                background: rgb(255, 255, 255);
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 border-top-left-radius: 15px;
                 border-top-right-radius: 15px;
-                background-color: #272e30;
+                background: radial-gradient(circle, rgba(0, 94, 60, 1) 0%, rgba(1, 54, 34, 1) 74%, rgba(0, 54, 34, 1) 100%);
                 color: #fff;
                 font-weight: bold;
                 gap: 10px;
@@ -88,13 +87,6 @@
                 border-radius: 8px;
                 padding: 6px 12px;
                 box-shadow: 0 0 3px #d1d2da;
-            }
-            #chat #chat-body .chat-message .clipboard-btn-container {
-                float: right;
-                font-size: 16px;
-                margin-right: -6px;
-                padding-left: 3px;
-                cursor: pointer;
             }
             #chat #chat-body .escrevendo:after {
                 overflow: hidden;
@@ -159,8 +151,9 @@
                 box-shadow: none;
             }
             #chat #chat-footer #start-chat {
-                background-color: #1777ff;
+                background-color: #272e30;
                 color: #fff;
+                padding: 7px 15px;
                 font-weight: bold;      
                 border-radius: 15px;  
             }
