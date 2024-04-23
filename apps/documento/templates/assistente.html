@@ -223,8 +223,7 @@
 
             function fillThread(data) {
                 const {id, mensagens } = data
-                const initialMsg = "Bem vindo! Sou uma assistente virtual especializada em responder dúvidas sobre direitos do consumidor e estou aqui para ajudá-lo com questões relacionadas à Defensoria Pública do Estado do Ceará. Como posso ajudar você hoje?"
-                insertConversation(mensagens, initialMsg)
+                insertConversation(mensagens, assistantDescription)
                 chatFormInput.show()
                 startChatEl.hide()
                 threadAtual = data
