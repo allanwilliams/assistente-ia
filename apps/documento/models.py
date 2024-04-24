@@ -21,7 +21,7 @@ class Chat(BaseModel):
         blank=True, null=True
     )
 
-    md5_hexdigit = models.CharField(max_length=64, blank=True, null=True,unique=True)
+    md5_hexdigit = models.CharField(max_length=64, blank=True, null=True)
     
     def __str__(self) -> str:
         return f'{self.id}'
@@ -104,7 +104,7 @@ class MediaTranscricao(BaseModel):
     diarizacao = models.TextField("Diarização",blank=True,null=True)
     transcricao = models.TextField("Transcrição",blank=True,null=True)
     status = models.IntegerField('Status', choices=CHOICES_STATUS_TRANSCRICAO, default=STATUS_FILA_PROCESSAMENTO)
-    md5_hexdigit = models.CharField(max_length=64, blank=True, null=True,unique=True)
+    md5_hexdigit = models.CharField(max_length=64, blank=True, null=True)
     visualizado = models.BooleanField('Visualizado', default=False)
 
     def __str__(self):
