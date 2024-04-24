@@ -8,7 +8,7 @@ from datetime import timedelta
 from openai import OpenAI
 from config.settings import ROOT_DIR
 from apps.documento import models
-import subprocess
+import random
 # from scipy.io import wavfile
 # import pdfkit
 # import noisereduce as nr
@@ -118,12 +118,18 @@ def preparar_audio(media_transcricao_id):
 
         # Se o arquivo for de video transforma em webm
         if instance.tipo == TRANSCRICAO_TIPO_VIDEO:
-            path_media_video = f'{ROOT_MEDIA}/arquivo_transcricao/{filename_audio}.webm'
+
+            filename_path = filename_audio
             
-            subprocess.run(['ffmpeg','-y','-i', file_path, '-c:v', 'libvpx', '-s', '426x240', path_media_video])
+            if ".webm" in file_path:
+                filename_path = f"{filename_path}_{random.randrange(10, 99)}"
+                
+            path_media_video = f'{ROOT_MEDIA}/arquivo_transcricao/{filename_path}.webm'
+            
+            subprocess.run(['ffmpeg','-y','-i', file_path, '-c:v', 'libvpx', '-s', '640x360', path_media_video])
             
             instance = models.MediaTranscricao.objects.get(pk=media_transcricao_id)
-            instance.arquivo.name = f'arquivo_transcricao/{filename_audio}.webm'
+            instance.arquivo.name = f'arquivo_transcricao/{filename_path}.webm'
             instance.save()
             
             os.remove(file_path)
