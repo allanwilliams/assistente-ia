@@ -1,9 +1,19 @@
 {% extends 'chat_base.html' %}
 {% load static %}
+
+{% block title %} 
+<title>Martinha</title>
+{% endblock %}
+
+{% block favicon %} 
+<link rel="icon" type="image/x-icon" href="{% static 'imagens/martinha-favicon.ico' %}">
+{% endblock %}
+
+
 {% block extrastyle %}
 <style>
     body {
-        background-image: url("{% static 'imagens/background_azul.jpg' %}");
+        background-image: url("{% static 'imagens/background_verde.jpg' %}");
     }
     #document #chat {
         flex: 37 1 0px;
