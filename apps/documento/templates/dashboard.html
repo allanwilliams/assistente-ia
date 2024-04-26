@@ -137,6 +137,9 @@ body  {
     font-weight: 900;
     color: #6e6e6e;
 }
+.drag-area-content img {
+    margin-bottom: 10px;
+}
 
 .drag-area{
     width: 100%;
@@ -204,6 +207,7 @@ body  {
     color: #fff;
     font-size: 40px;
     font-weight: bold;
+    margin-top: 22px;
 }
 .homenagem-principal img {
     width: 150px;
@@ -264,19 +268,23 @@ body  {
         <!-- <div class="texto-body-input"> -->
             <div class="drag-area">
                 <div class="drag-area-content">
-                    <div><i class="fa-sharp fa-solid fa-cloud-arrow-up" style="color:#00c0ef;font-size:3em"></i></div>
-                    <div class="drag-file">Arraste e solte ou <span style="color: #00c0ef;text-decoration: underline;cursor: pointer;"> clique aqui!</span></div>
+                    <div>
+                        <img src="{% if api == 'chat' %} {% static 'imagens/nuvem_pdf.png' %} {% else %} {% static 'imagens/nuvem_youtube.png' %} {% endif %}" width="100" alt="">
+                        <!-- <i class="fa-sharp fa-solid fa-cloud-arrow-up" style="color:#00c0ef;font-size:3em"></i> -->
+                    </div>
+                    <div class="drag-file">Arraste e solte o {% if api == 'chat' %}PDF {% else %} vídeo {% endif %} ou <span style="color: #00c0ef;text-decoration: underline;cursor: pointer;"> clique aqui!</span></div>
                     <input type="file" class="file-input" style="display: none;" />
-                    {% if api == 'chat' %}
+                    <!-- {% if api == 'chat' %}
                     <div class="aviso">
                         *Limites: {{config.DOCUMENTO_LIMITE_UPLOAD_PDF}} arquivos p/ mês de até 32mb cada e {{config.DOCUMENTO_LIMITE_PERGUNTAS_PDF}} perguntas por arquivo
                     </div>
                     {% endif %}
+
                     {% if api == 'media-transcricao' %}
                     <div class="aviso">
                         *Limites: {{config.DOCUMENTO_LIMITE_UPLOAD_VIDEO}} videos p/ mês de até 100mb cada
                     </div>
-                    {% endif %}
+                    {% endif %} -->
                 </div>  
             </div>      
         <!-- </div> -->
