@@ -232,6 +232,29 @@ body  {
     background-color: rgba(0, 0, 0, 0.5);
 }
 
+#table-documentos-medias .progress {
+    max-width: 180px;
+    margin: 0 auto;
+}
+#table-documentos-medias .progress-bar-animated {
+    animation: progress-bar-stripes 1s linear infinite;
+}
+
+@keyframes progress-bar-stripes {
+    0% { background-position: 40px 0; }
+    100% { background-position: 0 0; }
+}
+
+#table-documentos-medias .bg-danger {
+    background-color: #ff0000 !important;
+}
+#table-documentos-medias .bg-success {
+    background-color: #5cb85c !important;
+}
+#table-documentos-medias .bg-info {
+    background-color: #00c0ef !important;
+}
+
 </style>
 {% endblock %}
 
@@ -274,7 +297,7 @@ body  {
                     </div>
                     <div class="drag-file">Arraste e solte o {% if api == 'chat' %}PDF {% else %} vídeo {% endif %} ou <span style="color: #00c0ef;text-decoration: underline;cursor: pointer;"> clique aqui!</span></div>
                     <input type="file" class="file-input" style="display: none;" />
-                    <!-- {% if api == 'chat' %}
+                    {% if api == 'chat' %}
                     <div class="aviso">
                         *Limites: {{config.DOCUMENTO_LIMITE_UPLOAD_PDF}} arquivos p/ mês de até 32mb cada e {{config.DOCUMENTO_LIMITE_PERGUNTAS_PDF}} perguntas por arquivo
                     </div>
@@ -284,28 +307,19 @@ body  {
                     <div class="aviso">
                         *Limites: {{config.DOCUMENTO_LIMITE_UPLOAD_VIDEO}} videos p/ mês de até 100mb cada
                     </div>
-                    {% endif %} -->
+                    {% endif %}
                 </div>  
             </div>      
         <!-- </div> -->
     </div>
 
-    <!-- <div id="perguntas_favoritas">
-        <div class="titulo-header">Perguntas Favoritas</div>
-        <div class="conteudo-documentos">
-        <div id="grid-pergunta-chats">
-        </div>
-        </div>
-    </div> -->
-
     <div id="meus_documentos">
         
-        <!-- <div class="titulo-header">{{titulo_tabela}}</div> -->
         <div class="conteudo-documentos" style="display: none;">
             <table>
                 <thead>
-                    <th style="width: 44%;"></th>
-                    <th style="width: 44%;"></th>
+                    <th style="width: 55%;"></th>
+                    <th style="width: 33%;"></th>
                     <th style="width: 12%;"></th>
                 </thead>
                 <tbody id="table-documentos-medias"></tbody>
@@ -542,6 +556,20 @@ body  {
             return icons[status] || icons[1]
         }
 
+        const getProgress = (status) => {
+            const progress = {
+                1: { percent: 25, classColor: 'progress-bar-striped progress-bar-animated bg-info', color: '#00c0ef'},
+                2: { percent: 50, classColor: 'progress-bar-striped progress-bar-animated bg-info', color: '#00c0ef'},
+                3: { percent: 75, classColor: 'progress-bar-striped progress-bar-animated bg-info', color: '#00c0ef'},
+                4: { percent: 100, classColor: 'bg-success', color: '#5cb85c'},
+                5: { percent: 100, classColor: 'bg-danger', color: '#ff0000'},
+                6: { percent: 100, classColor: 'bg-danger', color: '#ff0000' },
+                7: { percent: 100, classColor: 'bg-danger', color: '#ff0000' },
+            }
+
+            return progress[status] || progress[1]
+        }
+
         if(chats[0] && chats[0].chatpdf_source_id) {
             chats.forEach((c) => {
                 list += `
@@ -559,18 +587,24 @@ body  {
             })
         } else {
             chats.forEach((c) => {
-                const indicator = getIcon(c.status)
+                // const indicator = getIcon(c.status)
+                const progress = getProgress(c.status)
                 list += `
                     <tr>
                         <td>${c.titulo}</td>
-                        <td> <b style="color:${indicator.color}">${indicator.icon}&nbsp; ${c.status_str}</b></td>
+                        <td> 
+                            <div class="progress">
+                                <div class="progress-bar ${progress.classColor}" role="progressbar" style="width: ${progress.percent}%;" aria-valuenow="${progress.percent}" aria-valuemin="0" aria-valuemax="100">${progress.percent}%</div>
+                            </div>
+                            <small style="color:${progress.color}">${c.status_str}</small>
+                        </td>
                         <td class="td-actions">
                             ${c.status === 4 ? 
                                 `<a href="/documento/{{redirect}}=${c.id}">
                                     <i style="color:#00c0ef" class='fa fa-eye'></i>
                                 </a>` : ''}
                             
-                            ${[1, 4, 6, 7].includes(c.status)  ? 
+                            ${[1, 6, 7].includes(c.status)  ? 
                                 `<i data-remove-id='${c.id}' style="color:red" class='fa fa-trash btn-remove-chat'></i>    
                                 ` : ``}
                         </td>
