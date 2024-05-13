@@ -64,8 +64,8 @@
         position: absolute;
     }
 
-    #transcricao .transcricao-message-row .clipboard-btn-container > .fa-solid {
-        color: orange;
+    #transcricao .transcricao-message-row .clipboard-btn-container > .fa-star.fa-solid {
+        color: #FA8C0B;
     }
 
     .transcricao-header, .media-header h3 {
@@ -312,6 +312,12 @@
         height: 7px !important;
         background-color: #cccccc !important;
     }
+    .vetado {
+        text-decoration: line-through;
+    }
+    .favoritado {
+        background-color: rgba(250, 140, 11, 0.1);
+    }
 </style>
 {% endblock %}
 
@@ -431,12 +437,29 @@
             openDialogEditSpeaker(msgId, speaker, colorSpeaker, replaceAllDefault)
         }
 
+        if(event.target.classList.contains('vetar-transcricao')) {
+            const id = event.target.attributes['data-id'].value
+            const vetado = event.target.attributes['data-vetado'].value
+            event.target.attributes['data-vetado'].value = !(vetado === 'true')
+            saveVeto(id, vetado)
+
+            const el = $(event.target).parent().siblings().first()
+            if(el) {
+                el.toggleClass('vetado')
+            }
+        }
         if(event.target.classList.contains('salvar-favoritos')) {
             const msgID = event.target.attributes['data-id'].value
             const favorito = event.target.attributes['data-favorito'].value
             event.target.attributes['data-favorito'].value = !(favorito === 'true')
             
             saveFavorite(msgID, favorito)
+
+            const el = $(event.target).parent().siblings().first()
+            
+            if(el) {
+                el.toggleClass('favoritado')
+            }
             
             event.target.classList.remove('fa-solid')
             event.target.classList.remove('fa-regular')
@@ -706,12 +729,12 @@
 
         let row = `
                 <div class="transcricao-message-row">
-                    <div class="transcricao-message" style="overflow: hidden; background-color:${convertHexToRGBA(askMsg.cor_speaker, 0.03)};">
+                    <div class="transcricao-message ${(askMsg.is_favorito) ? 'favoritado' : ''} ${askMsg.is_vetado ? 'vetado' : '' }" style="overflow: hidden;">
                         <div class='avatar' style="background-color:${askMsg.cor_speaker}">
                             <i class='fa fa-user'></i>
                         </div>
                         <div class="transcricao-message-txt" id="message-${askMsg.id}">
-                            <div><strong style="margin-right:5px;">${askMsg.speaker}</strong> <i class="fa-solid fa-pen-to-square btn-edit-speaker" data-id="${askMsg.id}" data-speaker="${askMsg.speaker}" data-color-speaker="${askMsg.cor_speaker}" data-replace-all-default="" data-toggle="tooltip" data-placement="right" title="Editar falante"></i></div>
+                            <div><strong style="margin-right:5px;">${askMsg.speaker}</strong> <i class="fa-solid fa-pen-to-square btn-edit-speaker" data-id="${askMsg.id}" data-speaker="${askMsg.speaker}" data-color-speaker="${askMsg.cor_speaker}" data-replace-all-default="" data-toggle="tooltip" data-placement="right" title="Editar orador"></i></div>
                             <div><i class="fa-solid fa-forward-step pointer btn-go-to-time" data-time=${askMsg.tempo_inicial_segundos} data-toggle="tooltip" data-placement="bottom" title="Ir para"></i> <strong>${askMsg.tempo_inicial} <i class='fa fa-arrow-right'></i> ${askMsg.tempo_final}</strong>: </div>
                             <div class='text-msg'>${textoFormatado}</div> 
                         </div>
@@ -719,6 +742,7 @@
                     <div class="clipboard-btn-container">
                         <i data-id='${askMsg.id}' data-favorito='${(askMsg.is_favorito)}' class='fa-${(askMsg.is_favorito) ?  'solid' : 'regular'}  fa-star salvar-favoritos'></i>
                         <i class="fa-regular fa-clipboard clipboard-btn" data-clipboard-target="#message-${askMsg.id}" data-toggle="tooltip" data-placement="left" title="Copiar"></i>
+                        <i data-id='${askMsg.id}' data-vetado='${(askMsg.is_vetado)}' class='fa${(askMsg.is_vetado) ?  '-solid' : ''} fa-ban vetar-transcricao' data-toggle="tooltip" data-placement="left" title="${(askMsg.is_vetado) ? 'Reconsiderar' : 'Desconsiderar'} "></i>
                     </div>
                 </div>
             `
@@ -870,6 +894,22 @@
             })
         }
 
+    }
+
+    function saveVeto(id, is_vetado) {
+
+        const valueVetado = !(is_vetado === 'true')
+        if(id) {
+            $.ajax({
+                type:'PATCH',
+                url: `/documento/api/transcricao/${id}/`,
+                data: { is_vetado: valueVetado }, 
+                success: (response) => {
+                    // console.log(response)
+                },
+                error: (e) =>  console.log(e),
+            })
+        }
     }
 
     function getFavoriteTranscriptions(transcricoes) {
