@@ -101,7 +101,7 @@ def export_transcricoes_txt(request, id=None):
     favoritos = request.GET.get('favoritos')
 
     if media_transcricao:
-        transcricoes = Transcricao.objects.filter(media_transcricao=media_transcricao)
+        transcricoes = Transcricao.objects.filter(media_transcricao=media_transcricao, is_vetado=False)
 
         if favoritos:
             transcricoes = transcricoes.filter(is_favorito=True)
