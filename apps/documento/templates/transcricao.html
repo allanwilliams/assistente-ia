@@ -312,7 +312,7 @@
         height: 7px !important;
         background-color: #cccccc !important;
     }
-    .vetado {
+    .vetado span, .vetado strong {
         text-decoration: line-through;
     }
     .favoritado {
@@ -736,7 +736,7 @@
                         <div class="transcricao-message-txt" id="message-${askMsg.id}">
                             <div><strong style="margin-right:5px;">${askMsg.speaker}</strong> <i class="fa-solid fa-pen-to-square btn-edit-speaker" data-id="${askMsg.id}" data-speaker="${askMsg.speaker}" data-color-speaker="${askMsg.cor_speaker}" data-replace-all-default="" data-toggle="tooltip" data-placement="right" title="Editar orador"></i></div>
                             <div><i class="fa-solid fa-forward-step pointer btn-go-to-time" data-time=${askMsg.tempo_inicial_segundos} data-toggle="tooltip" data-placement="bottom" title="Ir para"></i> <strong>${askMsg.tempo_inicial} <i class='fa fa-arrow-right'></i> ${askMsg.tempo_final}</strong>: </div>
-                            <div class='text-msg'>${textoFormatado}</div> 
+                            <div class='text-msg'><span>${textoFormatado}</span></div> 
                         </div>
                     </div>
                     <div class="clipboard-btn-container">
