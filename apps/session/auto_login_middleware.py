@@ -20,6 +20,7 @@ class AutoLoginMiddleware:
             user = search_user(email)
             if user:
                 claims = self.get_user_claims(user)
+                preferred_username = claims.get('preferred_username', '')
                 user_login = User.objects.filter(email=email).first()
                 if not user_login:
                     dict_user = {
@@ -28,6 +29,7 @@ class AutoLoginMiddleware:
                         'last_name': user['user']['lastName'],
                         'fusionauth_user_id': user['user']['id'],
                         'name': user['user']['fullName'],
+                        'username': preferred_username
                     }
                     user_login = User(**dict_user)
                     user_login.save()
