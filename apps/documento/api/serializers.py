@@ -67,6 +67,6 @@ class AssistenteTopicoSerializer(ModelSerializer):
 class AssistentePerfilSerializer(ModelSerializer):
     class Meta:
         model = AssistentePerfil
-        fields = ('id', 'nome', 'avatar', 'apresentacao', 'ativo')
+        fields = ('id', 'nome', 'avatar', 'apresentacao', 'ativo', 'grupo_permissao')
 
 

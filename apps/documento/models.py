@@ -149,6 +149,7 @@ class AssistentePerfil(BaseModel):
     apresentacao = models.TextField('Apresentação', blank=True, null=True)
     avatar = models.FileField('Avatar', upload_to='assistente_avatar', null=True, blank=True)
     ativo = models.BooleanField('Ativo', default=True)
+    grupo_permissao = models.CharField('Grupo Permissão', max_length=255, blank=True, null=True)
 
     def __str__(self):
         return f'{self.nome}'

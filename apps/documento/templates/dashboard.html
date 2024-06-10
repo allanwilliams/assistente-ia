@@ -270,7 +270,10 @@ body  {
 
     <img style="margin-left: 70px;" src="{% static 'imagens/defensoria_logo_branca.png' %}" alt="" width="240">
     
-    <div>
+    <div style="display: flex; gap: 1em;">
+        {% if request.user.is_superuser %}
+        <a href="/admin/documento" ><i class="fa-solid fa-home"></i> Admin</a>
+        {% endif %}
         <a href="/admin/logout"><i class="fa-solid fa-arrow-right-from-bracket"></i> Sair</a>
     </div>
 </div>
