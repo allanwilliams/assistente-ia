@@ -282,10 +282,12 @@
         background-size: cover;
         background-repeat: no-repeat;
     }
-
-    #media #media-obj-container #edit-group-speakers .edit-group-list {
+    #media #media-obj-container #edit-group-speakers .edit-group-wrapper {
         overflow-y: scroll;
         height: 24vh;
+    }
+
+    #media #media-obj-container #edit-group-speakers .edit-group-list {
         padding:5px; 
         display: grid; 
         grid-template-columns: 1fr 1fr 1fr 1fr;
@@ -293,7 +295,6 @@
     }
     #media #media-obj-container #edit-group-speakers .edit-group-item {
         display: flex; 
-        max-height: 70px;
         align-items: center; 
         gap: 8px;
         padding: 8px 18px 8px 8px;
@@ -870,6 +871,7 @@
         $('#edit-group-speakers').html(
             `
             <h3>Oradores da Transcrição</h3>
+            <div class="edit-group-wrapper">
             <div class="edit-group-list">
                 ${uniqueSpeakers.map((s) => `
                     <div class="edit-group-item" style="background-color:${convertHexToRGBA(s.cor_speaker, 0.03)};">
@@ -881,6 +883,7 @@
                     </div>
                 `).join('')}
                 
+            </div>
             </div>
             `
         )
