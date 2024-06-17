@@ -252,7 +252,7 @@ def preparar_transcricao_deepgram(media_transcricao_id, audio_file):
 
         if paragrafos:
             texto_total = ""
-            cores_avatar = ['#000000', '#BC1414', '#FA8C0B', '#179B14', '#0DA78B', '#0D6FA7', '#510BAA', '#C20FC6', '#F2E03E']
+            cores_avatar = ['#179B14', '#BC1414', '#FA8C0B', '#000000', '#0DA78B', '#0D6FA7', '#510BAA', '#C20FC6', '#F2E03E', '#FF6384', '#4BC0C0', '#8D99AE']
             with open(path_media_legenda, 'w') as vtt:
                 vtt.write('WEBVTT\n')
 
