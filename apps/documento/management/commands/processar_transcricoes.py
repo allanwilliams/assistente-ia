@@ -4,7 +4,7 @@ from apps.documento.models import MediaTranscricao
 from apps.documento.utils import preparar_audio
 
 def processar_transcricoes():
-    ocupado = MediaTranscricao.objects.filter(status=STATUS_PROCESSANDO_ARQUIVO, ativo=True).exists()
+    ocupado = MediaTranscricao.objects.filter(status=STATUS_PROCESSANDO_ARQUIVO, ativo=True).count() >= 4
     print('Executando ......')
     if not ocupado:
         transcricao = MediaTranscricao.objects.filter(status=STATUS_FILA_PROCESSAMENTO, ativo=True).order_by('id').first()
