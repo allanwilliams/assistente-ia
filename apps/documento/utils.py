@@ -33,6 +33,7 @@ from apps.documento.choices import (
 )
 
 from hashlib import md5
+import shutil
 
 ROOT_MEDIA = f'{ROOT_DIR}/media'
 ROOT_LEGENDA = f'{ROOT_DIR}/media/legenda_transcricao'
@@ -314,6 +315,62 @@ def get_md5File(filepath,fileopen=False):
                 break
             md5_hexdigits.update(data)
     return f'{md5_hexdigits.hexdigest()}'
+
+
+
+
+
+def compress_pdf(input_pdf_path, output_pdf_path, power=0):
+
+
+    # Define o nível de compressão
+    quality = {
+        0: '/default',  # Alta qualidade, menor compressão
+        1: '/screen',   # Baixa qualidade, maior compressão
+        2: '/ebook',    # Qualidade média
+        3: '/prepress', # Alta qualidade, menor compressão
+        4: '/printer'   # Qualidade para impressão
+    }
+
+    # Verifica se o nível de compressão está disponível
+    if power not in quality:
+        raise ValueError("Nível de compressão inválido. Use um valor entre 0 e 4.")
+
+    # Cria um caminho temporário para o arquivo comprimido
+    temp_output_path = output_pdf_path + ".tmp"
+
+    # Comando Ghostscript
+    gs_command = [
+        'gs',
+        '-sDEVICE=pdfwrite',
+        f'-dPDFSETTINGS={quality[power]}',
+        '-dNOPAUSE',
+        '-dQUIET',
+        '-dBATCH',
+        f'-sOutputFile={temp_output_path}',
+        input_pdf_path
+    ]
+
+    # Executa o comando
+    try:
+        subprocess.run(gs_command, check=True)
+        # Substitui o arquivo original pelo comprimido, se necessário
+        if input_pdf_path == output_pdf_path:
+            shutil.move(temp_output_path, output_pdf_path)
+        else:
+            shutil.move(temp_output_path, output_pdf_path)
+        print(f'Arquivo comprimido com sucesso: {output_pdf_path}')
+    except subprocess.CalledProcessError as e:
+        print(f'Erro na compressão: {e}')
+        # Remove o arquivo temporário em caso de erro
+        if os.path.exists(temp_output_path):
+            os.remove(temp_output_path)
+
+
+
+
+
+
 # def convert_mp3_to_wav(mp3_path, wav_path):
 #     # Comando ffmpeg para converter MP3 para WAV com taxa de amostragem de 16kHz
 #     # command = ['ffmpeg','-y','-i', mp3_path, '-f', 'wav', '-acodec', 'pcm_s16le', '-ar', '16000', '-ac', '1', 'copy', wav_path]

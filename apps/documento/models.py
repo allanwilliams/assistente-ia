@@ -7,7 +7,8 @@ from django.dispatch import receiver
 import requests
 import os
 from apps.users.models import User
-from .utils import get_md5File
+from .utils import get_md5File, compress_pdf
+import ocrmypdf
 
 class Chat(BaseModel):
     titulo = models.CharField('Titulo', max_length=255)
@@ -38,6 +39,15 @@ def criar_mensagens_chat(sender, instance, created, **kwargs):
             instance.md5_hexdigit = string_md5    
             instance.save()
     if instance and not instance.chatpdf_source_id:
+
+        try:
+            ocrmypdf.ocr(input_file=file_path, output_file=file_path, force_ocr=True, output_type='pdf', optimize=0)
+
+            compress_pdf(file_path, file_path, 2)
+
+        except Exception as e:
+            print('exception', e)
+
         try:
             with open(file_path, 'rb') as file:
             
@@ -177,3 +187,4 @@ class AssistenteMensagem(BaseModel):
         related_name='%(class)s_topico',
     )
     autor = models.IntegerField('Autor', choices=CHOICES_CHAT_AUTOR)
+
