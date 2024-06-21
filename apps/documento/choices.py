@@ -32,3 +32,20 @@ CHOICES_STATUS_TRANSCRICAO = (
     (STATUS_FALHA_PROCESSAMENTO, 'Falha no processamento do arquivo'),
     (STATUS_FALHA_TRANSCRICAO, 'Falha na transcrição'),
 )
+
+STATUS_OCR_FILA = 1
+STATUS_OCR_PROCESSANDO = 2
+STATUS_OCR_CONCLUIDO = 3
+STATUS_OCR_CANCELADO = 4
+STATUS_OCR_FALHA = 5
+STATUS_OCR_DISPENSADO = 6
+
+
+CHOICES_STATUS_OCR = (
+    (STATUS_OCR_FILA, 'Na fila de processamento'),
+    (STATUS_OCR_PROCESSANDO, 'Processando o arquivo'),
+    (STATUS_OCR_CONCLUIDO, 'Concluido'),
+    (STATUS_OCR_CANCELADO, 'Cancelado'),
+    (STATUS_OCR_FALHA, 'Falha no processamento do arquivo'),
+    (STATUS_OCR_DISPENSADO, 'Processamento dispensado'),
+)

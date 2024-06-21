@@ -29,7 +29,9 @@ from apps.documento.choices import (
     STATUS_FAZENDO_TRANSCRICAO, 
     STATUS_FALHA_PROCESSAMENTO, 
     STATUS_FALHA_TRANSCRICAO,
-    STATUS_CONCLUIDO
+    STATUS_CONCLUIDO,
+    STATUS_OCR_FILA,
+    STATUS_OCR_PROCESSANDO
 )
 from ..utils import create_questions
 from rest_framework.decorators import action
@@ -126,6 +128,14 @@ class ChatViewSet(ModelViewSet):
 
         if total_video_upload_usuario > config.DOCUMENTO_LIMITE_UPLOAD_PDF:
             mensagem = f"Você excedeu o limite máximo de {config.DOCUMENTO_LIMITE_UPLOAD_PDF} documentos analizados esse mês." 
+            return Response({"mensagem": mensagem }, status=status.HTTP_400_BAD_REQUEST)
+        
+
+        tem_processamento_pendente = Chat.objects.filter(criado_por=request.user, ativo=True, status_ocr__in=[
+            STATUS_OCR_PROCESSANDO, STATUS_OCR_FILA]).exists()
+
+        if tem_processamento_pendente:
+            mensagem = f"Você tem um arquivo em processamento no momento. Aguarde a finalização para enviar outro." 
             return Response({"mensagem": mensagem }, status=status.HTTP_400_BAD_REQUEST)
 
         return super().create(request, *args, **kwargs)

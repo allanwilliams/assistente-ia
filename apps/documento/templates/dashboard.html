@@ -255,6 +255,10 @@ body  {
     background-color: #00c0ef !important;
 }
 
+.swal2-popup {
+    font-size: 14px !important;
+}
+
 </style>
 {% endblock %}
 
@@ -372,7 +376,6 @@ body  {
             if(event.target.classList.contains('btn-remove-chat')) {
                 const chatId = event.target.attributes['data-remove-id'].value
                 deleteChat(chatId)
-                // event.target.parentElement.parentElement.remove()
             }
 
             if(event.target.classList.contains('btn-remove-question')) {
@@ -388,7 +391,7 @@ body  {
             if(validateDocument(target)){
                 const isTranscription = getIsTranscription(target)
                 if(isTranscription) newTranscription(target)
-                else newChat(target)
+                else dialogVerifyScannedPdf(target)
             }else{
                 Swal.fire({
                     icon: "error",
@@ -418,7 +421,7 @@ body  {
             if(validateDocument(target)){
                 const isTranscription = getIsTranscription(target)
                 if(isTranscription) newTranscription(target)
-                else newChat(target)
+                else dialogVerifyScannedPdf(target)
             }else{
                 Swal.fire({
                     icon: "error",
@@ -473,12 +476,37 @@ body  {
         return mediaTranscriptionTypes.indexOf(file.type) != -1
     }
 
-    function newChat(target) {
+    function dialogVerifyScannedPdf(target) {
+        Swal.fire({
+            title: "Seu PDF é escaneado?",
+            text: "Essa informação é importante para sabermos como processar o seu documento. .",
+            imageUrl: "https://images.wondershare.com/pdfelement/faq/scanned.png",
+            imageWidth: 400,
+            imageHeight: 200,
+            imageAlt: "Custom image",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#3085d6",
+            confirmButtonText: "Sim, meu PDF é Escaneado!",
+            cancelButtonText: "Não, meu PDF não é Escaneado!",
+            width: '50em'
+        }).then((result) => {
+            const scanned = result.isConfirmed
+            newChat(target, scanned)
+        });
+    }
+
+    function newChat(target, scannedPdf) {
         const file = target.files[0]
         const formData = new FormData()
         formData.append('titulo', file.name)
         formData.append('documento', file)
         formData.append('ativo', true)
+        
+        if(scannedPdf) {
+            const STATUS_OCR_FILA = 1
+            formData.append('status_ocr', STATUS_OCR_FILA)
+        }
 
         if(isValidSizes(maxFileSizePdf, file)) {
             $.ajax({
@@ -489,7 +517,11 @@ body  {
                 contentType: false,
                 processData: false,
                 success: (data) => {
-                    window.location.href = `/documento/chat/?documento=${data.id}`
+                    if(scannedPdf) {
+                        window.location.reload()
+                    } else {
+                        window.location.href = `/documento/chat/?documento=${data.id}`
+                    }
                 },
                 error: (error) => {
                     const mensagem = (error?.responseJSON?.mensagem) ? error?.responseJSON?.mensagem : "Houve um erro ao fazer o upload."

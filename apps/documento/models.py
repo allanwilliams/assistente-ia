@@ -1,14 +1,24 @@
 from django.db import models, transaction
 from apps.core.mixins import BaseModel
-from apps.documento.choices import CHOICES_CHAT_AUTOR, CHAT_AUTOR_IA, CHOICES_TRANSCRICAO_TIPO, CHOICES_STATUS_TRANSCRICAO, STATUS_FILA_PROCESSAMENTO
+from apps.documento.choices import (
+    CHOICES_CHAT_AUTOR, 
+    CHAT_AUTOR_IA, 
+    CHOICES_TRANSCRICAO_TIPO, 
+    CHOICES_STATUS_TRANSCRICAO, 
+    STATUS_FILA_PROCESSAMENTO,
+    CHOICES_STATUS_OCR,
+    STATUS_OCR_DISPENSADO,
+    STATUS_OCR_FILA,
+    STATUS_OCR_PROCESSANDO
+)
 from datetime import datetime
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 import requests
 import os
 from apps.users.models import User
-from .utils import get_md5File, compress_pdf
-import ocrmypdf
+from .utils import get_md5File, MartinhaUtils
+
 
 class Chat(BaseModel):
     titulo = models.CharField('Titulo', max_length=255)
@@ -22,14 +32,15 @@ class Chat(BaseModel):
         blank=True, null=True
     )
 
-    md5_hexdigit = models.CharField(max_length=64, blank=True, null=True)
-    
+    md5_hexdigit = models.CharField(max_length=64, blank=True, null=True)    
+    status_ocr = models.IntegerField('Status OCR', choices=CHOICES_STATUS_OCR, default=STATUS_OCR_DISPENSADO)
+
     def __str__(self) -> str:
         return f'{self.id}'
             
 @receiver(post_save, sender=Chat)
 def criar_mensagens_chat(sender, instance, created, **kwargs):
-    
+
     ROOT = os.path.abspath(os.path.dirname(f'media/documento_chat'))
     file_path = '{}/{}'.format(ROOT, instance.documento)
     string_md5 = get_md5File(file_path)
@@ -38,50 +49,15 @@ def criar_mensagens_chat(sender, instance, created, **kwargs):
         if not search_md5:
             instance.md5_hexdigit = string_md5    
             instance.save()
-    if instance and not instance.chatpdf_source_id:
 
-        try:
-            ocrmypdf.ocr(input_file=file_path, output_file=file_path, force_ocr=True, output_type='pdf', optimize=0)
+    if instance and not instance.status_ocr in [STATUS_OCR_FILA, STATUS_OCR_PROCESSANDO] and not instance.chatpdf_source_id:
+        martinha_utils = MartinhaUtils(chat_id=instance.id)
+        chatpdf_source_id = martinha_utils.enviar_arquivo_para_chatpdf()
 
-            compress_pdf(file_path, file_path, 2)
-
-        except Exception as e:
-            print('exception', e)
-
-        try:
-            with open(file_path, 'rb') as file:
+        if chatpdf_source_id:
+            instance.chatpdf_source_id = chatpdf_source_id
+            instance.save()
             
-                files = [
-                    ('file', ('file', file, 'application/octet-stream'))
-                ]
-                headers = {
-                    'x-api-key': 'sec_Ym330Go8S2k6oDbOSAzGLOAUYuAmNQR2'
-                }
-
-                response = requests.post(
-                    'https://api.chatpdf.com/v1/sources/add-file', headers=headers, files=files)
-
-                # msg_inicial = 'Bem vindo ao Dede chat.'
-
-                if response.status_code == 200:
-                    instance.chatpdf_source_id = response.json()['sourceId']
-                    instance.save()
-
-                else:
-                    msg_inicial = 'Houve um erro ao processar o PDF'
-                    nova_mensagem = Mensagem(texto=msg_inicial, chat_id=instance.id, autor=CHAT_AUTOR_IA, criado_em=datetime.now())
-                    nova_mensagem.save()
-
-                # Apenas para Honoráios
-                # if response.status_code == 200 and instance.chatpdf_source_id:
-                #     from .utils import create_questions
-                #     question = 'faca topicos com valor da causa, condecao honorario, certidao transito julgado, comprimento de sentenca'
-                #     CQ = create_questions(chat=instance.id,texto=question,autor=CHAT_AUTOR_IA,not_save = True)
-
-               
-        except Exception as e:
-            print('erro', e)
-
 
 class Mensagem(BaseModel):
     texto = models.TextField('mensagem')
