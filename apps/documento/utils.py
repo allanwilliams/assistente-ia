@@ -28,11 +28,11 @@ from apps.documento.choices import (
     STATUS_FAZENDO_TRANSCRICAO,
     STATUS_FALHA_TRANSCRICAO,
     STATUS_CONCLUIDO,
-    STATUS_FILA_PROCESSAMENTO,
+    STATUS_PDF_FALHA_ENVIO,
     TRANSCRICAO_TIPO_VIDEO,
     STATUS_OCR_CONCLUIDO,
     STATUS_OCR_PROCESSANDO,
-    STATUS_OCR_FALHA
+    STATUS_OCR_FALHA_PROCESSAMENTO
 )
 
 from hashlib import md5
@@ -324,27 +324,27 @@ class MartinhaUtils:
         self.chat = models.Chat.objects.get(id=chat_id)
         self.file_path = f'{ROOT_DIR}/media/{self.chat.documento}'
 
-    def atualizar_status_ocr(self, status):
-        self.chat.status_ocr = status
+    def atualizar_status(self, status):
+        self.chat.status = status
         self.chat.save()
 
     def preparar_ocr_pdf(self):
         try:
-            self.atualizar_status_ocr(STATUS_OCR_PROCESSANDO)
-            ocrmypdf.ocr(input_file=self.file_path, output_file=self.file_path, force_ocr=True, output_type='pdf', optimize=0)
-            self.compress_pdf()
+            self.atualizar_status(STATUS_OCR_PROCESSANDO)
+            ocrmypdf.ocr(input_file=self.file_path, output_file=self.file_path, redo_ocr=True, output_type='pdf', optimize=0)
     
             chatpdf_source_id = self.enviar_arquivo_para_chatpdf()
 
             if chatpdf_source_id:
                 self.chat.chatpdf_source_id = chatpdf_source_id
                 self.chat.save()
-           
-            self.atualizar_status_ocr(STATUS_OCR_CONCLUIDO)
+                self.atualizar_status(STATUS_OCR_CONCLUIDO)
+            else:
+                self.atualizar_status(STATUS_PDF_FALHA_ENVIO)
 
         except Exception as e:
             print('falha', e)
-            self.atualizar_status_ocr(STATUS_OCR_FALHA)
+            self.atualizar_status(STATUS_OCR_FALHA_PROCESSAMENTO)
 
 
     def compress_pdf(self, input_pdf_path=None, output_pdf_path=None, power=2):
@@ -389,6 +389,7 @@ class MartinhaUtils:
 
     def enviar_arquivo_para_chatpdf(self):
         try:
+            self.compress_pdf()
             with open(self.file_path, 'rb') as file:
             
                 files = [

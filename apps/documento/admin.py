@@ -11,7 +11,7 @@ class ChatAdmin(AuditoriaAdmin):
         'titulo',
     )
 
-    list_display = ('titulo',  'ativo', 'documento', 'status_ocr')
+    list_display = ('titulo',  'ativo', 'documento', 'status')
 
 
 @admin.register(Mensagem)

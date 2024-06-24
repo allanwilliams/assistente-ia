@@ -6,10 +6,11 @@ from apps.documento.choices import (
     CHOICES_TRANSCRICAO_TIPO, 
     CHOICES_STATUS_TRANSCRICAO, 
     STATUS_FILA_PROCESSAMENTO,
-    CHOICES_STATUS_OCR,
+    CHOICES_STATUS_PDF,
     STATUS_OCR_DISPENSADO,
     STATUS_OCR_FILA,
-    STATUS_OCR_PROCESSANDO
+    STATUS_OCR_PROCESSANDO,
+    STATUS_PDF_FALHA_ENVIO
 )
 from datetime import datetime
 from django.db.models.signals import post_save, pre_save
@@ -33,7 +34,8 @@ class Chat(BaseModel):
     )
 
     md5_hexdigit = models.CharField(max_length=64, blank=True, null=True)    
-    status_ocr = models.IntegerField('Status OCR', choices=CHOICES_STATUS_OCR, default=STATUS_OCR_DISPENSADO)
+    status = models.IntegerField('Status', choices=CHOICES_STATUS_PDF, default=STATUS_OCR_DISPENSADO)
+    visualizado = models.BooleanField('Visualizado', default=False)
 
     def __str__(self) -> str:
         return f'{self.id}'
@@ -50,12 +52,15 @@ def criar_mensagens_chat(sender, instance, created, **kwargs):
             instance.md5_hexdigit = string_md5    
             instance.save()
 
-    if instance and not instance.status_ocr in [STATUS_OCR_FILA, STATUS_OCR_PROCESSANDO] and not instance.chatpdf_source_id:
+    if instance and not instance.status in [STATUS_OCR_FILA, STATUS_OCR_PROCESSANDO] and not instance.chatpdf_source_id:
         martinha_utils = MartinhaUtils(chat_id=instance.id)
         chatpdf_source_id = martinha_utils.enviar_arquivo_para_chatpdf()
 
         if chatpdf_source_id:
             instance.chatpdf_source_id = chatpdf_source_id
+            instance.save()
+        else:
+            instance.status = STATUS_PDF_FALHA_ENVIO
             instance.save()
             
 

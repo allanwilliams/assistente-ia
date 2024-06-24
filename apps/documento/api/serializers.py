@@ -35,6 +35,10 @@ class TranscricaoSerializer(ModelSerializer):
 
 class ChatSerializer(ModelSerializer):
     mensagens = MensagemSerializer(source='mensagem_chat', many=True, read_only=True)
+    status_str = SerializerMethodField()
+
+    def get_status_str(self, obj):
+        return obj.get_status_display() if obj.status else None
 
     class Meta:
         model = Chat

@@ -442,21 +442,30 @@ body  {
             .then((data) => data.json())
             .then((data) => {
                 const { results } = data;
-                if(dominio === "media-transcricao") {
-                    if(results.length) {
-                        const ultimo = results.filter(i => i.visualizado === false)[0]
-                        if (ultimo) {
-                            fillListChats([ultimo])
-                        } else {
-                            $(".conteudo-documentos").fadeOut()
-                        }
-                    }
+                if(results.length) {
+                    let ultimo = null
 
-                    const concluido = results.filter(i => i.status === 4)
-                    if(concluido.length) $('.link-acesso').fadeIn()  
-                } else {
-                    if(results.length) {
-                        $('.link-acesso').fadeIn()
+                    if(dominio === "media-transcricao") {
+                        console.log('results', results)
+                        const STATUS_CONCLUIDO = 4
+                        ultimo = results.filter(i => i.visualizado === false)[0]
+                        const concluido = results.filter(i => i.status === STATUS_CONCLUIDO)
+                        if(concluido.length) $('.link-acesso').fadeIn()  
+                    } 
+
+                    if(dominio === 'chat') {
+                        const STATUS_OCR_DISPENSADO = 8
+                        const STATUS_OCR_CONCLUIDO = 4
+                        
+                        ultimo = results.filter(i => i.visualizado === false && i.status !== STATUS_OCR_DISPENSADO)[0]
+                        const concluido = results.filter(i => [STATUS_OCR_DISPENSADO, STATUS_OCR_CONCLUIDO].includes(i.status))
+                        if(concluido.length) $('.link-acesso').fadeIn()  
+                    }
+                    
+                    if (ultimo) {
+                        fillListChats([ultimo])
+                    } else {
+                        $(".conteudo-documentos").fadeOut()
                     }
                 }
             })
@@ -505,7 +514,7 @@ body  {
         
         if(scannedPdf) {
             const STATUS_OCR_FILA = 1
-            formData.append('status_ocr', STATUS_OCR_FILA)
+            formData.append('status', STATUS_OCR_FILA)
         }
 
         if(isValidSizes(maxFileSizePdf, file)) {
@@ -605,49 +614,31 @@ body  {
             return progress[status] || progress[1]
         }
 
-        if(chats[0] && chats[0].chatpdf_source_id) {
-            chats.forEach((c) => {
-                list += `
-                    <tr>
-                        <td>${c.titulo}</td>
-                        <td></td>
-                        <td>
-                            <a class="btn" href="/documento/{{redirect}}=${c.id}">
+        chats.forEach((c) => {
+            const progress = getProgress(c.status)
+            list += `
+                <tr>
+                    <td>${c.titulo}</td>
+                    <td> 
+                        <div class="progress">
+                            <div class="progress-bar ${progress.classColor}" role="progressbar" style="width: ${progress.percent}%;" aria-valuenow="${progress.percent}" aria-valuemin="0" aria-valuemax="100">${progress.percent}%</div>
+                        </div>
+                        <small style="color:${progress.color}">${c.status_str}</small>
+                    </td>
+                    <td class="td-actions">
+                        ${c.status === 4 ? 
+                            `<a href="/documento/{{redirect}}=${c.id}">
                                 <i style="color:#00c0ef" class='fa fa-eye'></i>
-                            </a>
-                            <i data-remove-id='${c.id}' style="color:red" class='fa fa-trash btn-remove-chat'></i>    
-                        </td>
-                    </tr>
-                `
-            })
-        } else {
-            chats.forEach((c) => {
-                // const indicator = getIcon(c.status)
-                const progress = getProgress(c.status)
-                list += `
-                    <tr>
-                        <td>${c.titulo}</td>
-                        <td> 
-                            <div class="progress">
-                                <div class="progress-bar ${progress.classColor}" role="progressbar" style="width: ${progress.percent}%;" aria-valuenow="${progress.percent}" aria-valuemin="0" aria-valuemax="100">${progress.percent}%</div>
-                            </div>
-                            <small style="color:${progress.color}">${c.status_str}</small>
-                        </td>
-                        <td class="td-actions">
-                            ${c.status === 4 ? 
-                                `<a href="/documento/{{redirect}}=${c.id}">
-                                    <i style="color:#00c0ef" class='fa fa-eye'></i>
-                                </a>` : ''}
-                            
-                            ${[1, 6, 7].includes(c.status)  ? 
-                                `<i data-remove-id='${c.id}' style="color:red" class='fa fa-trash btn-remove-chat'></i>    
-                                ` : ``}
-                        </td>
-                    </tr>
-                `
-            })
-            $(".conteudo-documentos").fadeIn()
-        }
+                            </a>` : ''}
+                        
+                        ${[1, 6, 7].includes(c.status)  ? 
+                            `<i data-remove-id='${c.id}' style="color:red" class='fa fa-trash btn-remove-chat'></i>    
+                            ` : ``}
+                    </td>
+                </tr>
+            `
+        })
+        $(".conteudo-documentos").fadeIn()
 
         tableDocumentosMedias.html(list)
     }

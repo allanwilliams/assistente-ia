@@ -31,7 +31,10 @@ from apps.documento.choices import (
     STATUS_FALHA_TRANSCRICAO,
     STATUS_CONCLUIDO,
     STATUS_OCR_FILA,
-    STATUS_OCR_PROCESSANDO
+    STATUS_OCR_PROCESSANDO,
+    STATUS_OCR_FALHA_PROCESSAMENTO,
+    STATUS_PDF_FALHA_ENVIO,
+    STATUS_OCR_CONCLUIDO
 )
 from ..utils import create_questions
 from rest_framework.decorators import action
@@ -110,7 +113,7 @@ class AssistentePerfilFilter(filters.FilterSet):
         }
 
 class ChatViewSet(ModelViewSet):
-    queryset = Chat.objects.all()
+    queryset = Chat.objects.all().order_by('-criado_em')
     serializer_class = ChatSerializer
     filterset_class = ChatFilter
     pagination_class = ResultsSetPagination
@@ -131,12 +134,16 @@ class ChatViewSet(ModelViewSet):
             return Response({"mensagem": mensagem }, status=status.HTTP_400_BAD_REQUEST)
         
 
-        tem_processamento_pendente = Chat.objects.filter(criado_por=request.user, ativo=True, status_ocr__in=[
+        tem_processamento_pendente = Chat.objects.filter(criado_por=request.user, ativo=True, status__in=[
             STATUS_OCR_PROCESSANDO, STATUS_OCR_FILA]).exists()
 
         if tem_processamento_pendente:
             mensagem = f"Você tem um arquivo em processamento no momento. Aguarde a finalização para enviar outro." 
             return Response({"mensagem": mensagem }, status=status.HTTP_400_BAD_REQUEST)
+        
+
+        Chat.objects.filter(criado_por=request.user, ativo=True, status__in=[STATUS_OCR_FALHA_PROCESSAMENTO, STATUS_PDF_FALHA_ENVIO]).update(ativo=False)
+        Chat.objects.filter(criado_por=request.user, visualizado=False, status=STATUS_OCR_CONCLUIDO).update(visualizado=True)
 
         return super().create(request, *args, **kwargs)
 

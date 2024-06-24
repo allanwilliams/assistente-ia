@@ -533,10 +533,12 @@
         return fetch(`/documento/api/media-transcricao/?criado_por=${userId}&ativo=true&status=${STATUS_CONCLUIDO}`)
     }
 
-    function fillListTranscricoes(Transcricoes) {
+    function fillListTranscricoes(transcricoes) {
         let list = ''
+        const STATUS_CONCLUIDO = 4
 
-        Transcricoes.forEach((c) => {
+        transcricoes = transcricoes.filter(c => c.status === STATUS_CONCLUIDO )
+        transcricoes.forEach((c) => {
            list += `<div class="choice-link-transcricao btn" data-id="${c.id}">${c.titulo}</div>`
         })
 

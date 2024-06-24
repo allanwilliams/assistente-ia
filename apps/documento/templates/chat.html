@@ -381,7 +381,9 @@
 
     function fillListChats(chats) {
         let list = ''
-
+        const STATUS_OCR_CONCLUIDO = 4
+        const STATUS_OCR_DISPENSADO = 8
+        chats = chats.filter(c => [STATUS_OCR_CONCLUIDO, STATUS_OCR_DISPENSADO].includes(c.status))
         chats.forEach((c) => {
            list += `<div class="choice-link-chat btn" data-id="${c.id}">${c.titulo}</div>`
         })
@@ -391,7 +393,7 @@
 
     
     function fillChat(data) {
-        const {id, mensagens, titulo, documento } = data
+        const {id, mensagens, titulo, documento, visualizado } = data
         loadDocumento(titulo, documento, id)
         insertConversation(mensagens)
         chatAtual = data
@@ -405,6 +407,10 @@
 
         if(link.length > 0) {
             link[0].classList.add('btn-info')
+        }
+
+        if(!visualizado) {
+            updateVisualizado(id)
         }
     }
 
@@ -737,6 +743,19 @@
         });
 
         $('[data-toggle="tooltip"]').tooltip()
+    }
+
+
+    function updateVisualizado(id) {
+        if(id) {
+            $.ajax({
+                type: 'PATCH',
+                url: `/documento/api/chat/${id}/`,
+                data: {
+                    visualizado: true
+                },
+            })
+        }
     }
 
 </script>
