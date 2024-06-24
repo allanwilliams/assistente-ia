@@ -28,11 +28,11 @@ $(document).ready(() => {
             deleteChat(chatId)
         }
 
-        if(event.target.classList.contains('btn-remove-question')) {
-            const chatId = event.target.attributes['data-id'].value
-            deleteQuestion(chatId)
-            event.target.parentElement.parentElement.remove()
-        }        
+        // if(event.target.classList.contains('btn-remove-question')) {
+        //     const chatId = event.target.attributes['data-id'].value
+        //     deleteQuestion(chatId)
+        //     event.target.parentElement.parentElement.remove()
+        // }        
     })
 
 
@@ -236,19 +236,19 @@ function newTranscription(target) {
 function fillListChats(chats) {
     let list = ''
 
-    const getIcon = (status) => {
-        const icons = {
-            1: { icon: '<i class="fa-solid fa-hourglass-half fa-fade" style="color:orange"></i>', color: 'orange'},
-            2: { icon:'<i class="fa-solid fa-circle-notch fa-spin" style="color:orange"></i>', color: 'orange'},
-            3: { icon:'<i class="fa-solid fa-circle-notch fa-spin" style="color:orange"></i>', color: 'orange'},
-            4: { icon:'<i class="fa-regular fa-circle-check" style="color: #5cb85c"></i>', color: '#5cb85c'},
-            5: { icon:'<i class="fa-solid fa-ban"></i>', color: 'orange'},
-            6: { icon:'<i class="fa-solid fa-triangle-exclamation" style="color: #ff0000;"></i>', color: '#ff0000'},
-            7: { icon:'<i class="fa-solid fa-triangle-exclamation" style="color: #ff0000;"></i>', color: '#ff0000'},
-        }
+    // const getIcon = (status) => {
+    //     const icons = {
+    //         1: { icon: '<i class="fa-solid fa-hourglass-half fa-fade" style="color:orange"></i>', color: 'orange'},
+    //         2: { icon:'<i class="fa-solid fa-circle-notch fa-spin" style="color:orange"></i>', color: 'orange'},
+    //         3: { icon:'<i class="fa-solid fa-circle-notch fa-spin" style="color:orange"></i>', color: 'orange'},
+    //         4: { icon:'<i class="fa-regular fa-circle-check" style="color: #5cb85c"></i>', color: '#5cb85c'},
+    //         5: { icon:'<i class="fa-solid fa-ban"></i>', color: 'orange'},
+    //         6: { icon:'<i class="fa-solid fa-triangle-exclamation" style="color: #ff0000;"></i>', color: '#ff0000'},
+    //         7: { icon:'<i class="fa-solid fa-triangle-exclamation" style="color: #ff0000;"></i>', color: '#ff0000'},
+    //     }
 
-        return icons[status] || icons[1]
-    }
+    //     return icons[status] || icons[1]
+    // }
 
     const getProgress = (status) => {
         const progress = {
@@ -308,41 +308,41 @@ function deleteChat(chatId) {
     } 
 }
 
-function deleteQuestion(chatId) {
-    if(chatId) {
-        $.ajax({
-            type: 'PATCH',
-            url: `/documento/api/mensagem/${chatId}/`,
-            data: {
-                is_favorito: false
-            },
-            success: (data) => {
+// function deleteQuestion(chatId) {
+//     if(chatId) {
+//         $.ajax({
+//             type: 'PATCH',
+//             url: `/documento/api/mensagem/${chatId}/`,
+//             data: {
+//                 is_favorito: false
+//             },
+//             success: (data) => {
                 
-            },
-            error: () => {}
-        })
-    } 
-}    
+//             },
+//             error: () => {}
+//         })
+//     } 
+// }    
 
-function getQuestion(id){
-    fetch(`/documento/api/mensagem/?criado_por=${id}&is_favorito=true`)
-    .then(res=>res.json())
-    .then(data=>{
-        const questions = data.results.reduce((acc,d) => {
-            acc += `<div class='question-div'>
-                        <i style='font-weight: 900;' class="fa-regular fa-circle-question"></i>
-                        <div>
-                            ${d.texto}
-                            <i style='color:#00c0ef;' data-id='${d.id}' class="fa fa-trash btn-remove-question"></i>
-                        </div>
-                    </div>`
-            return acc
+// function getQuestion(id){
+//     fetch(`/documento/api/mensagem/?criado_por=${id}&is_favorito=true`)
+//     .then(res=>res.json())
+//     .then(data=>{
+//         const questions = data.results.reduce((acc,d) => {
+//             acc += `<div class='question-div'>
+//                         <i style='font-weight: 900;' class="fa-regular fa-circle-question"></i>
+//                         <div>
+//                             ${d.texto}
+//                             <i style='color:#00c0ef;' data-id='${d.id}' class="fa fa-trash btn-remove-question"></i>
+//                         </div>
+//                     </div>`
+//             return acc
             
-        },'')
-        if(questions.length == 0){
-           $('#perguntas_favoritas').hide()
-        }
-        gridQuestion.html(questions)
-    })
-}     
-getQuestion(userId.val())      
+//         },'')
+//         if(questions.length == 0){
+//            $('#perguntas_favoritas').hide()
+//         }
+//         gridQuestion.html(questions)
+//     })
+// }     
+// getQuestion(userId.val())      
