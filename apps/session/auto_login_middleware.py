@@ -20,7 +20,7 @@ class AutoLoginMiddleware:
             user = search_user(email)
             if user:
                 claims = self.get_user_claims(user)
-                preferred_username = claims.get('preferred_username', '')
+                preferred_username = user['user']['username']
                 user_login = User.objects.filter(email=email).first()
                 if not user_login:
                     dict_user = {
