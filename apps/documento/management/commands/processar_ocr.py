@@ -7,7 +7,7 @@ from apps.documento.models import Chat
 from apps.documento.utils import MartinhaUtils
 
 def processar_ocr():
-    ocupado = Chat.objects.filter(status=STATUS_OCR_PROCESSANDO, ativo=True).exists()
+    ocupado = Chat.objects.filter(status=STATUS_OCR_PROCESSANDO, ativo=True).count() >= 1
     print('Executando OCR....')
     if not ocupado:
         chat = Chat.objects.filter(status=STATUS_OCR_FILA, ativo=True).order_by('id').first()
