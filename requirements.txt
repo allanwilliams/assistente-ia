@@ -93,7 +93,7 @@ optuna==3.5.0
 packaging==23.2
 pandas==2.0.3
 pdfkit==1.0.0
-Pillow==9.3.0
+Pillow==10.0.1
 platformdirs==4.2.0
 pooch==1.8.1
 primePy==1.3
