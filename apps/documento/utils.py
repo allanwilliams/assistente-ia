@@ -331,7 +331,7 @@ class MartinhaUtils:
     def preparar_ocr_pdf(self):
         try:
             self.atualizar_status(STATUS_OCR_PROCESSANDO)
-            ocrmypdf.ocr(input_file=self.file_path, output_file=self.file_path, redo_ocr=True, output_type='pdf', optimize=0)
+            ocrmypdf.ocr(input_file=self.file_path, output_file=self.file_path, redo_ocr=True, output_type='pdf', optimize=0, jobs=28)
     
             chatpdf_source_id = self.enviar_arquivo_para_chatpdf()
 

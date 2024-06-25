@@ -24,7 +24,7 @@ def iniciar_async(chat):
     
 
 def processar_ocr():
-    MAX_EXECUTION = 10
+    MAX_EXECUTION = 8
     run_documents = Chat.objects.filter(status=STATUS_OCR_PROCESSANDO, ativo=True).count()
     ocupado = run_documents >= MAX_EXECUTION
     if not ocupado:
