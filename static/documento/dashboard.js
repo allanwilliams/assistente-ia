@@ -41,7 +41,7 @@ $(document).ready(() => {
         if(validateDocument(target)){
             const isTranscription = getIsTranscription(target)
             if(isTranscription) newTranscription(target)
-            else dialogVerifyScannedPdf(target)
+            else newChat(target)
         }else{
             Swal.fire({
                 icon: "error",
@@ -71,7 +71,7 @@ $(document).ready(() => {
         if(validateDocument(target)){
             const isTranscription = getIsTranscription(target)
             if(isTranscription) newTranscription(target)
-            else dialogVerifyScannedPdf(target)
+            else newChat(target)
         }else{
             Swal.fire({
                 icon: "error",
@@ -82,7 +82,7 @@ $(document).ready(() => {
         }
     });        
     getDocumentsChats()
-    setInterval(() => getDocumentsChats(), 13000)
+    setInterval(() => getDocumentsChats(), 7000)
 })  
 
 function getDocumentsChats() {
@@ -137,37 +137,38 @@ function getIsTranscription(target){
     return mediaTranscriptionTypes.indexOf(file.type) != -1
 }
 
-function dialogVerifyScannedPdf(target) {
-    const file = target.files[0]
-    Swal.fire({
-        title: "Seu PDF é escaneado?",
-        text: "Essa informação é importante para sabermos como processar o seu documento. .",
-        imageUrl: "https://images.wondershare.com/pdfelement/faq/scanned.png",
-        imageWidth: 400,
-        imageHeight: 200,
-        imageAlt: "Custom image",
-        showCancelButton: true,
-        confirmButtonColor: "#3085d6",
-        cancelButtonColor: "#3085d6",
-        confirmButtonText: "Sim, meu PDF é Escaneado!",
-        cancelButtonText: "Não, meu PDF não é Escaneado!",
-        width: '50em'
-    }).then((result) => {
-        const scanned = result.isConfirmed
-        newChat(file, scanned)
-    });
-}
+// function dialogVerifyScannedPdf(target) {
+//     const file = target.files[0]
+//     Swal.fire({
+//         title: "Seu PDF é escaneado ou possui imagens em seu conteúdo?",
+//         text: "Essa informação é importante para sabermos se precisamos fazer um processamento avançado do seu PDF para obter dados contidos na imagens.",
+//         // imageUrl: "https://images.wondershare.com/pdfelement/faq/scanned.png",
+//         // imageWidth: 400,
+//         // imageHeight: 200,
+//         // imageAlt: "Custom image",
+//         showCancelButton: true,
+//         showDenyButton: true,
+//         // confirmButtonColor: "#3085d6",
+//         // cancelButtonColor: "#3085d6",
+//         confirmButtonText: "Sim, processar meu PDF",
+//         denyButtonText: "Não processar meu PDF",
+//         cancelButtonText: "Cancelar",
+//         width: '50em'
+//     }).then((result) => {
+//         const scanned = result.isConfirmed
+//         // newChat(file, scanned)
+//     });
+// }
 
-function newChat(file, scannedPdf) {
+function newChat(target) {
+    const file = target.files[0]
     const formData = new FormData()
     formData.append('titulo', file.name)
     formData.append('documento', file)
     formData.append('ativo', true)
     
-    if(scannedPdf) {
-        const STATUS_OCR_FILA = 1
-        formData.append('status', STATUS_OCR_FILA)
-    }
+    const STATUS_OCR_FILA = 1
+    formData.append('status', STATUS_OCR_FILA)
 
     if(isValidSizes(maxFileSizePdf, file)) {
         $.ajax({
@@ -178,11 +179,13 @@ function newChat(file, scannedPdf) {
             contentType: false,
             processData: false,
             success: (data) => {
-                if(scannedPdf) {
+                Swal.fire({
+                    icon: "success",
+                    title: 'Recebemos seu PDF!',
+                    text: 'Iniciaremos em breve o processamento do seu PDF para extrair o máximo de informações e usá-las na nossa inteligência artificial. Você pode acompanhar o andamento desse processo aqui mesmo na Dashboard!'
+                }).then(() => {
                     window.location.reload()
-                } else {
-                    window.location.href = `/documento/chat/?documento=${data.id}`
-                }
+                });
             },
             error: (error) => {
                 const mensagem = (error?.responseJSON?.mensagem) ? error?.responseJSON?.mensagem : "Houve um erro ao fazer o upload."
@@ -265,7 +268,6 @@ function fillListChats(chats) {
 
         return progress[status] || progress[1]
     }
-
     chats.forEach((c) => {
         const progress = getProgress(c.status)
         list += `

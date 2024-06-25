@@ -210,6 +210,9 @@ function newChat(target) {
     formData.append('documento', file)
     formData.append('ativo', true)
 
+    const STATUS_OCR_FILA = 1
+    formData.append('status', STATUS_OCR_FILA)
+
     if(validateDocument(documentType, target)) {
         if(isValidSizes(maxFileSizePdf, file)) {
             $.ajax({
@@ -220,8 +223,13 @@ function newChat(target) {
                 processData: false,
                 beforeSend:() => loader.fadeIn(),
                 success: (data) => {
-                    updateChatList(data, 'add')
-                    fillChat(data)
+                    Swal.fire({
+                        icon: "success",
+                        title: 'Recebemos seu PDF!',
+                        text: 'Iniciaremos em breve o processamento do seu PDF para extrair o máximo de informações e usá-las na nossa inteligência artificial. Você pode acompanhar o andamento desse processo na nossa Dashboard!'
+                    }).then(() => {
+                        window.location.href = `/documento/dashboard-documento/`
+                    });
                 },
                 error: (error) => {
                     const mensagem = (error?.responseJSON?.mensagem) ? error?.responseJSON?.mensagem : "Houve um erro ao fazer a solicitação."
@@ -256,7 +264,7 @@ function getChat(chatId) {
     } else {
         $.ajax({
             type: 'GET',
-            url: `/documento/api/chat/?criado_por=${userId.val()}&ativo=true`,
+            url: `/documento/api/chat/?criado_por=${userId.val()}&ativo=true&status__in=4,8`,
             success: (data) => { 
                 const { results } = data
                 if(results.length) {

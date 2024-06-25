@@ -58,6 +58,7 @@ class ChatFilter(filters.FilterSet):
         fields = {
             'criado_por': ['exact'],
             'ativo': ['exact'],
+            'status': ['range', 'in'],
         }
 
 class MediaTranscricaoFilter(filters.FilterSet):
@@ -122,14 +123,11 @@ class ChatViewSet(ModelViewSet):
     def create(self, request, *args, **kwargs):
         string_md5 = get_md5File(request.FILES.get('documento'),fileopen=True)
         search_md5 = Chat.objects.filter(criado_por=request.user,md5_hexdigit=string_md5,ativo=True)
-
-        if search_md5:
-            return Response({'mensagem': format_html(f"Foi identificado que o arquivo já foi pré processado, clique <a href='/documento/chat/?documento={search_md5.first().id}'>aqui!</a> para acessar")}, status=status.HTTP_400_BAD_REQUEST)
-        
+      
         hoje = date.today()
-        total_video_upload_usuario = Chat.objects.filter(criado_por=request.user, criado_em__month=hoje.month, criado_em__year=hoje.year).count()
+        total_chat_upload_usuario = Chat.objects.filter(criado_por=request.user, criado_em__month=hoje.month, criado_em__year=hoje.year).count()
 
-        if total_video_upload_usuario > config.DOCUMENTO_LIMITE_UPLOAD_PDF:
+        if total_chat_upload_usuario > config.DOCUMENTO_LIMITE_UPLOAD_PDF:
             mensagem = f"Você excedeu o limite máximo de {config.DOCUMENTO_LIMITE_UPLOAD_PDF} documentos analizados esse mês." 
             return Response({"mensagem": mensagem }, status=status.HTTP_400_BAD_REQUEST)
         
@@ -141,6 +139,8 @@ class ChatViewSet(ModelViewSet):
             mensagem = f"Você tem um arquivo em processamento no momento. Aguarde a finalização para enviar outro." 
             return Response({"mensagem": mensagem }, status=status.HTTP_400_BAD_REQUEST)
         
+        if search_md5:
+            return Response({'mensagem': format_html(f"Foi identificado que o arquivo já foi pré processado, clique <a href='/documento/chat/?documento={search_md5.first().id}'>aqui!</a> para acessar")}, status=status.HTTP_400_BAD_REQUEST)
 
         Chat.objects.filter(criado_por=request.user, ativo=True, status__in=[STATUS_OCR_FALHA_PROCESSAMENTO, STATUS_PDF_FALHA_ENVIO]).update(ativo=False)
         Chat.objects.filter(criado_por=request.user, visualizado=False, status=STATUS_OCR_CONCLUIDO).update(visualizado=True)
