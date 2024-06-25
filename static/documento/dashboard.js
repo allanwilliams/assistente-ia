@@ -86,7 +86,7 @@ $(document).ready(() => {
 })  
 
 function getDocumentsChats() {
-    
+
     if(userId.val()) {
         getUserChats(userId.val(), dominio)
         .then((data) => data.json())
@@ -111,12 +111,14 @@ function getDocumentsChats() {
                     const concluido = results.filter(i => [STATUS_OCR_DISPENSADO, STATUS_OCR_CONCLUIDO].includes(i.status))
                     if(concluido.length) $('.link-acesso').fadeIn()  
                 }
-                
+
                 if (ultimo) {
                     fillListChats([ultimo])
                 } else {
                     $(".conteudo-documentos").fadeOut()
                 }
+            } else {
+                $(".conteudo-documentos").fadeOut()
             }
         })
     }
@@ -136,6 +138,7 @@ function getIsTranscription(target){
 }
 
 function dialogVerifyScannedPdf(target) {
+    const file = target.files[0]
     Swal.fire({
         title: "Seu PDF é escaneado?",
         text: "Essa informação é importante para sabermos como processar o seu documento. .",
@@ -151,12 +154,11 @@ function dialogVerifyScannedPdf(target) {
         width: '50em'
     }).then((result) => {
         const scanned = result.isConfirmed
-        newChat(target, scanned)
+        newChat(file, scanned)
     });
 }
 
-function newChat(target, scannedPdf) {
-    const file = target.files[0]
+function newChat(file, scannedPdf) {
     const formData = new FormData()
     formData.append('titulo', file.name)
     formData.append('documento', file)
