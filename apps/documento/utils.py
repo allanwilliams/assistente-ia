@@ -390,10 +390,10 @@ class MartinhaUtils:
 
 
     def enviar_arquivo_para_chatpdf(self):
-        print(f'enviando arquivo para chatpdf {self.chat}')
         try:
-            self.compress_pdf()
+            # self.compress_pdf()
             with open(self.file_path, 'rb') as file:
+                print(f'enviando arquivo para chatpdf {self.chat}')
             
                 files = [
                     ('file', ('file', file, 'application/octet-stream'))
