@@ -348,7 +348,6 @@ class MartinhaUtils:
 
 
     def compress_pdf(self, input_pdf_path=None, output_pdf_path=None, power=2):
-        print(f'comprimindo arquivo {self.chat}')
         input_pdf_path = input_pdf_path if input_pdf_path else self.file_path
         output_pdf_path = output_pdf_path if output_pdf_path else self.file_path
 
@@ -391,10 +390,8 @@ class MartinhaUtils:
 
     def enviar_arquivo_para_chatpdf(self):
         try:
-            # self.compress_pdf()
+            self.compress_pdf()
             with open(self.file_path, 'rb') as file:
-                print(f'enviando arquivo para chatpdf {self.chat}')
-            
                 files = [
                     ('file', ('file', file, 'application/octet-stream'))
                 ]
