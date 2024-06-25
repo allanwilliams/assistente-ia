@@ -348,6 +348,7 @@ class MartinhaUtils:
 
 
     def compress_pdf(self, input_pdf_path=None, output_pdf_path=None, power=2):
+        print(f'comprimindo arquivo {self.chat}')
         input_pdf_path = input_pdf_path if input_pdf_path else self.file_path
         output_pdf_path = output_pdf_path if output_pdf_path else self.file_path
 
@@ -382,12 +383,14 @@ class MartinhaUtils:
             else:
                 shutil.move(temp_output_path, output_pdf_path)
         except subprocess.CalledProcessError as e:
+            print(f'erro gs {self.chat}:',e)
             if os.path.exists(temp_output_path):
                 os.remove(temp_output_path)
 
 
 
     def enviar_arquivo_para_chatpdf(self):
+        print(f'enviando arquivo para chatpdf {self.chat}')
         try:
             self.compress_pdf()
             with open(self.file_path, 'rb') as file:
@@ -406,6 +409,7 @@ class MartinhaUtils:
                 return None
                
         except Exception as e:
+           print(f'erro enviando arquivo para chatpdf {self.chat}',e)
            return None
 
 
