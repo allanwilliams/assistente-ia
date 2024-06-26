@@ -52,16 +52,16 @@ def criar_mensagens_chat(sender, instance, created, **kwargs):
             instance.md5_hexdigit = string_md5    
             instance.save()
 
-    if instance and not instance.status in [STATUS_OCR_FILA, STATUS_OCR_PROCESSANDO] and not instance.chatpdf_source_id:
-        martinha_utils = MartinhaUtils(chat_id=instance.id)
-        chatpdf_source_id = martinha_utils.enviar_arquivo_para_chatpdf()
+    # if instance and not instance.status in [STATUS_OCR_FILA, STATUS_OCR_PROCESSANDO] and not instance.chatpdf_source_id:
+    #     martinha_utils = MartinhaUtils(chat_id=instance.id)
+    #     chatpdf_source_id = martinha_utils.enviar_arquivo_para_chatpdf()
 
-        if chatpdf_source_id:
-            instance.chatpdf_source_id = chatpdf_source_id
-            instance.save()
-        else:
-            instance.status = STATUS_PDF_FALHA_ENVIO
-            instance.save()
+    #     if chatpdf_source_id:
+    #         instance.chatpdf_source_id = chatpdf_source_id
+    #         instance.save()
+    #     else:
+    #         instance.status = STATUS_PDF_FALHA_ENVIO
+    #         instance.save()
             
 
 class Mensagem(BaseModel):
