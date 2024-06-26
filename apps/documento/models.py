@@ -36,6 +36,7 @@ class Chat(BaseModel):
     md5_hexdigit = models.CharField(max_length=64, blank=True, null=True)    
     status = models.IntegerField('Status', choices=CHOICES_STATUS_PDF, default=STATUS_OCR_DISPENSADO)
     visualizado = models.BooleanField('Visualizado', default=False)
+    log_errors = models.TextField('Log errors', null=True, blank=True)
 
     def __str__(self) -> str:
         return f'{self.id}'

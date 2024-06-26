@@ -45,7 +45,7 @@ from ..utils import get_md5File
 from ..assistente import criar_topico, criar_pergunta
 from django.utils.html import format_html
 from rest_framework.pagination import PageNumberPagination
-
+from config.settings import CHAT_PDF_API_KEY
 class ResultsSetPagination(PageNumberPagination):
     page_size = 100
     page_size_query_param = 'page_size'
@@ -154,7 +154,7 @@ class ChatViewSet(ModelViewSet):
         if chat:
             Mensagem.objects.filter(chat=chat).delete()
 
-            headers = {'x-api-key': 'sec_Ym330Go8S2k6oDbOSAzGLOAUYuAmNQR2'}
+            headers = {'x-api-key': CHAT_PDF_API_KEY}
 
             # Remover o chat atigo no Chat PDF
             try:

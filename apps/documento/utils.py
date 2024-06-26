@@ -32,7 +32,8 @@ from apps.documento.choices import (
     TRANSCRICAO_TIPO_VIDEO,
     STATUS_OCR_CONCLUIDO,
     STATUS_OCR_PROCESSANDO,
-    STATUS_OCR_FALHA_PROCESSAMENTO
+    STATUS_OCR_FALHA_PROCESSAMENTO,
+    STATUS_OCR_DISPENSADO
 )
 
 from hashlib import md5
@@ -331,7 +332,7 @@ class MartinhaUtils:
     def preparar_ocr_pdf(self):
         try:
             self.atualizar_status(STATUS_OCR_PROCESSANDO)
-            ocrmypdf.ocr(input_file=self.file_path, output_file=self.file_path, redo_ocr=True, output_type='pdf', optimize=0, jobs=28)
+            ocrmypdf.ocr(input_file=self.file_path, output_file=self.file_path, redo_ocr=True, output_type='pdf', optimize=0, jobs=28, invalidate_digital_signatures=True)
     
             chatpdf_source_id = self.enviar_arquivo_para_chatpdf()
 
@@ -344,9 +345,19 @@ class MartinhaUtils:
 
         except Exception as e:
             print('falha', e)
-            self.atualizar_status(STATUS_OCR_FALHA_PROCESSAMENTO)
+            chatpdf_source_id = self.enviar_arquivo_para_chatpdf()
 
+            if chatpdf_source_id:
+                self.chat.chatpdf_source_id = chatpdf_source_id
+                self.chat.log_errors = f'OCR: {e}'
+                self.chat.save()
+                self.atualizar_status(STATUS_OCR_CONCLUIDO)
+            else:
+                self.atualizar_status(STATUS_PDF_FALHA_ENVIO)
 
+            # self.atualizar_status(STATUS_OCR_FALHA_PROCESSAMENTO)
+
+    
     def compress_pdf(self, input_pdf_path=None, output_pdf_path=None, power=2):
         input_pdf_path = input_pdf_path if input_pdf_path else self.file_path
         output_pdf_path = output_pdf_path if output_pdf_path else self.file_path
@@ -406,8 +417,9 @@ class MartinhaUtils:
                 return None
                
         except Exception as e:
-           print(f'erro enviando arquivo para chatpdf {self.chat}',e)
-           return None
+            self.chat.log_errors = f'CHAT_PDF: {e}'
+            self.chat.save()
+            return None
 
 
 
