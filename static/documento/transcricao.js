@@ -271,17 +271,20 @@ function newtranscricao(target) {
                 beforeSend:() => loader.fadeIn(),
                 success: (data) => {
                     Swal.fire({
-                        title: 'O arquivo foi enviado para processamento e em breve estará pronto.'
+                        icon: "success",
+                        title: 'Recebemos seu arquivo!',
+                        text: 'Iniciaremos em breve o processamento do seu arquivo para extrair o máximo de informações e usá-las na nossa inteligência artificial. Você pode acompanhar o andamento desse processo na nossa Dashboard!',
+                        confirmButtonColor:'#00c0ef'
                     }).then(() => {
-                        updatetranscricaoList(data, 'add')
-                        filltranscricao(data)
-                    })
+                        window.location.href = `/documento/dashboard-media/`
+                    });
                 },
                 error: (error) => {
                     const mensagem = (error?.responseJSON?.mensagem) ? error?.responseJSON?.mensagem : "Houve um erro ao fazer o upload."
                     Swal.fire({
                         icon: "error",
                         title: mensagem,
+                        confirmButtonColor:'#00c0ef'
                     });
                 },
                 complete: () => loader.fadeOut() 
@@ -291,6 +294,7 @@ function newtranscricao(target) {
         Swal.fire({
             icon: "error",
             title: "Tipo de arquivo não suportado",
+            confirmButtonColor:'#00c0ef'
         }).then(() => {
             window.location.reload()
         });
@@ -405,7 +409,7 @@ function openDialogEditSpeaker(id, speaker, colorSpeaker, replaceAllDefault) {
         showCancelButton: true,
         confirmButtonText: "Aplicar",
         cancelButtonText: 'Cancelar',
-        confirmButtonColor: '#1777ff', 
+        confirmButtonColor:'#00c0ef',
         preConfirm: () => ({
            name: document.getElementById('name').value,
            color: document.querySelector('input[name="color"]:checked').value,

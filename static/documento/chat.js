@@ -226,7 +226,8 @@ function newChat(target) {
                     Swal.fire({
                         icon: "success",
                         title: 'Recebemos seu PDF!',
-                        text: 'Iniciaremos em breve o processamento do seu PDF para extrair o máximo de informações e usá-las na nossa inteligência artificial. Você pode acompanhar o andamento desse processo na nossa Dashboard!'
+                        text: 'Iniciaremos em breve o processamento do seu PDF para extrair o máximo de informações e usá-las na nossa inteligência artificial. Você pode acompanhar o andamento desse processo na nossa Dashboard!',
+                        confirmButtonColor:'#00c0ef'
                     }).then(() => {
                         window.location.href = `/documento/dashboard-documento/`
                     });
@@ -236,6 +237,7 @@ function newChat(target) {
                     Swal.fire({
                         icon: "error",
                         title: mensagem,
+                        confirmButtonColor:'#00c0ef'
                     }).then(() => {
                         window.location.reload()
                     });
@@ -247,6 +249,7 @@ function newChat(target) {
         Swal.fire({
             icon: "error",
             title: "Tipo de arquivo não suportado",
+            confirmButtonColor:'#00c0ef'
         }).then(() => {
             window.location.reload()
         });
@@ -401,6 +404,7 @@ function sendAsk(texto) {
                 Swal.fire({
                     icon: "error",
                     title: mensagem,
+                    confirmButtonColor:'#00c0ef'
                 });
             },
             complete: () => {

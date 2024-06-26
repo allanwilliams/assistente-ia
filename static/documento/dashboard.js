@@ -46,6 +46,7 @@ $(document).ready(() => {
             Swal.fire({
                 icon: "error",
                 title: "Tipo de arquivo não suportado",
+                confirmButtonColor:'#00c0ef'
             }).then(() => {
                 window.location.reload()
             });
@@ -76,6 +77,7 @@ $(document).ready(() => {
             Swal.fire({
                 icon: "error",
                 title: "Tipo de arquivo não suportado",
+                confirmButtonColor:'#00c0ef'
             }).then(() => {
                 window.location.reload()
             });
@@ -182,7 +184,8 @@ function newChat(target) {
                 Swal.fire({
                     icon: "success",
                     title: 'Recebemos seu PDF!',
-                    text: 'Iniciaremos em breve o processamento do seu PDF para extrair o máximo de informações e usá-las na nossa inteligência artificial. Você pode acompanhar o andamento desse processo aqui mesmo na Dashboard!'
+                    text: 'Iniciaremos em breve o processamento do seu PDF para extrair o máximo de informações e usá-las na nossa inteligência artificial. Você pode acompanhar o andamento desse processo aqui mesmo na Dashboard!',
+                    confirmButtonColor:'#00c0ef'
                 }).then(() => {
                     window.location.reload()
                 });
@@ -193,6 +196,7 @@ function newChat(target) {
                 Swal.fire({
                     icon: "error",
                     title: mensagem,
+                    confirmButtonColor:'#00c0ef'
                 }).then(() => {
                     window.location.reload()
                 });
@@ -221,7 +225,14 @@ function newTranscription(target) {
             contentType: false,
             processData: false,
             success: (data) => {
-                window.location.reload()
+                Swal.fire({
+                    icon: "success",
+                    title: 'Recebemos seu arquivo!',
+                    text: 'Iniciaremos em breve o processamento do seu arquivo para extrair o máximo de informações e usá-las na nossa inteligência artificial. Você pode acompanhar o andamento desse processo aqui mesmo na Dashboard!',
+                    confirmButtonColor:'#00c0ef'
+                }).then(() => {
+                    window.location.reload()
+                });
             },
             error: (error) => {
                 const mensagem = (error?.responseJSON?.mensagem) ? error?.responseJSON?.mensagem : "Houve um erro ao fazer o upload."
@@ -229,6 +240,7 @@ function newTranscription(target) {
                 Swal.fire({
                     icon: "error",
                     title: mensagem,
+                    confirmButtonColor:'#00c0ef'
                 }).then(() => {
                     window.location.reload()
                 });
