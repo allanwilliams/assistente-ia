@@ -1,0 +1,142 @@
+#preloader {
+    position: fixed; 
+    width: 100%; 
+    height: 100vh; 
+    top: 0; 
+    left:0;
+    display: none;
+    opacity: 0.7;
+    background-color: rgba(0, 0, 0);
+    z-index: 400;
+}
+#preloader .spinner-loader {
+    border: 7px solid #f3f3f3;
+    border-radius: 50%;
+    border-top: 7px solid #2c3b41;
+    width: 60px;
+    height: 60px;
+    -webkit-animation: spin 2s linear infinite; /* Safari */
+    animation: spin 2s linear infinite;
+}
+#preloader .wrapper-loader {
+    display: flex;
+    width: 100%;
+    height: 100vh; 
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+#preloader .wrapper-loader span {
+    color: #fff;
+    font-weight: bold;
+    margin-top: 5px;
+    font-size: 1.4em;
+}
+
+/* Safari */
+@-webkit-keyframes spin {
+    0% { -webkit-transform: rotate(0deg); }
+    100% { -webkit-transform: rotate(360deg); }
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+#document {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    height: calc(100vh - 72px);
+    width: 100%;
+    
+}
+#document #toolbar {
+    flex: 13 1 0px;
+    overflow: hidden;
+    color: #fff;
+
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+#document #toolbar .drag-area {
+    padding: 6px 10px;
+    text-align: center;
+    border: 2px dotted #ccc;
+    cursor: pointer;
+    border-radius: 8px;
+    background-color: #4d5b5f;
+}
+#document #toolbar .drag-active {
+    background-color: #899a9f;
+}
+#document #toolbar .drag-area i {
+    font-size: 1.5rem;
+}
+#document #toolbar .drag-file {
+    margin: 0;
+}
+#document #toolbar .drag-area .drag-area-content {
+    margin-top: 5px;
+}
+
+#document #pdf, #document #media {
+    background: rgb(255, 255, 255);
+    padding-bottom: 42px;
+    flex: 37 1 0px;
+    overflow: hidden;
+    border: 1px solid lightgrey;
+}
+
+#document #pdf #pdf-obj-container, 
+#document #media #media-obj-container {
+    
+    height: 100%;
+}
+.logo-interna-homenagem  {
+    display: flex;
+    padding-left: 50px;
+    justify-content: start;
+    align-items: center;
+    width: 250px;
+    gap: 10px;
+}
+.logo-interna-homenagem  img {
+    width: 50px;
+}
+.logo-interna-homenagem h2 {
+    font-size: 20px;
+    margin: 0;
+    font-weight: bold;
+}
+#document-header {
+    /* background: #000; */
+    /* background: radial-gradient(circle, rgba(0, 94, 60, 1) 0%, rgba(1, 54, 34, 1) 74%, rgba(0, 54, 34, 1) 100%); */
+    color: #fff;
+    padding: 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+#document-header .document-header-links {
+    display: flex;
+    gap: 20px;
+    padding-right: 15px;
+}
+#document-header .document-header-links a {
+    color: #fff;
+    font-weight: bold;
+}
+#document-header .document-header-links a:hover {
+    text-decoration: none;
+}
+#document-header .document-header-links a i {
+    margin-right: 5px;
+}
+
+.swal2-popup {
+    font-size: 14px !important;
+}

@@ -4,9 +4,9 @@ import requests
 import subprocess
 import json
 from pydub import AudioSegment
-from datetime import timedelta
+from datetime import timedelta, datetime
 from openai import OpenAI
-from config.settings import ROOT_DIR
+from config.settings import ROOT_DIR, DEEPGRAM_API_KEY, OPEN_IA_API_KEY, CHAT_PDF_API_KEY
 from apps.documento import models
 import random
 # from scipy.io import wavfile
@@ -28,18 +28,22 @@ from apps.documento.choices import (
     STATUS_FAZENDO_TRANSCRICAO,
     STATUS_FALHA_TRANSCRICAO,
     STATUS_CONCLUIDO,
-    STATUS_FILA_PROCESSAMENTO,
-    TRANSCRICAO_TIPO_VIDEO
+    STATUS_PDF_FALHA_ENVIO,
+    TRANSCRICAO_TIPO_VIDEO,
+    STATUS_OCR_CONCLUIDO,
+    STATUS_OCR_PROCESSANDO,
+    STATUS_OCR_FALHA_PROCESSAMENTO,
+    STATUS_OCR_DISPENSADO
 )
 
 from hashlib import md5
+import shutil
+import ocrmypdf
 
 ROOT_MEDIA = f'{ROOT_DIR}/media'
 ROOT_LEGENDA = f'{ROOT_DIR}/media/legenda_transcricao'
 ROOT_PDF = f'{ROOT_DIR}/media/documento_chat'
 
-DEEPGRAM_API_KEY = "29f98c5edc5065f3f8d644149ba08b38eb942e5c"
-OPEN_IA_API_KEY = "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"
 
 def create_questions(*args, **kwargs):
     from .models import Chat, Mensagem 
@@ -56,7 +60,7 @@ def create_questions(*args, **kwargs):
     chatpdf_source_id = models.Chat.objects.get(pk=chat).chatpdf_source_id
 
     headers = {
-        'x-api-key': 'sec_Ym330Go8S2k6oDbOSAzGLOAUYuAmNQR2',
+        'x-api-key': CHAT_PDF_API_KEY,
         "Content-Type": "application/json",
     }
 
@@ -314,6 +318,111 @@ def get_md5File(filepath,fileopen=False):
                 break
             md5_hexdigits.update(data)
     return f'{md5_hexdigits.hexdigest()}'
+
+
+class MartinhaUtils:
+    def __init__(self, chat_id):
+        self.chat = models.Chat.objects.get(id=chat_id)
+        self.file_path = f'{ROOT_DIR}/media/{self.chat.documento}'
+
+    def atualizar_status(self, status):
+        self.chat.status = status
+        self.chat.save()
+
+    def preparar_ocr_pdf(self):
+        try:
+            self.atualizar_status(STATUS_OCR_PROCESSANDO)
+            ocrmypdf.ocr(input_file=self.file_path, output_file=self.file_path, redo_ocr=True, output_type='pdf', optimize=0, jobs=28, invalidate_digital_signatures=True)
+    
+            chatpdf_source_id = self.enviar_arquivo_para_chatpdf()
+
+            if chatpdf_source_id:
+                self.chat.chatpdf_source_id = chatpdf_source_id
+                self.chat.save()
+                self.atualizar_status(STATUS_OCR_CONCLUIDO)
+            else:
+                self.atualizar_status(STATUS_PDF_FALHA_ENVIO)
+
+        except Exception as e:
+            print('falha', e)
+            chatpdf_source_id = self.enviar_arquivo_para_chatpdf()
+
+            if chatpdf_source_id:
+                self.chat.chatpdf_source_id = chatpdf_source_id
+                self.chat.log_errors = f'OCR: {e}'
+                self.chat.save()
+                self.atualizar_status(STATUS_OCR_CONCLUIDO)
+            else:
+                self.atualizar_status(STATUS_PDF_FALHA_ENVIO)
+
+            # self.atualizar_status(STATUS_OCR_FALHA_PROCESSAMENTO)
+
+    
+    def compress_pdf(self, input_pdf_path=None, output_pdf_path=None, power=2):
+        input_pdf_path = input_pdf_path if input_pdf_path else self.file_path
+        output_pdf_path = output_pdf_path if output_pdf_path else self.file_path
+
+        quality = {
+            0: '/default',  # Alta qualidade, menor compressão
+            1: '/screen',   # Baixa qualidade, maior compressão
+            2: '/ebook',    # Qualidade média
+            3: '/prepress', # Alta qualidade, menor compressão
+            4: '/printer'   # Qualidade para impressão
+        }
+
+        if power not in quality:
+            raise ValueError("Nível de compressão inválido. Use um valor entre 0 e 4.")
+
+        temp_output_path = output_pdf_path + ".tmp"
+
+        gs_command = [
+            'gs',
+            '-sDEVICE=pdfwrite',
+            f'-dPDFSETTINGS={quality[power]}',
+            '-dNOPAUSE',
+            '-dQUIET',
+            '-dBATCH',
+            f'-sOutputFile={temp_output_path}',
+            input_pdf_path
+        ]
+
+        try:
+            subprocess.run(gs_command, check=True)
+            if input_pdf_path == output_pdf_path:
+                shutil.move(temp_output_path, output_pdf_path)
+            else:
+                shutil.move(temp_output_path, output_pdf_path)
+        except subprocess.CalledProcessError as e:
+            print(f'erro gs {self.chat}:',e)
+            if os.path.exists(temp_output_path):
+                os.remove(temp_output_path)
+
+
+
+    def enviar_arquivo_para_chatpdf(self):
+        try:
+            self.compress_pdf()
+            with open(self.file_path, 'rb') as file:
+                files = [
+                    ('file', ('file', file, 'application/octet-stream'))
+                ]
+                headers = {'x-api-key': CHAT_PDF_API_KEY}
+
+                response = requests.post('https://api.chatpdf.com/v1/sources/add-file', headers=headers, files=files)
+
+
+                if response.status_code == 200:
+                    return response.json()['sourceId']
+
+                return None
+               
+        except Exception as e:
+            self.chat.log_errors = f'CHAT_PDF: {e}'
+            self.chat.save()
+            return None
+
+
+
 # def convert_mp3_to_wav(mp3_path, wav_path):
 #     # Comando ffmpeg para converter MP3 para WAV com taxa de amostragem de 16kHz
 #     # command = ['ffmpeg','-y','-i', mp3_path, '-f', 'wav', '-acodec', 'pcm_s16le', '-ar', '16000', '-ac', '1', 'copy', wav_path]

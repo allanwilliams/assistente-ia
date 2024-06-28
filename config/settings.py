@@ -380,3 +380,7 @@ EMAIL_PORT = 1025
 
 
 MAX_ATTEMPTS = 5
+
+DEEPGRAM_API_KEY = env("DEEPGRAM_API_KEY", default='')
+OPEN_IA_API_KEY = env("OPEN_IA_API_KEY", default='')
+CHAT_PDF_API_KEY = env("CHAT_PDF_API_KEY", default='')

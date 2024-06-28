@@ -1,0 +1,226 @@
+body  {
+    background-size:cover;
+    -webkit-animation: slidein 50s;
+    animation: slidein 50s;
+
+    -webkit-animation-fill-mode: forwards;
+    animation-fill-mode: forwards;
+
+    -webkit-animation-iteration-count: infinite;
+    animation-iteration-count: infinite;
+
+    -webkit-animation-direction: alternate;
+    animation-direction: alternate;              
+}
+
+@-webkit-keyframes slidein {
+    from {background-position: top; background-size:2000px; }
+    to {background-position: -100px 0px;background-size:2750px;}
+}
+
+@keyframes slidein {
+    from {background-position: top;background-size:2000px; }
+    to {background-position: -100px 0px;background-size:2750px;}
+}
+
+.texto-body-input{
+    border: 1px dashed gray;
+    background-color: white;
+    padding: 0.2em;
+    height: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.texto-body{
+    padding: 1em;
+    background: #fff;
+    box-shadow: 0px 2px 3px 0px gray;
+    border-radius: 10px;
+}
+.conteudo{
+    max-width: 800px;
+    height: calc(100vh - 95px);
+    justify-content: center;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 2em;
+}
+
+#grid-documentos-chats ,#grid-pergunta-chats{
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 50px;
+}
+
+.texto-header {
+    text-align: center;
+    margin-top: 15px;
+    margin-bottom: 15px;
+}
+.texto-header h2 {
+    font-weight: bold;
+    color: #fff;
+}
+
+.titulo-header{
+    font-weight: 900;
+    font-size: 18px;
+    background-color: rgba(255, 255, 255, 0.3);
+    color: #fff;
+}
+.documento-chat{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #1677ff;
+    gap: 10px;
+}
+
+.conteudo-documentos {
+    /* display: flex;
+    flex-direction: column;
+    gap: 1em; */
+    /* box-shadow: 0px 2px 3px 0px gray; */
+    margin-bottom: 25px;
+    padding: 10px;
+    border-radius: 10px;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: #fff;
+}
+
+.conteudo-documentos table {
+    width: 100%;
+}
+
+
+.titulo-header{
+    box-shadow: 0px 0px 2px 0px gray;
+    padding: 1em;
+    border-radius: 4px 4px 0px 0px;
+}
+
+.drag-area-content{
+    text-align: center;
+    font-size: 18px;
+    font-weight: 900;
+    color: #6e6e6e;
+}
+.drag-area-content img {
+    margin-bottom: 10px;
+}
+
+.drag-area{
+    width: 100%;
+    background-color: white;
+    border: 1px dashed gray;
+    padding: 0.2em;
+    border-radius: 10px;
+    height: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;    
+}
+
+.btn-remove-chat,.btn-remove-question {
+    cursor: pointer;
+}
+
+.drag-active {
+    background-color: #dcdcdc !important;
+}
+
+.nova-pergunta-bloco{
+    display: flex;
+    gap: 1em;
+    justify-content: flex-start;
+    align-items: baseline;
+}
+
+.cab {
+    display: flex;
+    flex-direction: row;
+    padding: 0em 1em;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+}
+
+.cab a {
+    color: #fff;
+    font-weight: bold;
+}
+.cab a i {
+    margin-right: 5px;
+}
+
+#table-documentos-medias th, #table-documentos-medias td {
+  padding: 10px;
+  font-weight: bold;
+  text-align: center;
+}
+
+#table-documentos-medias td.td-actions {
+    text-align: right;
+}
+#table-documentos-medias td.td-actions a {
+    margin-right: 5px;
+}
+
+.homenagem-principal {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.homenagem-principal h2 {
+    color: #fff;
+    font-size: 40px;
+    font-weight: bold;
+    margin-top: 22px;
+}
+.homenagem-principal img {
+    width: 150px;
+}
+.aviso {
+    color: gray;
+    margin-top: 10px;
+    font-size: 12px;
+}
+
+.link-acesso {
+    text-align: center;
+    display: none;
+}
+.link-acesso a {
+    color: #fff;
+    font-weight: bold;
+    border-radius: 10px;
+    border: 2px solid #fff;
+    padding: 10px 15px;
+    font-size: 18px;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+#table-documentos-medias .progress {
+    max-width: 180px;
+    margin: 0 auto;
+}
+#table-documentos-medias .progress-bar-animated {
+    animation: progress-bar-stripes 1s linear infinite;
+}
+
+@keyframes progress-bar-stripes {
+    0% { background-position: 40px 0; }
+    100% { background-position: 0 0; }
+}
+
+#table-documentos-medias .bg-danger {
+    background-color: #ff0000 !important;
+}
+#table-documentos-medias .bg-success {
+    background-color: #5cb85c !important;
+}
+#table-documentos-medias .bg-info {
+    background-color: #00c0ef !important;
+}
