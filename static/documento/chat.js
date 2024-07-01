@@ -229,7 +229,7 @@ function newChat(target) {
                         text: 'Iniciaremos em breve o processamento do seu PDF para extrair o máximo de informações e usá-las na nossa inteligência artificial. Você pode acompanhar o andamento desse processo na nossa Dashboard!',
                         confirmButtonColor:'#00c0ef'
                     }).then(() => {
-                        window.location.href = `/documento/dashboard-documento/`
+                        window.location.href = `/documento/martinha/`
                     });
                 },
                 error: (error) => {

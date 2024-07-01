@@ -30,7 +30,7 @@ def chat(request):
 @login_required
 def dashboard(request):
     path = request.path 
-    if 'dashboard-documento' in path:
+    if 'martinha' in path:
         chats = Chat.objects.filter(criado_por=request.user, ativo=True)
         context = {
             'chats': chats,
@@ -43,7 +43,7 @@ def dashboard(request):
 
         return render(request, 'dashboard.html', context)
     
-    if 'dashboard-media' in path:
+    if 'tanaka' in path:
         transcricoes = MediaTranscricao.objects.filter(criado_por=request.user, ativo=True)
         context = {
             'transcricoes': transcricoes,

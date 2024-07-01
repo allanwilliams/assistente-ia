@@ -198,7 +198,7 @@ SIMPLE_JWT = {
 }
 
 DOMINIO_ATUAL = env('DOMINIO_ATUAL', default='localhost:8000')
-DASHBOARD = "/documento/dashboard-documento/"
+DASHBOARD = env("DASHBOARD", default='/documento/tanaka/')
 CONSTANCE_BACKEND = 'constance.backends.database.DatabaseBackend'
 CONSTANCE_CONFIG = {
     'DOMINIO_ATUAL': (DOMINIO_ATUAL,

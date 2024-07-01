@@ -276,7 +276,7 @@ function newtranscricao(target) {
                         text: 'Iniciaremos em breve o processamento do seu arquivo para extrair o máximo de informações e usá-las na nossa inteligência artificial. Você pode acompanhar o andamento desse processo na nossa Dashboard!',
                         confirmButtonColor:'#00c0ef'
                     }).then(() => {
-                        window.location.href = `/documento/dashboard-media/`
+                        window.location.href = `/documento/tanaka/`
                     });
                 },
                 error: (error) => {
