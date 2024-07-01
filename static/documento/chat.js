@@ -150,11 +150,12 @@ function fillChat(data) {
 }
 
 function loadDocumento(titulo, url, id) {
+    const newUrl = url.includes('http://martinha') || url.includes('http://tanaka') ? url.replace('http://','https://') : url
     pdfContainer.html(`
         <div class="pdf-header">
             <h3>${titulo}</h3> 
         </div>
-        <embed src='${url}' width="100%" height="100%">
+        <embed src='${newUrl}' width="100%" height="100%">
     `)
 }
 

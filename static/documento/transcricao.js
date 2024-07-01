@@ -173,7 +173,7 @@ function filltranscricao(data) {
 function loadDocumento(titulo, url, id, tipo, legenda) {
     let classe = 'audio'
     if (tipo == 1) { classe = 'video'}
-  
+    const newUrl = url.includes('http://martinha') || url.includes('http://tanaka') ? url.replace('http://','https://') : url
     mediaContainer.html(`
         <div class="media-header">
             <h3 title="${titulo}">${titulo}</h3> 
@@ -183,7 +183,7 @@ function loadDocumento(titulo, url, id, tipo, legenda) {
             </div>
         </div>
         <video id="media-el" controls preload="auto" class="${classe}">
-            <source src="${url}" />
+            <source src="${newUrl}" />
             <track label="Português" kind="subtitles" srclang="en" src="${legenda}" default />
         </video>
         <div id="media-footer">
