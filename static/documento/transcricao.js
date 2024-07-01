@@ -174,6 +174,7 @@ function loadDocumento(titulo, url, id, tipo, legenda) {
     let classe = 'audio'
     if (tipo == 1) { classe = 'video'}
     const newUrl = url.includes('http://martinha') || url.includes('http://tanaka') ? url.replace('http://','https://') : url
+    const newLegendaUrl = legenda.includes('http://martinha') || legenda.includes('http://tanaka') ? legenda.replace('http://','https://') : legenda
     mediaContainer.html(`
         <div class="media-header">
             <h3 title="${titulo}">${titulo}</h3> 
@@ -184,7 +185,7 @@ function loadDocumento(titulo, url, id, tipo, legenda) {
         </div>
         <video id="media-el" controls preload="auto" class="${classe}">
             <source src="${newUrl}" />
-            <track label="Português" kind="subtitles" srclang="en" src="${legenda}" default />
+            <track label="Português" kind="subtitles" srclang="en" src="${newLegendaUrl}" default />
         </video>
         <div id="media-footer">
             <div id="favorite-transcriptions"></div>
