@@ -20,7 +20,7 @@ def iniciar_async(media_transcricao):
     process.append(th)   
 
 def processar_transcricoes():
-    MAX_EXECUTION = 4
+    MAX_EXECUTION = 10
     run_transcricoes = MediaTranscricao.objects.filter(status=STATUS_PROCESSANDO_ARQUIVO, ativo=True).count()
     ocupado = run_transcricoes >= MAX_EXECUTION
     if not ocupado:

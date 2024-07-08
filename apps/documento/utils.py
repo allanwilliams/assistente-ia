@@ -3,17 +3,11 @@
 import requests
 import subprocess
 import json
-from pydub import AudioSegment
 from datetime import timedelta, datetime
-from openai import OpenAI
+# from openai import OpenAI
 from config.settings import ROOT_DIR, DEEPGRAM_API_KEY, OPEN_IA_API_KEY, CHAT_PDF_API_KEY
 from apps.documento import models
-import random
-# from scipy.io import wavfile
-# import pdfkit
-# import noisereduce as nr
-# import torch
-# from pyannote.audio import Pipeline
+
 import os
 from deepgram import (
     DeepgramClient,
@@ -116,200 +110,198 @@ def get_md5File(filepath,fileopen=False):
     return f'{md5_hexdigits.hexdigest()}'
 
 
-# def start_pipeline_transcricao(id):
-#     preparar_audio(id)
 
 class TanakaUtils:
     def __init__(self,media_transcricao_id):
         self.media_transcricao = models.MediaTranscricao.objects.get(pk=media_transcricao_id)
         self.filename_audio = str(self.media_transcricao.arquivo.name).split('/')[1].split('.')[-2]
-        self.path_media_audio = f'{ROOT_MEDIA}/{self.filename_audio}.wav'
+        self.path_media_audio = f'{ROOT_MEDIA}/{self.filename_audio}.mp3'
         self.file_path = '{}/{}'.format(ROOT_MEDIA, self.media_transcricao.arquivo)
+
+
+    def preparar_audio(self):
+        try:
+            self.atualizar_status_transcricao(STATUS_PROCESSANDO_ARQUIVO)
+
+            self.extrair_audio()
+
+            self.converter_video()
+
+            if os.path.exists(self.path_media_audio):
+                # preparar_transcricao_openia(media_transcricao_id, audio_file)
+                self.preparar_transcricao_deepgram()
+            else:
+                self.atualizar_status_transcricao(STATUS_FALHA_PROCESSAMENTO)
+        
+        except Exception as e:
+            self.atualizar_status_transcricao(STATUS_FALHA_PROCESSAMENTO)
+
 
     def atualizar_status_transcricao(self, status):
         self.media_transcricao.status = status
         self.media_transcricao.save()
 
-    def preparar_audio(self):
-        try:
-            print("<<<<<<<<<<<< PREPARANDO AUDIO >>>>>>>>>>>>")
-            self.atualizar_status_transcricao(STATUS_PROCESSANDO_ARQUIVO)
 
-            # converte arquivo em wav
-            subprocess.run(['ffmpeg','-y','-i', self.file_path, '-f', 'wav', '-acodec', 'pcm_s16le', '-ar', '22050', '-ac', '1', 'copy', self.path_media_audio])
+    def converter_video(self):
+        # Se o arquivo for de video transforma em webm
+        if self.media_transcricao.tipo == TRANSCRICAO_TIPO_VIDEO and not ".webm" in self.file_path:
+            current_time = int(datetime.now().replace(microsecond=0).timestamp())
 
-            # Se o arquivo for de video transforma em webm
-            if self.media_transcricao.tipo == TRANSCRICAO_TIPO_VIDEO:
-
-                filename_path = self.filename_audio
+            filename_path = f'{self.filename_audio}_{current_time}'
                 
-                if ".webm" in self.file_path:
-                    filename_path = f"{filename_path}_{random.randrange(10, 99)}"
-                    
-                path_media_video = f'{ROOT_MEDIA}/arquivo_transcricao/{filename_path}.webm'
-                
-                subprocess.run(['ffmpeg','-y','-i', self.file_path, '-c:v', 'libvpx', '-s', '640x360', path_media_video])
-                
-                self.media_transcricao.arquivo.name = f'arquivo_transcricao/{filename_path}.webm'
-                self.media_transcricao.save()
-                self.filename_audio = str(self.media_transcricao.arquivo.name).split('/')[1].split('.')[-2]
-                
-                os.remove(self.file_path)
-
-            # converte arquivo wav em mp3
-            convert = AudioSegment.from_wav(self.path_media_audio)
-            audio_file = convert.export(f'{self.filename_audio}_temp.mp3', format="mp3")
+            path_media_video = f'{ROOT_MEDIA}/arquivo_transcricao/{filename_path}.webm'
+            subprocess.run(['ffmpeg','-y','-i', self.file_path, '-c:v', 'libvpx', '-s', '640x360', path_media_video])
+            # subprocess.run(['ffmpeg','-y','-i', self.file_path, '-c:v', 'libvpx-vp9', '-crf', '51', '-b:v', '250K', '-c:a', 'libvorbis',  path_media_video])
             
-            os.remove(self.path_media_audio)
-
-            if audio_file:
-                print("<<<<<<<<<<<< PREPARAÇAO AUDIO CONCLUIDA >>>>>>>>>>>>")
-                # preparar_transcricao_openia(media_transcricao_id, audio_file)
-                self.preparar_transcricao_deepgram(audio_file)
-            else:
-                print("<<<<<<<<<<<< ERRO AO PREPARAR AUDIO >>>>>>>>>>>>")
-                self.atualizar_status_transcricao(STATUS_FALHA_PROCESSAMENTO)
-        
-        except Exception as e:
-            print("<<<<<<<<<<<< ERRO AO PREPARAR AUDIO >>>>>>>>>>>>", e)
-            self.atualizar_status_transcricao(STATUS_FALHA_PROCESSAMENTO)
-
-    def preparar_transcricao_openia(self,audio_file):
-        try: 
-            # envia arquivo para OpenAI
-            path_media_legenda = f'{ROOT_LEGENDA}/{self.filename_audio}.vtt'
+            self.media_transcricao.arquivo.name = f'arquivo_transcricao/{filename_path}.webm'
+            self.media_transcricao.save()
+            self.filename_audio = str(self.media_transcricao.arquivo.name).split('/')[1].split('.')[-2]
             
-            print("<<<<<<<<<<<< PREPARANDO TRANSCRIÇÃO >>>>>>>>>>>>")
-            self.atualizar_status_transcricao(STATUS_FAZENDO_TRANSCRICAO)
-
-            client = OpenAI(api_key=OPEN_IA_API_KEY)
-            transcricao = client.audio.transcriptions.create(
-                model="whisper-1", 
-                file=audio_file, 
-                response_format="verbose_json"
-            )
-
-            if transcricao:
-                print('audio_file.name', audio_file.name)
-                # diarization = get_diarizations(audio_file.name)
-                texto_total = ""
-                with open(path_media_legenda, 'w') as vtt:
-                    vtt.write('WEBVTT\n')
-                    
-                    for t in transcricao.segments:
-                        start = convert_to_time(t.get('start'), True)
-                        end = convert_to_time(t.get('end'), True)
-                        text = t.get('text')
-
-                        vtt.write(f'{start} --> {end}\r')
-                        vtt.write(f'{str(text).strip()}\r')
-
-                        texto_total += f'{start} - {end}</br>'
-                        texto_total += f'{text}</br>'
-
-                        dict_transcricao = {
-                            'media_transcricao': self.media_transcricao,
-                            'texto': text,
-                            'tempo_inicial': convert_to_time(t.get('start'), False),
-                            'tempo_final': convert_to_time(t.get('end'), False),
-                            'tempo_inicial_segundos': int(t.get('start')),
-                            # 'speaker': get_speaker(diarization,t.get('start'),t.get('end'))
-                            'speaker': 'Não identificado'
-                        }
-                        transcricao_new = models.Transcricao(**dict_transcricao)
-                        transcricao_new.save()
-                    
-                    self.media_transcricao.legenda = f'legenda_transcricao/{self.filename_audio}.vtt'
-                    # instance.diarizacao = diarization
-                    transcricao_obj = {
-                        "segments": transcricao.segments,
-                    }
-                    self.media_transcricao.transcricao = json.dumps(transcricao_obj)
-                    self.media_transcricao.save()
-                        
-                vtt.close()
-                print("<<<<<<<<<<<< TRANSCRIÇÃO CONCLUIDA >>>>>>>>>>>>")
-                self.atualizar_status_transcricao(STATUS_CONCLUIDO)
-            else:
-                print("<<<<<<<<<<<< FALHA NA TRANSCRIÇÃO >>>>>>>>>>>>")
-                self.atualizar_status_transcricao(STATUS_FALHA_TRANSCRICAO)
-
-        except Exception as e:
-            print("<<<<<<<<<<<< FALHA NA TRANSCRIÇÃO EXCEPT >>>>>>>>>>>>", e)
-            self.atualizar_status_transcricao(STATUS_FALHA_TRANSCRICAO)
+            os.remove(self.file_path)
 
 
-    def preparar_transcricao_deepgram(self, audio_file):
+    def extrair_audio(self):
+        # subprocess.run(['ffmpeg','-y','-i', self.file_path, '-f', 'wav', '-acodec', 'pcm_s16le', '-ar', '22050', '-ac', '1', 'copy', self.path_media_audio])
+        subprocess.run(['ffmpeg','-y','-i', self.file_path, '-f', 'mp3', '-ar', '22050', '-ac', '1', 'copy', self.path_media_audio])
+
+
+    def preparar_transcricao_deepgram(self):
         try: 
             path_media_legenda = f'{ROOT_LEGENDA}/{self.filename_audio}.vtt'
             
-            print("<<<<<<<<<<<< PREPARANDO TRANSCRIÇÃO >>>>>>>>>>>>")
             self.atualizar_status_transcricao(STATUS_FAZENDO_TRANSCRICAO)
 
             deepgram = DeepgramClient(DEEPGRAM_API_KEY)
 
-            payload: FileSource = {
-                "buffer": audio_file,
-            }
+            with open(self.path_media_audio, 'rb') as f:
 
-            options = PrerecordedOptions(
-                model="whisper-large",
-                language="pt-BR",
-                smart_format=True, 
-                punctuate=True, 
-                paragraphs=True, 
-                diarize=True, 
-            )
+                payload: FileSource = {
+                    "buffer": f.read(),
+                }
 
-            response = deepgram.listen.prerecorded.v("1").transcribe_file(payload, options, timeout = 900)
+                options = PrerecordedOptions(
+                    model="whisper-large",
+                    language="pt-BR",
+                    smart_format=True, 
+                    punctuate=True, 
+                    paragraphs=True, 
+                    diarize=True, 
+                )
 
-            paragrafos = response.results.channels[0].alternatives[0].paragraphs.paragraphs
+                response = deepgram.listen.prerecorded.v("1").transcribe_file(payload, options, timeout = 900)
 
-            if paragrafos:
-                texto_total = ""
-                cores_avatar = ['#179B14', '#BC1414', '#FA8C0B', '#000000', '#0DA78B', '#0D6FA7', '#510BAA', '#C20FC6', '#F2E03E', '#FF6384', '#4BC0C0', '#8D99AE']
-                with open(path_media_legenda, 'w') as vtt:
-                    vtt.write('WEBVTT\n')
+                paragrafos = response.results.channels[0].alternatives[0].paragraphs.paragraphs
 
-                    for p in paragrafos:
-                        
-                        for s in p.sentences:
-                            start = convert_to_time(s.start, True)
-                            end = convert_to_time(s.end, True)
-                            text = s.text
+                if paragrafos:
+                    texto_total = ""
+                    cores_avatar = ['#179B14', '#BC1414', '#FA8C0B', '#000000', '#0DA78B', '#0D6FA7', '#510BAA', '#C20FC6', '#F2E03E', '#FF6384', '#4BC0C0', '#8D99AE']
+                    with open(path_media_legenda, 'w') as vtt:
+                        vtt.write('WEBVTT\n')
 
-                            vtt.write(f'{start} --> {end}\r')
-                            vtt.write(f'{str(text).strip()}\r')
+                        for p in paragrafos:
+                            
+                            for s in p.sentences:
+                                start = convert_to_time(s.start, True)
+                                end = convert_to_time(s.end, True)
+                                text = s.text
 
-                            texto_total += f'{start} - {end}</br>'
-                            texto_total += f'{text}</br>'
+                                vtt.write(f'{start} --> {end}\r')
+                                vtt.write(f'{str(text).strip()}\r')
 
-                            dict_transcricao = {
-                                'media_transcricao': self.media_transcricao,
-                                'texto': text,
-                                'tempo_inicial': convert_to_time(s.start, False),
-                                'tempo_final': convert_to_time(s.end, False),
-                                'tempo_inicial_segundos': int(s.start),
-                                'speaker': f"Orador {p.speaker}",
-                                'cor_speaker': cores_avatar[p.speaker]
-                            }
-                            transcricao_new = models.Transcricao(**dict_transcricao)
-                            transcricao_new.save()
+                                texto_total += f'{start} - {end}</br>'
+                                texto_total += f'{text}</br>'
+
+                                dict_transcricao = {
+                                    'media_transcricao': self.media_transcricao,
+                                    'texto': text,
+                                    'tempo_inicial': convert_to_time(s.start, False),
+                                    'tempo_final': convert_to_time(s.end, False),
+                                    'tempo_inicial_segundos': int(s.start),
+                                    'speaker': f"Orador {p.speaker}",
+                                    'cor_speaker': cores_avatar[p.speaker]
+                                }
+                                transcricao_new = models.Transcricao(**dict_transcricao)
+                                transcricao_new.save()
 
 
-                    self.media_transcricao.legenda = f'legenda_transcricao/{self.filename_audio}.vtt'
-                    self.media_transcricao.save()
-                        
-                vtt.close()
-                os.remove(f'{ROOT_DIR}/{audio_file.name}')
-                print("<<<<<<<<<<<< TRANSCRIÇÃO CONCLUIDA >>>>>>>>>>>>")
-                self.atualizar_status_transcricao(STATUS_CONCLUIDO)
-            else:
-                print("<<<<<<<<<<<< FALHA NA TRANSCRIÇÃO >>>>>>>>>>>>")
-                self.atualizar_status_transcricao(STATUS_FALHA_TRANSCRICAO)
+                        self.media_transcricao.legenda = f'legenda_transcricao/{self.filename_audio}.vtt'
+                        self.media_transcricao.save()
+                            
+                    vtt.close()
+                    self.atualizar_status_transcricao(STATUS_CONCLUIDO)
+                else:
+                    self.atualizar_status_transcricao(STATUS_FALHA_TRANSCRICAO)
+
+                f.close()
+            os.remove(self.path_media_audio)
+
         except Exception as e:
-            print("<<<<<<<<<<<< FALHA NA TRANSCRIÇÃO EXCEPT >>>>>>>>>>>>", e)
-            self.atualizar_status_transcricao( STATUS_FALHA_TRANSCRICAO)
+            self.atualizar_status_transcricao(STATUS_FALHA_TRANSCRICAO)
+
+
+        # def preparar_transcricao_openia(self,audio_file):
+    #     try: 
+    #         # envia arquivo para OpenAI
+    #         path_media_legenda = f'{ROOT_LEGENDA}/{self.filename_audio}.vtt'
+            
+    #         print("<<<<<<<<<<<< PREPARANDO TRANSCRIÇÃO >>>>>>>>>>>>")
+    #         self.atualizar_status_transcricao(STATUS_FAZENDO_TRANSCRICAO)
+
+    #         client = OpenAI(api_key=OPEN_IA_API_KEY)
+    #         transcricao = client.audio.transcriptions.create(
+    #             model="whisper-1", 
+    #             file=audio_file, 
+    #             response_format="verbose_json"
+    #         )
+
+    #         if transcricao:
+    #             print('audio_file.name', audio_file.name)
+    #             # diarization = get_diarizations(audio_file.name)
+    #             texto_total = ""
+    #             with open(path_media_legenda, 'w') as vtt:
+    #                 vtt.write('WEBVTT\n')
+                    
+    #                 for t in transcricao.segments:
+    #                     start = convert_to_time(t.get('start'), True)
+    #                     end = convert_to_time(t.get('end'), True)
+    #                     text = t.get('text')
+
+    #                     vtt.write(f'{start} --> {end}\r')
+    #                     vtt.write(f'{str(text).strip()}\r')
+
+    #                     texto_total += f'{start} - {end}</br>'
+    #                     texto_total += f'{text}</br>'
+
+    #                     dict_transcricao = {
+    #                         'media_transcricao': self.media_transcricao,
+    #                         'texto': text,
+    #                         'tempo_inicial': convert_to_time(t.get('start'), False),
+    #                         'tempo_final': convert_to_time(t.get('end'), False),
+    #                         'tempo_inicial_segundos': int(t.get('start')),
+    #                         # 'speaker': get_speaker(diarization,t.get('start'),t.get('end'))
+    #                         'speaker': 'Não identificado'
+    #                     }
+    #                     transcricao_new = models.Transcricao(**dict_transcricao)
+    #                     transcricao_new.save()
+                    
+    #                 self.media_transcricao.legenda = f'legenda_transcricao/{self.filename_audio}.vtt'
+    #                 # instance.diarizacao = diarization
+    #                 transcricao_obj = {
+    #                     "segments": transcricao.segments,
+    #                 }
+    #                 self.media_transcricao.transcricao = json.dumps(transcricao_obj)
+    #                 self.media_transcricao.save()
+                        
+    #             vtt.close()
+    #             print("<<<<<<<<<<<< TRANSCRIÇÃO CONCLUIDA >>>>>>>>>>>>")
+    #             self.atualizar_status_transcricao(STATUS_CONCLUIDO)
+    #         else:
+    #             print("<<<<<<<<<<<< FALHA NA TRANSCRIÇÃO >>>>>>>>>>>>")
+    #             self.atualizar_status_transcricao(STATUS_FALHA_TRANSCRICAO)
+
+    #     except Exception as e:
+    #         print("<<<<<<<<<<<< FALHA NA TRANSCRIÇÃO EXCEPT >>>>>>>>>>>>", e)
+    #         self.atualizar_status_transcricao(STATUS_FALHA_TRANSCRICAO)
 
 
 class MartinhaUtils:
