@@ -34,7 +34,8 @@ from apps.documento.choices import (
     STATUS_OCR_PROCESSANDO,
     STATUS_OCR_FALHA_PROCESSAMENTO,
     STATUS_PDF_FALHA_ENVIO,
-    STATUS_OCR_CONCLUIDO
+    STATUS_OCR_CONCLUIDO,
+    CHAT_AUTOR_HUMANO
 )
 from ..utils import create_questions
 from rest_framework.decorators import action
@@ -204,7 +205,7 @@ class MensagemViewSet(ModelViewSet):
         texto = request.POST.get('texto')
         autor = request.POST.get('autor')
 
-        total_perguntas_chat = Mensagem.objects.filter(criado_por=request.user, chat_id=chat).count()
+        total_perguntas_chat = Mensagem.objects.filter(criado_por=request.user, chat_id=chat, autor=CHAT_AUTOR_HUMANO).count()
 
         if total_perguntas_chat > config.DOCUMENTO_LIMITE_PERGUNTAS_PDF:
             mensagem = f"Você excedeu o limite máximo de {config.DOCUMENTO_LIMITE_PERGUNTAS_PDF} perguntas para este documento." 
