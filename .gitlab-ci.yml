@@ -37,7 +37,7 @@ SonarQubeCheck:
       - .sonar/cache
   script: 
     - sonar-scanner
-        -Dsonar.projectKey=dev-dpge_template-django-admin_AYtdpS9X7Q6IbM8YFewV
+        -Dsonar.projectKey=dev-dpge_assistente-ia_AZDAmeROJ2d37lK-69q6
         -Dsonar.qualitygate.wait=true
         -Dsonar.python.coverage.reportPaths=coverage.xml
         -Dsonar.login=$SONARQUBE_TOKEN
