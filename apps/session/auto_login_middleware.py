@@ -59,7 +59,6 @@ class AutoLoginMiddleware:
             'email_verified': True,
             'family_name': user['user']['lastName'],
             'given_name': user['user']['firstName'],
-            'middle_name': user['user']['middleName'],
             'name': user['user']['fullName'],
             'roles': self.get_user_application_roles(user),
             'scope': 'openid email',
