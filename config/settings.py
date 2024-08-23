@@ -216,6 +216,18 @@ CONSTANCE_CONFIG = {
     'DOCUMENTO_LIMITE_UPLOAD_VIDEO': (10,
                 'Limite de uploads de video do usuário por mês no app de transcrição de media',
                 int),
+    'MARTINHA_NUM_MAX_EXECUTION': (8,
+                'Número máximo de arquivos PDF que serão processados pela Martinha',
+                int),
+    'TANAKA_NUM_MAX_EXECUTION': (7,
+                'Número máximo de arquivos de vídeo que serão processados pelo Tanaka',
+                int),
+    'MARTINHA_NUM_MAX_EXECUTION_LOAD_BALANCE': (4,
+                'Número máximo de arquivos PDF que serão processados pelo Tanaka em load balance da Martinha',
+                int),
+    'TANAKA_NUM_MAX_EXECUTION_LOAD_BALANCE': (3,
+                'Número máximo de arquivos de vídeo que serão processados pela Martinha em load balance do Tanaka',
+                int)
 }
 
 # Password validation
@@ -384,3 +396,6 @@ MAX_ATTEMPTS = 5
 DEEPGRAM_API_KEY = env("DEEPGRAM_API_KEY", default='')
 OPEN_IA_API_KEY = env("OPEN_IA_API_KEY", default='')
 CHAT_PDF_API_KEY = env("CHAT_PDF_API_KEY", default='')
+
+IS_TANAKA = env.bool("IS_TANAKA",default=False)
+IS_MARTINHA = env.bool("IS_MARTINHA",default=False)

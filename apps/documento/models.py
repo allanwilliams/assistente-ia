@@ -37,6 +37,7 @@ class Chat(BaseModel):
     status = models.IntegerField('Status', choices=CHOICES_STATUS_PDF, default=STATUS_OCR_DISPENSADO)
     visualizado = models.BooleanField('Visualizado', default=False)
     log_errors = models.TextField('Log errors', null=True, blank=True)
+    is_martinha_processando = models.BooleanField('Processado pela Martinha',blank=True,null=True)
 
     def __str__(self) -> str:
         return f'{self.id}'
@@ -98,6 +99,7 @@ class MediaTranscricao(BaseModel):
     status = models.IntegerField('Status', choices=CHOICES_STATUS_TRANSCRICAO, default=STATUS_FILA_PROCESSAMENTO)
     md5_hexdigit = models.CharField(max_length=64, blank=True, null=True)
     visualizado = models.BooleanField('Visualizado', default=False)
+    is_tanaka_processando = models.BooleanField('Processado pelo tanaka',blank=True,null=True)
 
     def __str__(self):
         return f'{self.titulo}'
