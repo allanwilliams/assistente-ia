@@ -25,6 +25,7 @@ def importar_usuarios(request):
 
 def return_context(request):
     mensagem = ''
+    data = ''
     if request.method == "POST":
         form = ImportarUsuariosForm(request.POST, request.FILES)
         if form.is_valid():
