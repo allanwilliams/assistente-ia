@@ -148,8 +148,7 @@ class TanakaUtils:
 
             if os.path.exists(self.path_media_audio):
                 # preparar_transcricao_openia(media_transcricao_id, audio_file)
-                # self.preparar_transcricao_deepgram()
-                self.atualizar_status_transcricao(STATUS_CONCLUIDO)
+                self.preparar_transcricao_deepgram()
             else:
                 self.atualizar_status_transcricao(STATUS_FALHA_PROCESSAMENTO)
         
@@ -339,15 +338,15 @@ class MartinhaUtils:
         try:
             self.atualizar_status(STATUS_OCR_PROCESSANDO)
             ocrmypdf.ocr(input_file=self.file_path, output_file=self.file_path, redo_ocr=True, output_type='pdf', optimize=0, jobs=28, invalidate_digital_signatures=True)
-            self.atualizar_status(STATUS_OCR_CONCLUIDO)
-            # chatpdf_source_id = self.enviar_arquivo_para_chatpdf()
+    
+            chatpdf_source_id = self.enviar_arquivo_para_chatpdf()
 
-            # if chatpdf_source_id:
-            #     self.chat.chatpdf_source_id = chatpdf_source_id
-            #     self.chat.save()
-            #     self.atualizar_status(STATUS_OCR_CONCLUIDO)
-            # else:
-            #     self.atualizar_status(STATUS_PDF_FALHA_ENVIO)
+            if chatpdf_source_id:
+                self.chat.chatpdf_source_id = chatpdf_source_id
+                self.chat.save()
+                self.atualizar_status(STATUS_OCR_CONCLUIDO)
+            else:
+                self.atualizar_status(STATUS_PDF_FALHA_ENVIO)
 
         except Exception as e:
             print('falha', e)
