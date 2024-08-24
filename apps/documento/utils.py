@@ -118,7 +118,40 @@ class TanakaUtils:
         self.path_media_audio = f'{ROOT_MEDIA}/{self.filename_audio}.mp3'
         self.file_path = '{}/{}'.format(ROOT_MEDIA, self.media_transcricao.arquivo)
 
-
+    def transcribe_atrain(self):
+        try:
+            print('aquii')
+            filename = self.path_media_audio
+            model = 'large-v1'
+            language = 'pt'
+            speaker_detection = 'true'
+            num_speakers = '3'
+            device = 'GPU'
+            compute_type = 'int8'
+            from aTrain  import audio, handle_upload, transcribe, output_files
+            output_file = str(self.media_transcricao.id) + ".wav"
+            output_path =  os.path.join(ROOT_MEDIA,output_file)
+            os.remove(output_path)
+            processed_file = audio.prepare_audio(f'{self.media_transcricao.id}',self.media_transcricao.arquivo.path,ROOT_MEDIA)
+            audio_duration = audio.get_audio_duration(processed_file)
+            estimated_process_time = handle_upload.estimate_processing_time(audio_duration,model, device)
+            print(processed_file)
+            # file_directory = os.path.join(TRANSCRIPT_DIR,file_id)
+            # prepared_file = os.path.join(file_directory, file_id + ".wav")
+            for step in transcribe.transcribe(processed_file, model, language, speaker_detection, num_speakers, device, compute_type):
+                response = f"data: {step['task']}\n\n"
+                print(response)
+            output_files.create_output_files(step["result"], speaker_detection, ROOT_MEDIA, self.filename_audio)
+            os.remove(processed_file)
+            
+        except Exception as e:
+            print(e)
+            # delete_transcription(file_id)
+            # traceback_str = traceback.format_exc()
+            # error = str(e)
+            # html = render_template("modals/modal_error.html", error=error, traceback=traceback_str).replace('\n', '')
+            # response = f"event: stopstream\ndata: {html}\n\n"
+            # yield response
     def preparar_audio(self):
         try:
             self.atualizar_status_transcricao(STATUS_PROCESSANDO_ARQUIVO)

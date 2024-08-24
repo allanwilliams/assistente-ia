@@ -10,7 +10,9 @@ from apps.documento.choices import (
     STATUS_OCR_DISPENSADO,
     STATUS_OCR_FILA,
     STATUS_OCR_PROCESSANDO,
-    STATUS_PDF_FALHA_ENVIO
+    STATUS_PDF_FALHA_ENVIO,
+    CHOICES_INTERPRETADOR,
+    INTERPRETADOR_DEFENSORIA
 )
 from datetime import datetime
 from django.db.models.signals import post_save, pre_save
@@ -98,6 +100,8 @@ class MediaTranscricao(BaseModel):
     status = models.IntegerField('Status', choices=CHOICES_STATUS_TRANSCRICAO, default=STATUS_FILA_PROCESSAMENTO)
     md5_hexdigit = models.CharField(max_length=64, blank=True, null=True)
     visualizado = models.BooleanField('Visualizado', default=False)
+    interpretador = models.IntegerField("Interpretador",choices=CHOICES_INTERPRETADOR, default=INTERPRETADOR_DEFENSORIA)
+    speakers = models.IntegerField("Número de falantes",default=0)
 
     def __str__(self):
         return f'{self.titulo}'
