@@ -7,11 +7,12 @@ from apps.documento.models import Mensagem, Chat, MediaTranscricao, Transcricao,
 
 @admin.register(Chat)
 class ChatAdmin(AuditoriaAdmin):
+    list_filter = ('criado_por','status','ativo')
     search_fields = (
         'titulo',
     )
 
-    list_display = ('titulo',  'ativo', 'documento', 'status')
+    list_display = ('titulo',  'ativo', 'documento', 'status','criado_por')
 
 
 @admin.register(Mensagem)
@@ -24,11 +25,12 @@ class MensagemAdmin(AuditoriaAdmin):
 
 @admin.register(MediaTranscricao)
 class MediaTranscricaoAdmin(AuditoriaAdmin):
+    list_filter = ('criado_por','status','ativo')
     search_fields = (
         'titulo',
     )
 
-    list_display = ('titulo',  'ativo', 'status', 'arquivo','legenda')
+    list_display = ('titulo',  'ativo', 'status', 'arquivo','legenda','criado_por')
 
 
 @admin.register(Transcricao)
