@@ -311,7 +311,12 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 
 # Media
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_PATH = env('MEDIA_PATH',default='/')
+if MEDIA_PATH != '/':
+    MEDIA_ROOT = MEDIA_PATH
+else:
+    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+    
 MEDIA_URL = env('MEDIA_URL', default='/media/')
 
 # Default primary key field type
