@@ -45,7 +45,8 @@ class Chat(BaseModel):
 @receiver(post_save, sender=Chat)
 def criar_mensagens_chat(sender, instance, created, **kwargs):
 
-    ROOT = os.path.abspath(os.path.dirname(f'media/documento_chat'))
+    # ROOT = os.path.abspath(os.path.dirname(f'media/documento_chat'))
+    ROOT = '/mnt/dados/documento_chat'
     file_path = '{}/{}'.format(ROOT, instance.documento)
     string_md5 = get_md5File(file_path)
     search_md5 = sender.objects.filter(criado_por=instance.criado_por,md5_hexdigit=string_md5,ativo=True)
