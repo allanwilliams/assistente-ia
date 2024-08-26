@@ -109,7 +109,8 @@ class MediaTranscricao(BaseModel):
 @receiver(post_save, sender=MediaTranscricao)
 def criar_transcricao(sender, instance, created, **kwargs):
     
-    ROOT = os.path.abspath(os.path.dirname(f'media/arquivo_transcricao'))
+    # ROOT = os.path.abspath(os.path.dirname(f'media/arquivo_transcricao'))
+    ROOT = MEDIA_ROOT
     file_path = '{}/{}'.format(ROOT, instance.arquivo)
     string_md5 = get_md5File(file_path)
     search_md5 = sender.objects.filter(criado_por=instance.criado_por,md5_hexdigit=string_md5,ativo=True)
