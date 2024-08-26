@@ -19,6 +19,7 @@ import requests
 import os
 from apps.users.models import User
 from .utils import get_md5File, MartinhaUtils
+from config.settings import MEDIA_ROOT
 
 
 class Chat(BaseModel):
@@ -46,7 +47,7 @@ class Chat(BaseModel):
 def criar_mensagens_chat(sender, instance, created, **kwargs):
 
     # ROOT = os.path.abspath(os.path.dirname(f'media/documento_chat'))
-    ROOT = '/mnt/dados'
+    ROOT = MEDIA_ROOT
     file_path = '{}/{}'.format(ROOT, instance.documento)
     string_md5 = get_md5File(file_path)
     search_md5 = sender.objects.filter(criado_por=instance.criado_por,md5_hexdigit=string_md5,ativo=True)

@@ -5,7 +5,7 @@ import subprocess
 import json
 from datetime import timedelta, datetime
 # from openai import OpenAI
-from config.settings import ROOT_DIR, DEEPGRAM_API_KEY, OPEN_IA_API_KEY, CHAT_PDF_API_KEY
+from config.settings import ROOT_DIR, DEEPGRAM_API_KEY, OPEN_IA_API_KEY, CHAT_PDF_API_KEY, MEDIA_ROOT
 from apps.documento import models
 
 import os
@@ -35,9 +35,10 @@ import shutil
 import ocrmypdf
 from constance import config
 
-ROOT_MEDIA = f'{ROOT_DIR}/media'
-ROOT_LEGENDA = f'{ROOT_DIR}/media/legenda_transcricao'
-ROOT_PDF = f'{ROOT_DIR}/media/documento_chat'
+# ROOT_MEDIA = f'{ROOT_DIR}/media'
+ROOT_MEDIA = MEDIA_ROOT
+ROOT_LEGENDA = f'{MEDIA_ROOT}/legenda_transcricao'
+ROOT_PDF = f'{MEDIA_ROOT}/documento_chat'
 
 
 def create_questions(*args, **kwargs):
@@ -329,7 +330,7 @@ class MartinhaUtils:
         self.chat.is_martinha_processando = is_martinha
         self.chat.save()
         # self.file_path = f'{ROOT_DIR}/media/{self.chat.documento}'
-        self.file_path = f'/mnt/dados/{self.chat.documento}'
+        self.file_path = f'{ROOT_MEDIA}/{self.chat.documento}'
 
     def atualizar_status(self, status):
         self.chat.status = status
