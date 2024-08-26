@@ -329,7 +329,7 @@ class MartinhaUtils:
         self.chat.is_martinha_processando = is_martinha
         self.chat.save()
         # self.file_path = f'{ROOT_DIR}/media/{self.chat.documento}'
-        self.file_path = f'/mnt/dados{self.chat.documento}'
+        self.file_path = f'/mnt/dados/{self.chat.documento}'
 
     def atualizar_status(self, status):
         self.chat.status = status
