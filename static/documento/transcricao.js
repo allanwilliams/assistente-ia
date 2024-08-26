@@ -388,7 +388,7 @@ function openDialogEditSpeaker(id, speaker, colorSpeaker, replaceAllDefault) {
     const radioChecked = (color) => (colorSpeaker == color ? 'checked' : '' )
 
     Swal.fire({
-        title: "Editar falante",
+        title: "Editar orador",
         html: `
             <div class="form-group">
                 <label>Nome</label>
@@ -487,7 +487,7 @@ function getIndividualSpeakers(transcricoes) {
                         <i class="fa fa-user"></i>
                     </div>
                     <span>${s.speaker}</span>
-                    <i class="fa-solid fa-pen-to-square btn-edit-speaker" data-id="${s.id}" data-speaker="${s.speaker}" data-color-speaker="${s.cor_speaker}" data-replace-all-default="true"  data-toggle="tooltip" data-placement="right" title="Editar falante"></i>
+                    <i class="fa-solid fa-pen-to-square btn-edit-speaker" data-id="${s.id}" data-speaker="${s.speaker}" data-color-speaker="${s.cor_speaker}" data-replace-all-default="true"  data-toggle="tooltip" data-placement="right" title="Editar orador"></i>
                 </div>
             `).join('')}
             
