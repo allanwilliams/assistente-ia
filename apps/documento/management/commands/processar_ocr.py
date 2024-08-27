@@ -41,6 +41,7 @@ def processar_ocr():
             init = True
             max_execution = config.MARTINHA_NUM_MAX_EXECUTION_LOAD_BALANCE - run_documents_tanaka
             is_martinha = False
+            ocupado = tanaka_ocupada
 
     if not ocupado and init:
         chats = Chat.objects.filter(status=STATUS_OCR_FILA, ativo=True).order_by('id')[:max_execution]

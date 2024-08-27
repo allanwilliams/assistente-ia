@@ -39,6 +39,7 @@ def processar_transcricoes():
             init = True
             max_execution = config.TANAKA_NUM_MAX_EXECUTION_LOAD_BALANCE - run_transcricoes_martinha
             is_tanaka = False
+            ocupado = martinha_ocupado
 
     if not ocupado and init:
         transcricoes = MediaTranscricao.objects.filter(status=STATUS_FILA_PROCESSAMENTO, ativo=True).order_by('id')[:max_execution]
