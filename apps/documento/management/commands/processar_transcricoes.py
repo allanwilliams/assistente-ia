@@ -33,9 +33,9 @@ def processar_transcricoes():
     max_execution = config.TANAKA_NUM_MAX_EXECUTION - run_transcricoes_tanaka
     if settings.IS_MARTINHA:
         init = False
-        ocupado, run_documents_martinha, run_documents_tanaka = martinha_ocupada()
+        martinha_ocupado, run_documents_martinha, run_documents_tanaka = martinha_ocupada()
         martinha_size_to_max = config.MARTINHA_NUM_MAX_EXECUTION - run_documents_martinha
-        if not martinha_ocupada and martinha_size_to_max == config.MARTINHA_NUM_MAX_EXECUTION:
+        if not martinha_ocupado and martinha_size_to_max == config.MARTINHA_NUM_MAX_EXECUTION:
             init = True
             max_execution = config.TANAKA_NUM_MAX_EXECUTION_LOAD_BALANCE - run_transcricoes_martinha
             is_tanaka = False
