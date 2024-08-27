@@ -28,7 +28,7 @@ def iniciar_async(chat,is_martinha):
     
 def processar_ocr():
     if settings.IS_TANAKA:
-        time.sleep(5)
+        time.sleep(15)
     init = True
     is_martinha = True
     ocupado, run_documents_martinha, run_documents_tanaka = martinha_ocupada()

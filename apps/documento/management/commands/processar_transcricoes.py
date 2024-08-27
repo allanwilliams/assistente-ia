@@ -26,7 +26,7 @@ def iniciar_async(media_transcricao,is_tanaka):
 
 def processar_transcricoes():
     if settings.IS_MARTINHA:
-        time.sleep(5)
+        time.sleep(15)
     init = True
     is_tanaka = True
     ocupado, run_transcricoes_tanaka, run_transcricoes_martinha = tanaka_ocupado()
