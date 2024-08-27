@@ -8,6 +8,8 @@ from django.db import connection
 from apps.documento.utils import tanaka_ocupado, martinha_ocupada
 from constance import config
 from django.conf import settings
+import time
+
 
 process = []
 
@@ -23,6 +25,8 @@ def iniciar_async(media_transcricao,is_tanaka):
     process.append(th)   
 
 def processar_transcricoes():
+    if settings.IS_MARTINHA:
+        time.sleep(5)
     init = True
     is_tanaka = True
     ocupado, run_transcricoes_tanaka, run_transcricoes_martinha = tanaka_ocupado()

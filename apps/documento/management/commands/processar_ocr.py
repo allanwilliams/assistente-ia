@@ -11,6 +11,7 @@ from django.db import connection
 from apps.documento.utils import martinha_ocupada, tanaka_ocupado
 from constance import config
 from django.conf import settings
+import time
 
 process = []
 
@@ -26,6 +27,8 @@ def iniciar_async(chat,is_martinha):
     process.append(th)
     
 def processar_ocr():
+    if settings.IS_TANAKA:
+        time.sleep(5)
     init = True
     is_martinha = True
     ocupado, run_documents_martinha, run_documents_tanaka = martinha_ocupada()
