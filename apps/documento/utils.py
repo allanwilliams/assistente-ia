@@ -159,6 +159,7 @@ class TanakaUtils:
 
     def atualizar_status_transcricao(self, status):
         self.media_transcricao.status = status
+        self.media_transcricao.modificado_em = datetime.now()
         self.media_transcricao.save()
 
 
@@ -256,6 +257,7 @@ class TanakaUtils:
             os.remove(self.path_media_audio)
 
         except Exception as e:
+            print(e)
             self.atualizar_status_transcricao(STATUS_FALHA_TRANSCRICAO)
 
 
@@ -334,6 +336,7 @@ class MartinhaUtils:
 
     def atualizar_status(self, status):
         self.chat.status = status
+        self.chat.modificado_em = datetime.now()
         self.chat.save()
 
     def preparar_ocr_pdf(self):

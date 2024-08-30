@@ -20,11 +20,11 @@ import os
 from apps.users.models import User
 from .utils import get_md5File, MartinhaUtils
 from config.settings import MEDIA_ROOT
-
+import os
 
 class Chat(BaseModel):
     titulo = models.CharField('Titulo', max_length=255)
-    documento = models.FileField('Documento', upload_to='documento_chat')
+    documento = models.FileField('Documento', upload_to='documento_chat',blank=True,null=True)
     ativo = models.BooleanField('Ativo', default=True)
     chatpdf_source_id = models.CharField('Chat PDF source id', max_length=255, blank=True, null=True)
     usuario = models.ForeignKey(
@@ -42,19 +42,22 @@ class Chat(BaseModel):
 
     def __str__(self) -> str:
         return f'{self.id}'
-            
+    
+    def remove_old_file(self):
+        self.documento.delete(save=False)
+        Chat.objects.filter(id=self.id).update(documento=None)
+
 @receiver(post_save, sender=Chat)
 def criar_mensagens_chat(sender, instance, created, **kwargs):
-
-    # ROOT = os.path.abspath(os.path.dirname(f'media/documento_chat'))
-    ROOT = MEDIA_ROOT
-    file_path = '{}/{}'.format(ROOT, instance.documento)
-    string_md5 = get_md5File(file_path)
-    search_md5 = sender.objects.filter(criado_por=instance.criado_por,md5_hexdigit=string_md5,ativo=True)
-    if instance and not instance.md5_hexdigit:
-        if not search_md5:
-            instance.md5_hexdigit = string_md5    
-            instance.save()
+    if instance.documento:
+        ROOT = MEDIA_ROOT
+        file_path = '{}/{}'.format(ROOT, instance.documento)
+        string_md5 = get_md5File(file_path)
+        search_md5 = sender.objects.filter(criado_por=instance.criado_por,md5_hexdigit=string_md5,ativo=True)
+        if instance and not instance.md5_hexdigit:
+            if not search_md5:
+                instance.md5_hexdigit = string_md5    
+                instance.save()
 
     # if instance and not instance.status in [STATUS_OCR_FILA, STATUS_OCR_PROCESSANDO] and not instance.chatpdf_source_id:
     #     martinha_utils = MartinhaUtils(chat_id=instance.id)
@@ -86,7 +89,7 @@ class Mensagem(BaseModel):
 
 class MediaTranscricao(BaseModel):
     titulo = models.CharField('Titulo', max_length=255,blank=True,null=True)
-    arquivo = models.FileField('Arquivo', upload_to='arquivo_transcricao')
+    arquivo = models.FileField('Arquivo', upload_to='arquivo_transcricao',blank=True,null=True)
     legenda = models.FileField('Legenda', upload_to='legenda_transcricao',blank=True,null=True)
     tipo = models.IntegerField("Tipo",choices=CHOICES_TRANSCRICAO_TIPO)
     ativo = models.BooleanField('Ativo', default=True)
@@ -105,7 +108,11 @@ class MediaTranscricao(BaseModel):
 
     def __str__(self):
         return f'{self.titulo}'
-
+    
+    def remove_old_file(self):
+        self.arquivo.delete(save=False)
+        MediaTranscricao.objects.filter(id=self.id).update(arquivo=None)
+            
 @receiver(post_save, sender=MediaTranscricao)
 def criar_transcricao(sender, instance, created, **kwargs):
     

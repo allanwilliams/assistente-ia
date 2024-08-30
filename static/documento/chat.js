@@ -150,13 +150,28 @@ function fillChat(data) {
 }
 
 function loadDocumento(titulo, url, id) {
-    const newUrl = url.includes('http://martinha') || url.includes('http://tanaka') ? url.replace('http://','https://') : url
-    pdfContainer.html(`
-        <div class="pdf-header">
-            <h3>${titulo}</h3> 
-        </div>
-        <embed src='${newUrl}' width="100%" height="100%">
-    `)
+    if (url){
+        const newUrl = url.includes('http://martinha') || url.includes('http://tanaka') ? url.replace('http://','https://') : url
+        pdfContainer.html(`
+            <div class="pdf-header">
+                <h3>${titulo}</h3> 
+            </div>
+            <embed src='${newUrl}' width="100%" height="100%">
+        `)
+    }else {
+        pdfContainer.html(`
+            <div class="pdf-header">
+                <h3>${titulo}</h3> 
+            </div>
+            <div class="media-not-found"> 
+                <span class="fa-stack fa-2x" style="position: relative; height: 4em;width: 4em;">
+                    <i class="fas fa-file-pdf fa-stack-1x"></i>
+                    <i class="fas fa-slash fa-stack-1x" style="position: absolute; top: 0; left: -0.2em; width: 100%; height: 100%;"></i>
+                </span>
+                <p> Arquivo PDF removido </p>
+            </div>
+        `)
+    }
 }
 
 
@@ -174,7 +189,7 @@ function insertConversation(mensagens) {
                         <li><i class="btn-send-fake fa-solid fa-paper-plane" data-id="msg-default-3"></i> <span id="msg-default-3">Resuma detalhadamente a sentença  indicando os principais argumentos e a decisão final</span></li>
                         <li><i class="btn-send-fake fa-solid fa-paper-plane" data-id="msg-default-4"></i> <span id="msg-default-4">Resuma detalhadamente o recurso indicando os principais argumentos e pedidos</span></li>
                         <li><i class="btn-send-fake fa-solid fa-paper-plane" data-id="msg-default-5"></i> <span id="msg-default-5">Resuma detalhadamente o acórdão indicando os principais argumentos e a decisão final</span></li>
-                        <li><i class="btn-send-fake fa-solid fa-paper-plane" data-id="msg-default-6"></i> <span id="msg-default-6">Resuma detalhadamente o todos processo indicando as principais informações da petição inicial - contestação - sentença - recurso - acórdão -  indicando a página de cada de forma que seja possível acessar facilmente</span></li>
+                        <li><i class="btn-send-fake fa-solid fa-paper-plane" data-id="msg-default-6"></i> <span id="msg-default-6">Resuma detalhadamente todo o processo indicando as principais informações da petição inicial - contestação - sentença - recurso - acórdão -  indicando a página de cada de forma que seja possível acessar facilmente</span></li>
                     </ul>
                 </div>
             </div>

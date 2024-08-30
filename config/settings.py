@@ -227,6 +227,12 @@ CONSTANCE_CONFIG = {
                 int),
     'TANAKA_NUM_MAX_EXECUTION_LOAD_BALANCE': (3,
                 'Número máximo de arquivos de vídeo que serão processados pela Martinha em load balance do Tanaka',
+                int),
+    'MARTINHA_NUM_MAX_DAYS_KEEP_FILES': (30,
+                'Número máximo de dias que os arquivos PDF da Martinha serão mantidos no sistema',
+                int),
+    'TANAKA_NUM_MAX_DAYS_KEEP_FILES': (30,
+                'Número máximo de dias que os arquivos Vídeo/Audio do Tanaka serão mantidos no sistema',
                 int)
 }
 

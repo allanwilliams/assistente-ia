@@ -173,25 +173,45 @@ function filltranscricao(data) {
 function loadDocumento(titulo, url, id, tipo, legenda) {
     let classe = 'audio'
     if (tipo == 1) { classe = 'video'}
-    const newUrl = url.includes('http://martinha') || url.includes('http://tanaka') ? url.replace('http://','https://') : url
-    const newLegendaUrl = legenda.includes('http://martinha') || legenda.includes('http://tanaka') ? legenda.replace('http://','https://') : legenda
-    mediaContainer.html(`
-        <div class="media-header">
-            <h3 title="${titulo}">${titulo}</h3> 
-            <div>
-                <a href="/documento/export-transcricoes-txt/${id}"><i class="fa-solid fa-download" data-toggle="tooltip" data-placement="bottom" title="Exportar transcrição"></i></a>
-                <i data-remove-id='${id}' class='fa fa-trash btn-remove-transcricao'></i>
+    if (url){
+        const newUrl = url.includes('http://martinha') || url.includes('http://tanaka') ? url.replace('http://','https://') : url
+        const newLegendaUrl = legenda.includes('http://martinha') || legenda.includes('http://tanaka') ? legenda.replace('http://','https://') : legenda
+        mediaContainer.html(`
+            <div class="media-header">
+                <h3 title="${titulo}">${titulo}</h3> 
+                <div>
+                    <a href="/documento/export-transcricoes-txt/${id}"><i class="fa-solid fa-download" data-toggle="tooltip" data-placement="bottom" title="Exportar transcrição"></i></a>
+                    <i data-remove-id='${id}' class='fa fa-trash btn-remove-transcricao'></i>
+                </div>
             </div>
-        </div>
-        <video id="media-el" controls preload="auto" class="${classe}">
-            <source src="${newUrl}" />
-            <track label="Português" kind="subtitles" srclang="en" src="${newLegendaUrl}" default />
-        </video>
-        <div id="media-footer">
-            <div id="favorite-transcriptions"></div>
-            <div id="edit-group-speakers"></div>
-        </div>
-    `)
+            <video id="media-el" controls preload="auto" class="${classe}">
+                <source src="${newUrl}" />
+                <track label="Português" kind="subtitles" srclang="en" src="${newLegendaUrl}" default />
+            </video>
+            <div id="media-footer">
+                <div id="favorite-transcriptions"></div>
+                <div id="edit-group-speakers"></div>
+            </div>
+        `)
+    }else {
+        mediaContainer.html(`
+            <div class="media-header">
+                <h3 title="${titulo}">${titulo}</h3> 
+                <div>
+                    <a href="/documento/export-transcricoes-txt/${id}"><i class="fa-solid fa-download" data-toggle="tooltip" data-placement="bottom" title="Exportar transcrição"></i></a>
+                    <i data-remove-id='${id}' class='fa fa-trash btn-remove-transcricao'></i>
+                </div>
+            </div>
+            <div class="media-not-found"> 
+                <i class="fa-solid fa-video-slash"></i>
+                <p> Arquivo de midia removido </p>
+            </div>
+            <div id="media-footer">
+                <div id="favorite-transcriptions"></div>
+                <div id="edit-group-speakers"></div>
+            </div>    
+        `)
+    }
 }
 
 btnFindText.addEventListener('click',function(){

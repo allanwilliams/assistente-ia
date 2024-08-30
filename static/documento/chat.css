@@ -180,3 +180,18 @@ li.question {
 .choice-link-chat {
     font-weight: bold;
 }
+
+.media-not-found {
+    text-align: center;
+    background: #eaeaea;
+    padding: 8em;
+    margin: 0 1em;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-direction: column;
+}
+
+.media-not-found i {
+    font-size: 5em;
+}

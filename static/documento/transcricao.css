@@ -321,3 +321,14 @@ video.audio {
 .favoritado {
     background-color: rgba(250, 140, 11, 0.1);
 }
+
+.media-not-found {
+    text-align: center;
+    background: #eaeaea;
+    padding: 8em;
+    margin: 0 1em;
+}
+
+.media-not-found i {
+    font-size: 5em;
+}
