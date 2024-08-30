@@ -279,7 +279,7 @@ function fillListChats(chat) {
     }
 
     if(chat) {
-        const progress = getProgress(chat.status)
+        const progress = getProgress(chat.status);
 
         ([1, 6, 7].includes(chat.status)) ? documentoDelete.css('display','block') : documentoDelete.css('display','none');
 

@@ -118,7 +118,7 @@ class ChatViewSet(ModelViewSet):
     queryset = Chat.objects.all().order_by('-criado_em')
     serializer_class = ChatSerializer
     filterset_class = ChatFilter
-    pagination_class = ResultsSetPagination
+    # pagination_class = ResultsSetPagination
     http_method_names = ['get', 'patch', 'post', 'delete','put']
 
     def create(self, request, *args, **kwargs):
@@ -219,7 +219,7 @@ class MediaTranscricaoViewSet(ModelViewSet):
     queryset = MediaTranscricao.objects.all().order_by('-id')
     serializer_class = MediaTranscricaoSerializer
     filterset_class = MediaTranscricaoFilter
-    pagination_class = ResultsSetPagination
+    # pagination_class = ResultsSetPagination
     http_method_names = ['get', 'patch', 'post', 'delete','put']
 
     def create(self, request, *args, **kwargs):

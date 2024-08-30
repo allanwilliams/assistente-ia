@@ -15,6 +15,7 @@ const questionBox = document.querySelector('#questionBox')
 const loader = $("#preloader")
 const chatHeaderActions = $("#chat-header-actions")
 let chatAtual = null
+let listChats = []
 
 body.addEventListener('click', function(event) {
     if(event.target.classList.contains('btn-page') && chatAtual) {
@@ -101,27 +102,21 @@ $(document).ready(() => {
     });
     
     if(userId.val()) {
-        getUserChats(userId.val(), 'chat')
-        .then((data) => data.json())
-        .then((data) => fillListChats(data.results))
-        .then(() => {
-            const url = window.location.search
-            const urlParams = new URLSearchParams(url);
-            const documento = urlParams.get('documento')
-            getChat(documento)
-        })
+        getChats(null)
     }
 })
 
 
-function fillListChats(chats) {
+
+function fillListChats(next) {
     let list = ''
-    const STATUS_OCR_CONCLUIDO = 4
-    const STATUS_OCR_DISPENSADO = 8
-    chats = chats.filter(c => [STATUS_OCR_CONCLUIDO, STATUS_OCR_DISPENSADO].includes(c.status))
-    chats.forEach((c) => {
+    listChats.forEach((c) => {
        list += `<div class="choice-link-chat btn" data-id="${c.id}">${c.titulo}</div>`
     })
+
+    if(next) {
+        list += `<div class="action-more" ><buttom onclick="getChats('${next}')" class="btn btn-more">Ver mais</buttom></div>`
+    }
 
     listChatsEl.html(list)
 }
@@ -147,6 +142,8 @@ function fillChat(data) {
     if(!visualizado) {
         updateVisualizado(id)
     }
+
+    setUrlParams('documento', id)
 }
 
 function loadDocumento(titulo, url, id) {
@@ -173,7 +170,6 @@ function loadDocumento(titulo, url, id) {
         `)
     }
 }
-
 
 function insertConversation(mensagens) {
     listMessagesEl.empty()
@@ -297,6 +293,39 @@ function getChat(chatId) {
         
     }
 }
+
+function getChats(nextUrl) {
+    const url = (nextUrl) ? nextUrl : `/documento/api/chat/?criado_por=${userId.val()}&ativo=true&status__in=4,8`;
+
+    $.ajax({
+        type: 'GET',
+        url: url,
+        success: (data) => { 
+            const { results, next } = data
+            listChats = (nextUrl) ? listChats.concat(results) : results;
+
+            fillListChats(next)
+
+            const url = window.location.search
+            const urlParams = new URLSearchParams(url);
+            let documento = urlParams.get('documento')
+
+            const hasDocInList = listChats.some((e) => e.id == documento)
+            
+            if(!hasDocInList) documento = null
+
+            getChat(documento)
+        },
+        error: () => {
+            Swal.fire({
+                icon: "error",
+                title: 'Falha em obter os documentos',
+                confirmButtonColor:'#00c0ef'
+            });
+        }
+    })
+}
+
 
 function deleteChat(chatId) {
     if(chatId) {

@@ -17,6 +17,7 @@ const transcricaoInputAsk = document.querySelector('#transcricao-input-ask')
 const colors = ['#179B14', '#BC1414', '#FA8C0B', '#000000', '#0DA78B', '#0D6FA7', '#510BAA', '#C20FC6', '#F2E03E', '#FF6384', '#4BC0C0', '#8D99AE']
 
 let transcricaoAtual = null
+let listTranscricoes = []
 
 body.addEventListener('click', function(event) {
 
@@ -117,38 +118,59 @@ $(document).ready(() => {
     });
     
     if(userId.val()) {
-        getUserTranscricoes(userId.val())
-        .then((data) => data.json())
-        .then((data) => fillListTranscricoes(data.results))
-        .then(() => {
-            const url = window.location.search
-            const urlParams = new URLSearchParams(url);
-            const documento = urlParams.get('arquivo')
-            getTranscricao(documento)
-        })
+        getTranscricoes(null)
     }
 })
 
-function getUserTranscricoes(userId) {
+function getTranscricoes(nextUrl) {
     const STATUS_CONCLUIDO = 4
-    return fetch(`/documento/api/media-transcricao/?criado_por=${userId}&ativo=true&status=${STATUS_CONCLUIDO}`)
+    const url =  (nextUrl) ? nextUrl : `/documento/api/media-transcricao/?criado_por=${userId.val()}&ativo=true&status=${STATUS_CONCLUIDO}`
+
+    $.ajax({
+        type: 'GET',
+        url: url,
+        success: (data) => { 
+            const { results, next } = data
+            listTranscricoes = (nextUrl) ? listTranscricoes.concat(results) : results;
+
+            fillListTranscricoes(next)
+
+            const url = window.location.search
+            const urlParams = new URLSearchParams(url);
+            let documento = urlParams.get('arquivo')
+
+            const hasMediaInList = listTranscricoes.some((e) => e.id == documento)
+            
+            if(!hasMediaInList) documento = null
+
+            getTranscricao(documento)
+        },
+        error: () => {
+            Swal.fire({
+                icon: "error",
+                title: 'Falha em obter as transcrições',
+                confirmButtonColor:'#00c0ef'
+            });
+        }
+    })
 }
 
-function fillListTranscricoes(transcricoes) {
+function fillListTranscricoes(next) {
     let list = ''
-    const STATUS_CONCLUIDO = 4
-
-    transcricoes = transcricoes.filter(c => c.status === STATUS_CONCLUIDO )
-    transcricoes.forEach((c) => {
+    listTranscricoes.forEach((c) => {
        list += `<div class="choice-link-transcricao btn" data-id="${c.id}">${c.titulo}</div>`
     })
+
+    if(next) {
+        list += `<div class="action-more" ><buttom onclick="getTranscricoes('${next}')" class="btn btn-more">Ver mais</buttom></div>`
+    }
 
     listTranscricoesEl.html(list)
 }
 
 function filltranscricao(data) {
-    const {id, transcricoes, titulo, arquivo, tipo, legenda, visualizado, status } = data
-    loadDocumento(titulo, arquivo, id,tipo,legenda)
+    const {id, transcricoes, titulo, arquivo, tipo, legenda, visualizado, status, duracao } = data
+    loadDocumento(titulo, arquivo, id,tipo,legenda, duracao)
     insertConversation(transcricoes)
     transcricaoAtual = data
     transcricaoIdOpenEl.val(id)
@@ -167,10 +189,13 @@ function filltranscricao(data) {
     if(link.length > 0) {
         link[0].classList.add('btn-info')
     }
+
+    setUrlParams('arquivo', id)
 }
 
 
-function loadDocumento(titulo, url, id, tipo, legenda) {
+function loadDocumento(titulo, url, id, tipo, legenda, duracao) {
+    duracao = formatDuration(duracao)
     let classe = 'audio'
     if (tipo == 1) { classe = 'video'}
     if (url){
@@ -178,7 +203,7 @@ function loadDocumento(titulo, url, id, tipo, legenda) {
         const newLegendaUrl = legenda.includes('http://martinha') || legenda.includes('http://tanaka') ? legenda.replace('http://','https://') : legenda
         mediaContainer.html(`
             <div class="media-header">
-                <h3 title="${titulo}">${titulo}</h3> 
+                <h3 title="${titulo} - ${duracao}">${titulo} - ${duracao}</h3> 
                 <div>
                     <a href="/documento/export-transcricoes-txt/${id}"><i class="fa-solid fa-download" data-toggle="tooltip" data-placement="bottom" title="Exportar transcrição"></i></a>
                     <i data-remove-id='${id}' class='fa fa-trash btn-remove-transcricao'></i>
@@ -591,3 +616,12 @@ function updateVisualizado(id) {
         })
     }
 }
+
+function formatDuration(seconds) {
+    const hours = Math.floor(seconds / 3600); // Converte segundos para horas inteiras
+    const minutes = Math.floor((seconds % 3600) / 60); // Converte o restante para minutos inteiros
+    const remainingSeconds = seconds % 60; // Obtém os segundos restantes
+    return `${hours}h ${minutes}m ${remainingSeconds}s`;
+}
+
+

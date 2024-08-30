@@ -184,6 +184,14 @@ class TanakaUtils:
     def extrair_audio(self):
         # subprocess.run(['ffmpeg','-y','-i', self.file_path, '-f', 'wav', '-acodec', 'pcm_s16le', '-ar', '22050', '-ac', '1', 'copy', self.path_media_audio])
         subprocess.run(['ffmpeg','-y','-i', self.file_path, '-f', 'mp3', '-ar', '22050', '-ac', '1', 'copy', self.path_media_audio])
+        result = subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of",
+                                 "default=noprint_wrappers=1:nokey=1", self.path_media_audio],
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.STDOUT
+                            )
+        duration = round(float(result.stdout))
+        self.media_transcricao.duracao = duration
+        self.media_transcricao.save()
 
 
     def preparar_transcricao_deepgram(self):

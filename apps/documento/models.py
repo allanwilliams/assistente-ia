@@ -105,6 +105,7 @@ class MediaTranscricao(BaseModel):
     md5_hexdigit = models.CharField(max_length=64, blank=True, null=True)
     visualizado = models.BooleanField('Visualizado', default=False)
     is_tanaka_processando = models.BooleanField('Processado pelo tanaka',blank=True,null=True)
+    duracao = models.IntegerField("Duração", blank=True, null=True)
 
     def __str__(self):
         return f'{self.titulo}'

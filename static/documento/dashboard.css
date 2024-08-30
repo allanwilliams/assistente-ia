@@ -230,7 +230,7 @@ body  {
     width: 100%;
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: start;
     flex-direction: row;
 }
 
@@ -359,18 +359,21 @@ body  {
 }
 
 #table-documentos-medias #documento-link {
-    border: 1px solid #00c0ef;
-    color: #00c0ef;
+    display: none;
+    border: 2px solid #fff;
+    color: #fff;
     border-radius: 5px;
-    padding: 3px 10px;
+    padding: 3px 19px;
     font-weight: bold;
+    margin-left: 11px;
 }
 
 #table-documentos-medias  .btn-remove-chat {
     display: none;
-    border: 1px solid red;
+    border: 2px solid red;
     color: red;
     border-radius: 5px;
-    padding: 3px 10px;
+    padding: 3px 19px;
     font-weight: bold;
+    margin-left: 11px;
 }

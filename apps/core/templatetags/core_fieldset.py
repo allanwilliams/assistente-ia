@@ -62,3 +62,9 @@ def get_nested_attr(obj, key):
 @register.filter
 def get_field_from_instance(obj,field):
     return getattr(obj,field)
+
+@register.filter
+def duration_format(value):
+    hours = int(value)
+    minutes = int((value - hours) * 60)
+    return f"{hours}h {minutes}m"

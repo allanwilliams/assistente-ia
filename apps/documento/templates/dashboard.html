@@ -29,7 +29,7 @@
     }
 </style>
 
-<link rel="stylesheet" href="{% static 'documento/dashboard.css' %}?v=1.3">
+<link rel="stylesheet" href="{% static 'documento/dashboard.css' %}?v=1.4">
 {% endblock %}
 
 {% block conteudo %}
@@ -134,8 +134,8 @@
                                     <small id="progress-bar-status-text" style="text-align: center;"></small>
                                 </div>
 
-                                <a id="documento-link" style="display: none;" href="/documento/">abrir</a>
-                                <span class='btn-remove-chat'  id="documento-delete" data-remove-id="0" >remover</span>
+                                <a id="documento-link" style="display: none;" href="/documento/">Acessar</a>
+                                <span class='btn-remove-chat'  id="documento-delete" data-remove-id="0" >Remover</span>
                             </div>
                         </td>
                     </tr>
@@ -161,5 +161,5 @@
 {% endblock %}
 
 {% block extrajs %}
-<script src="{% static 'documento/dashboard.js' %}?v=1.2"></script>
+<script src="{% static 'documento/dashboard.js' %}?v=1.3"></script>
 {% endblock %}
