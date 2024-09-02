@@ -29,7 +29,7 @@
     }
 </style>
 
-<link rel="stylesheet" href="{% static 'documento/dashboard.css' %}?v=1.2">
+<link rel="stylesheet" href="{% static 'documento/dashboard.css' %}?v=1.4">
 {% endblock %}
 
 {% block conteudo %}
@@ -90,11 +90,56 @@
         <div class="conteudo-documentos" style="display: none;">
             <table>
                 <thead>
-                    <th style="width: 55%;"></th>
-                    <th style="width: 33%;"></th>
-                    <th style="width: 12%;"></th>
+                    <th style="width: 50%;"></th>
+                    <th style="width: 50%;"></th>
                 </thead>
-                <tbody id="table-documentos-medias"></tbody>
+                <tbody id="table-documentos-medias">
+                    <tr>
+                        <td id="progress-media-titulo"></td>
+                        <td>
+                            <div class="main-progress-bar">
+                                <div>
+                                    <ul>
+                                        <li>
+                                            <div class="step first active" data-toggle="tooltip" data-placement="top" title="Na fila de processamento">
+                                                <p>1</p>
+                                                <i class="awesome fa-solid fa-check"></i>
+                                                <i class="fa-regular fa-hourglass-half fa-fade"></i>
+                                            </div>
+                                        </li>
+                                        <li>
+                                            <div class="step second" data-toggle="tooltip" data-placement="top" title="Processando o arquivo">
+                                                <p>2</p>
+                                                <i class="awesome fa-solid fa-check"></i>
+                                                <i class="fa-solid fa-gear fa-spin"></i>
+                                                <i class="fa-solid fa-close"></i>
+                                            </div>
+                                        </li>
+                                        <li>
+                                            <div class="step third"  data-toggle="tooltip" data-placement="top" title=" {% if api == 'chat' %} Enviando arquivo para IA {% else %} Fazendo a transcrição {% endif %}">
+                                                <p>3</p>
+                                                <i class="awesome fa-solid fa-check"></i>
+                                                <i class="fa-solid fa-gear fa-spin"></i>
+                                                <i class="fa-solid fa-close"></i>
+                                            </div>
+                                        </li>
+                                        <li>
+                                            <div class="step fourth" data-toggle="tooltip" data-placement="top" title="Concluído">
+                                                <p>4</p>
+                                                <i class="awesome fa-solid fa-check"></i>
+                                                <i class="fa-solid fa-close"></i>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                    <small id="progress-bar-status-text" style="text-align: center;"></small>
+                                </div>
+
+                                <a id="documento-link" style="display: none;" href="/documento/">Acessar</a>
+                                <span class='btn-remove-chat'  id="documento-delete" data-remove-id="0" >Remover</span>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
             </table>
         </div>
 
@@ -108,6 +153,7 @@
         </div>
     </div> 
     <br>
+
 </div>
 <input type="hidden"  id="user-id" value="{{request.user.id}}">
 <input type="hidden" id="dominio" value="{{api}}">
@@ -115,5 +161,5 @@
 {% endblock %}
 
 {% block extrajs %}
-<script src="{% static 'documento/dashboard.js' %}?v=1.1"></script>
+<script src="{% static 'documento/dashboard.js' %}?v=1.3"></script>
 {% endblock %}

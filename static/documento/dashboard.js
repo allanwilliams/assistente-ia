@@ -9,8 +9,12 @@ const tableDocumentosMedias = $("#table-documentos-medias")
 const loader = $("#preloader")
 const dominio = $('#dominio').val()
 const redirect = $('#redirect').val()
+const documentoLink = $('#documento-link')
+const documentoDelete = $('#documento-delete')
 
 $(document).ready(() => {
+
+    $('[data-toggle="tooltip"]').tooltip()
 
     $.ajaxSetup({
         headers: {"X-CSRFToken": csrf_token },
@@ -115,7 +119,7 @@ function getDocumentsChats() {
                 }
 
                 if (ultimo) {
-                    fillListChats([ultimo])
+                    fillListChats(ultimo)
                 } else {
                     $(".conteudo-documentos").fadeOut()
                 }
@@ -250,63 +254,70 @@ function newTranscription(target) {
     }
 }
 
-function fillListChats(chats) {
-    let list = ''
+function fillListChats(chat) {
 
-    // const getIcon = (status) => {
-    //     const icons = {
-    //         1: { icon: '<i class="fa-solid fa-hourglass-half fa-fade" style="color:orange"></i>', color: 'orange'},
-    //         2: { icon:'<i class="fa-solid fa-circle-notch fa-spin" style="color:orange"></i>', color: 'orange'},
-    //         3: { icon:'<i class="fa-solid fa-circle-notch fa-spin" style="color:orange"></i>', color: 'orange'},
-    //         4: { icon:'<i class="fa-regular fa-circle-check" style="color: #5cb85c"></i>', color: '#5cb85c'},
-    //         5: { icon:'<i class="fa-solid fa-ban"></i>', color: 'orange'},
-    //         6: { icon:'<i class="fa-solid fa-triangle-exclamation" style="color: #ff0000;"></i>', color: '#ff0000'},
-    //         7: { icon:'<i class="fa-solid fa-triangle-exclamation" style="color: #ff0000;"></i>', color: '#ff0000'},
-    //     }
-
-    //     return icons[status] || icons[1]
-    // }
+    const firstStep = $(".main-progress-bar .first");
+    const secondStep = $(".main-progress-bar .second");
+    const thirdStep = $(".main-progress-bar .third");
+    const fourthStep = $(".main-progress-bar .fourth");
+    const progressbarStatusText = $("#progress-bar-status-text");
+    const progressMediaTitulo = $("#progress-media-titulo");
 
     const getProgress = (status) => {
+        
         const progress = {
-            1: { percent: 15, classColor: 'progress-bar-striped progress-bar-animated bg-info', color: '#00c0ef'},
-            2: { percent: 50, classColor: 'progress-bar-striped progress-bar-animated bg-info', color: '#00c0ef'},
-            3: { percent: 75, classColor: 'progress-bar-striped progress-bar-animated bg-info', color: '#00c0ef'},
-            4: { percent: 100, classColor: 'bg-success', color: '#5cb85c'},
-            5: { percent: 100, classColor: 'bg-danger', color: '#ff0000'},
-            6: { percent: 100, classColor: 'bg-danger', color: '#ff0000' },
-            7: { percent: 100, classColor: 'bg-danger', color: '#ff0000' },
+            1: { step: 1, classColor: '', color: '#00c0ef'},
+            2: { step: 2, classColor: '', color: '#00c0ef'},
+            3: { step: 3, classColor: '', color: '#00c0ef'},
+            4: { step: 4, classColor: 'bg-success', color: '#5cb85c'},
+            5: { step: 5, classColor: 'bg-danger', color: '#ff0000'},
+            6: { step: 5, classColor: 'bg-danger', color: '#ff0000', stepEl: secondStep, beforeStep: firstStep},
+            7: { step: 5, classColor: 'bg-danger', color: '#ff0000', stepEl: thirdStep, beforeStep: secondStep},
         }
 
         return progress[status] || progress[1]
     }
-    chats.forEach((c) => {
-        const progress = getProgress(c.status)
-        list += `
-            <tr>
-                <td>${c.titulo}</td>
-                <td> 
-                    <div class="progress">
-                        <div class="progress-bar ${progress.classColor}" role="progressbar" style="width: ${progress.percent}%;" aria-valuenow="${progress.percent}" aria-valuemin="0" aria-valuemax="100">${progress.percent}%</div>
-                    </div>
-                    <small style="color:${progress.color}">${c.status_str}</small>
-                </td>
-                <td class="td-actions">
-                    ${c.status === 4 ? 
-                        `<a href="/documento/${redirect}=${c.id}">
-                            <i style="color:#00c0ef" class='fa fa-eye'></i>
-                        </a>` : ''}
-                    
-                    ${[1, 6, 7].includes(c.status)  ? 
-                        `<i data-remove-id='${c.id}' style="color:red" class='fa fa-trash btn-remove-chat'></i>    
-                        ` : ``}
-                </td>
-            </tr>
-        `
-    })
-    $(".conteudo-documentos").fadeIn()
 
-    tableDocumentosMedias.html(list)
+    if(chat) {
+        const progress = getProgress(chat.status);
+
+        ([1, 6, 7].includes(chat.status)) ? documentoDelete.css('display','block') : documentoDelete.css('display','none');
+
+        if (progress.step > 0 && progress.step < 5) {
+            firstStep.addClass('active').addClass('running')
+        }
+        
+        if (progress.step > 1) {
+            secondStep.addClass('active').addClass('running')
+            firstStep.removeClass('running')
+        }
+        
+        if (progress.step > 2){
+            thirdStep.addClass('active').addClass('running')
+            secondStep.removeClass('running')
+        }
+        
+        if (progress.step == 4) {
+            fourthStep.addClass('active')
+            thirdStep.removeClass('running')
+            documentoLink.css('display','block')
+            documentoLink.attr('href',`/documento/${redirect}=${chat.id}`)
+        }
+        documentoDelete.attr('data-remove-id',`${chat.id}`)
+
+        if (progress.step > 4){
+            if (progress.stepEl == secondStep) thirdStep.removeClass('running').removeClass('active')
+            if(progress.stepEl) progress.stepEl.removeClass('running').addClass('active').addClass('error')
+            if(progress.beforeStep) progress.beforeStep.removeClass('running')
+        }
+        
+        progressbarStatusText.text(chat.status_str)
+        progressbarStatusText.css('color', progress.color) 
+        progressMediaTitulo.text(chat.titulo)
+
+
+    }
+    $(".conteudo-documentos").fadeIn()
 }
 
 function deleteChat(chatId) {

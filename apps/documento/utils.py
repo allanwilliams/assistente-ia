@@ -5,7 +5,7 @@ import subprocess
 import json
 from datetime import timedelta, datetime
 # from openai import OpenAI
-from config.settings import ROOT_DIR, DEEPGRAM_API_KEY, OPEN_IA_API_KEY, CHAT_PDF_API_KEY
+from config.settings import ROOT_DIR, DEEPGRAM_API_KEY, OPEN_IA_API_KEY, CHAT_PDF_API_KEY, MEDIA_ROOT
 from apps.documento import models
 
 import os
@@ -33,10 +33,12 @@ from apps.documento.choices import (
 from hashlib import md5
 import shutil
 import ocrmypdf
+from constance import config
 
-ROOT_MEDIA = f'{ROOT_DIR}/media'
-ROOT_LEGENDA = f'{ROOT_DIR}/media/legenda_transcricao'
-ROOT_PDF = f'{ROOT_DIR}/media/documento_chat'
+# ROOT_MEDIA = f'{ROOT_DIR}/media'
+ROOT_MEDIA = MEDIA_ROOT
+ROOT_LEGENDA = f'{MEDIA_ROOT}/legenda_transcricao'
+ROOT_PDF = f'{MEDIA_ROOT}/documento_chat'
 
 
 def create_questions(*args, **kwargs):
@@ -109,11 +111,29 @@ def get_md5File(filepath,fileopen=False):
             md5_hexdigits.update(data)
     return f'{md5_hexdigits.hexdigest()}'
 
+def martinha_ocupada():
+    run_documents_martinha = models.Chat.objects.filter(status=STATUS_OCR_PROCESSANDO, ativo=True,is_martinha_processando=True).count()
+    run_documents_tanaka = models.Chat.objects.filter(status=STATUS_OCR_PROCESSANDO, ativo=True,is_martinha_processando=False).count()
+    return [
+        run_documents_martinha >= config.MARTINHA_NUM_MAX_EXECUTION,
+        run_documents_martinha,
+        run_documents_tanaka
+    ]
 
-
+def tanaka_ocupado():
+    run_transcricoes_tanaka = models.MediaTranscricao.objects.filter(status=STATUS_PROCESSANDO_ARQUIVO, ativo=True,is_tanaka_processando=True).count()
+    run_transcricoes_martinha = models.MediaTranscricao.objects.filter(status=STATUS_PROCESSANDO_ARQUIVO, ativo=True,is_tanaka_processando=False).count()
+    return [
+        run_transcricoes_tanaka >= config.TANAKA_NUM_MAX_EXECUTION,
+        run_transcricoes_tanaka,
+        run_transcricoes_martinha
+    ]
+    
 class TanakaUtils:
-    def __init__(self,media_transcricao_id):
+    def __init__(self,media_transcricao_id,is_tanaka):
         self.media_transcricao = models.MediaTranscricao.objects.get(pk=media_transcricao_id)
+        self.media_transcricao.is_tanaka_processando = is_tanaka
+        self.media_transcricao.save()
         self.filename_audio = str(self.media_transcricao.arquivo.name).split('/')[1].split('.')[-2]
         self.path_media_audio = f'{ROOT_MEDIA}/{self.filename_audio}.mp3'
         self.file_path = '{}/{}'.format(ROOT_MEDIA, self.media_transcricao.arquivo)
@@ -139,6 +159,7 @@ class TanakaUtils:
 
     def atualizar_status_transcricao(self, status):
         self.media_transcricao.status = status
+        self.media_transcricao.modificado_em = datetime.now()
         self.media_transcricao.save()
 
 
@@ -163,6 +184,14 @@ class TanakaUtils:
     def extrair_audio(self):
         # subprocess.run(['ffmpeg','-y','-i', self.file_path, '-f', 'wav', '-acodec', 'pcm_s16le', '-ar', '22050', '-ac', '1', 'copy', self.path_media_audio])
         subprocess.run(['ffmpeg','-y','-i', self.file_path, '-f', 'mp3', '-ar', '22050', '-ac', '1', 'copy', self.path_media_audio])
+        result = subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of",
+                                 "default=noprint_wrappers=1:nokey=1", self.path_media_audio],
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.STDOUT
+                            )
+        duration = round(float(result.stdout))
+        self.media_transcricao.duracao = duration
+        self.media_transcricao.save()
 
 
     def preparar_transcricao_deepgram(self):
@@ -236,6 +265,7 @@ class TanakaUtils:
             os.remove(self.path_media_audio)
 
         except Exception as e:
+            print(e)
             self.atualizar_status_transcricao(STATUS_FALHA_TRANSCRICAO)
 
 
@@ -305,12 +335,16 @@ class TanakaUtils:
 
 
 class MartinhaUtils:
-    def __init__(self, chat_id):
+    def __init__(self, chat_id,is_martinha):
         self.chat = models.Chat.objects.get(id=chat_id)
-        self.file_path = f'{ROOT_DIR}/media/{self.chat.documento}'
+        self.chat.is_martinha_processando = is_martinha
+        self.chat.save()
+        # self.file_path = f'{ROOT_DIR}/media/{self.chat.documento}'
+        self.file_path = f'{ROOT_MEDIA}/{self.chat.documento}'
 
     def atualizar_status(self, status):
         self.chat.status = status
+        self.chat.modificado_em = datetime.now()
         self.chat.save()
 
     def preparar_ocr_pdf(self):

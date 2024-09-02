@@ -7,11 +7,12 @@ from apps.documento.models import Mensagem, Chat, MediaTranscricao, Transcricao,
 
 @admin.register(Chat)
 class ChatAdmin(AuditoriaAdmin):
+    list_filter = ('criado_por','status','ativo','criado_em','modificado_em')
     search_fields = (
         'titulo',
     )
 
-    list_display = ('titulo',  'ativo', 'documento', 'status')
+    list_display = ('titulo',  'ativo', 'documento', 'status','criado_por','criado_em','modificado_em')
 
 
 @admin.register(Mensagem)
@@ -24,13 +25,26 @@ class MensagemAdmin(AuditoriaAdmin):
 
 @admin.register(MediaTranscricao)
 class MediaTranscricaoAdmin(AuditoriaAdmin):
+    list_filter = ('criado_por','status','ativo','criado_em','modificado_em')
     search_fields = (
         'titulo',
     )
 
-    list_display = ('titulo',  'ativo', 'status', 'arquivo','legenda')
+    list_display = ('titulo',  'ativo', 'status', 'arquivo','get_duracao','get_criador','criado_em','modificado_em')
 
+    def get_duracao(self, obj):
+        hours = obj.duracao // 3600
+        minutes = (obj.duracao % 3600) // 60
+        seconds = obj.duracao % 60
+        return f"{hours}h {minutes}m {seconds}s"
 
+    get_duracao.short_description = 'Duração'
+
+    def get_criador(self, obj):
+        return obj.criado_por.name
+
+    get_criador.short_description = 'Criador'
+    
 @admin.register(Transcricao)
 class TranscricaoAdmin(AuditoriaAdmin):
     search_fields = (
