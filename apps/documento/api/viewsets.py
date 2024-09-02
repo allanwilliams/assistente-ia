@@ -48,9 +48,9 @@ from django.utils.html import format_html
 from rest_framework.pagination import PageNumberPagination
 from config.settings import CHAT_PDF_API_KEY
 class ResultsSetPagination(PageNumberPagination):
-    page_size = 100
+    page_size = 20
     page_size_query_param = 'page_size'
-    max_page_size = 100
+    max_page_size = 20
 
 
 class ChatFilter(filters.FilterSet):
@@ -219,7 +219,7 @@ class MediaTranscricaoViewSet(ModelViewSet):
     queryset = MediaTranscricao.objects.all().order_by('-id')
     serializer_class = MediaTranscricaoSerializer
     filterset_class = MediaTranscricaoFilter
-    # pagination_class = ResultsSetPagination
+    pagination_class = ResultsSetPagination
     http_method_names = ['get', 'patch', 'post', 'delete','put']
 
     def create(self, request, *args, **kwargs):
