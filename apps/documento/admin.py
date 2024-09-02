@@ -33,10 +33,12 @@ class MediaTranscricaoAdmin(AuditoriaAdmin):
     list_display = ('titulo',  'ativo', 'status', 'arquivo','get_duracao','get_criador','criado_em','modificado_em')
 
     def get_duracao(self, obj):
-        hours = obj.duracao // 3600
-        minutes = (obj.duracao % 3600) // 60
-        seconds = obj.duracao % 60
-        return f"{hours}h {minutes}m {seconds}s"
+        if obj.duracao:
+            hours = obj.duracao // 3600
+            minutes = (obj.duracao % 3600) // 60
+            seconds = obj.duracao % 60
+            return f"{hours}h {minutes}m {seconds}s"
+        return '-'
 
     get_duracao.short_description = 'Duração'
 
