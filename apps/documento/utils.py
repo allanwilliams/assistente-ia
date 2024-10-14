@@ -155,6 +155,7 @@ class TanakaUtils:
             compute_type = 'int8'
 
             processed_file = audio.prepare_audio(f'{self.media_transcricao.id}',self.media_transcricao.arquivo.path,ROOT_MEDIA)
+            print(processed_file)
             
             for step in transcribe.transcribe(processed_file, model, language, speaker_detection, num_speakers, device, compute_type):
                 response = f"data: {step['task']}\n\n"
