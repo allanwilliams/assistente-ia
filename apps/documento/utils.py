@@ -144,6 +144,7 @@ class TanakaUtils:
         self.file_path = '{}/{}'.format(ROOT_MEDIA, self.media_transcricao.arquivo)
 
     def preparar_transcricao_defensoria(self):
+        processed_file = audio.prepare_audio(f'{self.media_transcricao.id}',self.media_transcricao.arquivo.path,ROOT_MEDIA)
         try: 
             self.atualizar_status_transcricao(STATUS_FAZENDO_TRANSCRICAO)
 
@@ -154,7 +155,6 @@ class TanakaUtils:
             device = 'GPU' if torch.cuda.is_available() else "CPU"
             compute_type = 'int8'
 
-            processed_file = audio.prepare_audio(f'{self.media_transcricao.id}',self.media_transcricao.arquivo.path,ROOT_MEDIA)
             print(processed_file)
             
             for step in transcribe.transcribe(processed_file, model, language, speaker_detection, num_speakers, device, compute_type):
@@ -206,7 +206,8 @@ class TanakaUtils:
             os.remove(processed_file)
 
         except Exception as e:
-            os.remove(self.path_media_audio)
+            print(e)
+            os.remove(processed_file)
             self.atualizar_status_transcricao(STATUS_FALHA_TRANSCRICAO)
 
     def preparar_audio(self):

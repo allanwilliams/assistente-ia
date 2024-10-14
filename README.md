@@ -149,7 +149,13 @@ caso apresente algum erro na detecção do atrain comentar a linha de validaçã
     #DEFAULT_BROWSER = webbrowser.get().name
 ```
 
-também pode ser necessário incluir o chrome
+também pode ser necessário incluir o chrome (caso apresente erro ao realizar migrations ou execução dos commands)
 ```
 sudo apt-get install google-chrome-stable
+```
+
+também pode ser necessário incluir o path do cudnn ( se for apresentando um erro durante a transcrição usando o modelo do whisper)
+```
+export LD_LIBRARY_PATH=`python3 -c 'import os; import nvidia.cublas.lib; import nvidia.cudnn.lib; import torch; print(os.path.dirname(nvidia.cublas.lib.__file__) + ":" + os.path.dirname(nvidia.cudnn.lib.__file__) + ":" + os.path.dirname(torch.__file__) +"/lib")'`
+
 ```
