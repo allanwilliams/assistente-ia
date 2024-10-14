@@ -27,17 +27,21 @@ from apps.documento.choices import (
     STATUS_OCR_CONCLUIDO,
     STATUS_OCR_PROCESSANDO,
     STATUS_OCR_FALHA_PROCESSAMENTO,
-    STATUS_OCR_DISPENSADO
+    STATUS_OCR_DISPENSADO,
+    INTERPRETADOR_DEEPGRAM,
+    INTERPRETADOR_DEFENSORIA
 )
 
 from hashlib import md5
 import shutil
 import ocrmypdf
+from aTrain  import audio, handle_upload, transcribe, output_files
+import torch
 
 ROOT_MEDIA = f'{ROOT_DIR}/media'
 ROOT_LEGENDA = f'{ROOT_DIR}/media/legenda_transcricao'
 ROOT_PDF = f'{ROOT_DIR}/media/documento_chat'
-
+CORES_AVATAR = ['#179B14', '#BC1414', '#FA8C0B', '#000000', '#0DA78B', '#0D6FA7', '#510BAA', '#C20FC6', '#F2E03E', '#FF6384', '#4BC0C0', '#8D99AE']
 
 def create_questions(*args, **kwargs):
     from .models import Chat, Mensagem 
@@ -118,53 +122,87 @@ class TanakaUtils:
         self.path_media_audio = f'{ROOT_MEDIA}/{self.filename_audio}.mp3'
         self.file_path = '{}/{}'.format(ROOT_MEDIA, self.media_transcricao.arquivo)
 
-    def transcribe_atrain(self):
-        try:
-            print('aquii')
-            filename = self.path_media_audio
-            model = 'large-v1'
+    def preparar_transcricao_defensoria(self):
+        try: 
+            self.atualizar_status_transcricao(STATUS_FAZENDO_TRANSCRICAO)
+
+            model = 'large-v2'
             language = 'pt'
             speaker_detection = 'true'
-            num_speakers = '3'
-            device = 'GPU'
+            num_speakers = 'auto-detect'
+            device = 'GPU' if torch.cuda.is_available() else "CPU"
             compute_type = 'int8'
-            from aTrain  import audio, handle_upload, transcribe, output_files
-            output_file = str(self.media_transcricao.id) + ".wav"
-            output_path =  os.path.join(ROOT_MEDIA,output_file)
-            os.remove(output_path)
+
             processed_file = audio.prepare_audio(f'{self.media_transcricao.id}',self.media_transcricao.arquivo.path,ROOT_MEDIA)
-            audio_duration = audio.get_audio_duration(processed_file)
-            estimated_process_time = handle_upload.estimate_processing_time(audio_duration,model, device)
-            print(processed_file)
-            # file_directory = os.path.join(TRANSCRIPT_DIR,file_id)
-            # prepared_file = os.path.join(file_directory, file_id + ".wav")
+            
             for step in transcribe.transcribe(processed_file, model, language, speaker_detection, num_speakers, device, compute_type):
                 response = f"data: {step['task']}\n\n"
-                print(response)
-            output_files.create_output_files(step["result"], speaker_detection, ROOT_MEDIA, self.filename_audio)
-            os.remove(processed_file)
             
+            transcricao = step["result"]
+            if transcricao:
+                texto_total = ""
+                path_media_legenda = f'{ROOT_LEGENDA}/{self.filename_audio}.vtt'
+                with open(path_media_legenda, 'w') as vtt:
+                    vtt.write('WEBVTT\n')
+                    
+                    for t in transcricao['segments']:
+                        start = convert_to_time(t.get('start'), True)
+                        end = convert_to_time(t.get('end'), True)
+                        text = t.get('text')
+
+                        vtt.write(f'{start} --> {end}\r')
+                        vtt.write(f'{str(text).strip()}\r')
+
+                        texto_total += f'{start} - {end}</br>'
+                        texto_total += f'{text}</br>'
+
+                        speaker_id = int(t.get('speaker').split('_')[1])
+                        dict_transcricao = {
+                            'media_transcricao': self.media_transcricao,
+                            'texto': text,
+                            'tempo_inicial': convert_to_time(t.get('start'), False),
+                            'tempo_final': convert_to_time(t.get('end'), False),
+                            'tempo_inicial_segundos': int(t.get('start')),
+                            'speaker': f"Orador {speaker_id}",
+                            'cor_speaker': CORES_AVATAR[speaker_id]
+                        }
+                        
+                        transcricao_new = models.Transcricao(**dict_transcricao)
+                        transcricao_new.save()
+                    
+                    self.media_transcricao.legenda = f'legenda_transcricao/{self.filename_audio}.vtt'
+                    transcricao_obj = {
+                        "segments": transcricao['segments'],
+                    }
+                    self.media_transcricao.transcricao = json.dumps(transcricao_obj)
+                    self.media_transcricao.save()
+                        
+                vtt.close()
+                self.atualizar_status_transcricao(STATUS_CONCLUIDO)
+
+            os.remove(processed_file)
+
         except Exception as e:
-            print(e)
-            # delete_transcription(file_id)
-            # traceback_str = traceback.format_exc()
-            # error = str(e)
-            # html = render_template("modals/modal_error.html", error=error, traceback=traceback_str).replace('\n', '')
-            # response = f"event: stopstream\ndata: {html}\n\n"
-            # yield response
+            os.remove(self.path_media_audio)
+            self.atualizar_status_transcricao(STATUS_FALHA_TRANSCRICAO)
+
     def preparar_audio(self):
         try:
             self.atualizar_status_transcricao(STATUS_PROCESSANDO_ARQUIVO)
 
-            self.extrair_audio()
-
             self.converter_video()
 
-            if os.path.exists(self.path_media_audio):
-                # preparar_transcricao_openia(media_transcricao_id, audio_file)
-                self.preparar_transcricao_deepgram()
-            else:
-                self.atualizar_status_transcricao(STATUS_FALHA_PROCESSAMENTO)
+            if self.media_transcricao.interpretador == INTERPRETADOR_DEFENSORIA:
+                # aTrain
+                self.preparar_transcricao_defensoria()
+            
+            if self.media_transcricao.interpretador == INTERPRETADOR_DEEPGRAM:
+                self.extrair_audio()
+                if os.path.exists(self.path_media_audio):
+                    self.preparar_transcricao_deepgram()    
+                    # preparar_transcricao_openia(media_transcricao_id, audio_file)
+                else:
+                    self.atualizar_status_transcricao(STATUS_FALHA_PROCESSAMENTO)
         
         except Exception as e:
             self.atualizar_status_transcricao(STATUS_FALHA_PROCESSAMENTO)
@@ -181,12 +219,24 @@ class TanakaUtils:
             current_time = int(datetime.now().replace(microsecond=0).timestamp())
 
             filename_path = f'{self.filename_audio}_{current_time}'
-                
-            path_media_video = f'{ROOT_MEDIA}/arquivo_transcricao/{filename_path}.webm'
-            subprocess.run(['ffmpeg','-y','-i', self.file_path, '-c:v', 'libvpx', '-s', '640x360', path_media_video])
+
+            #determina device de conversão    
+            device = "GPU" if torch.cuda.is_available() else "CPU"
+            
+            #determina extensão de saida do arquivo comprimido
+            ext_output_file = 'mp4' if device == 'GPU' else 'webm'
+
+            path_media_video = f'{ROOT_MEDIA}/arquivo_transcricao/{filename_path}.{ext_output_file}'
+
+            if device == 'CPU':
+                subprocess.run(['ffmpeg','-y','-i', self.file_path, '-c:v', 'libvpx', '-s', '640x360', path_media_video])
+                self.media_transcricao.arquivo.name = f'arquivo_transcricao/{filename_path}.webm'
+            else:
+                subprocess.run(['ffmpeg','-y','-vsync','0','-hwaccel','cuda','-i', self.file_path, '-vf','scale=640:360', '-c:v', 'h264_nvenc', '-b:v','250k', path_media_video])
+                self.media_transcricao.arquivo.name = f'arquivo_transcricao/{filename_path}.webm'
+
             # subprocess.run(['ffmpeg','-y','-i', self.file_path, '-c:v', 'libvpx-vp9', '-crf', '51', '-b:v', '250K', '-c:a', 'libvorbis',  path_media_video])
             
-            self.media_transcricao.arquivo.name = f'arquivo_transcricao/{filename_path}.webm'
             self.media_transcricao.save()
             self.filename_audio = str(self.media_transcricao.arquivo.name).split('/')[1].split('.')[-2]
             
@@ -227,7 +277,6 @@ class TanakaUtils:
 
                 if paragrafos:
                     texto_total = ""
-                    cores_avatar = ['#179B14', '#BC1414', '#FA8C0B', '#000000', '#0DA78B', '#0D6FA7', '#510BAA', '#C20FC6', '#F2E03E', '#FF6384', '#4BC0C0', '#8D99AE']
                     with open(path_media_legenda, 'w') as vtt:
                         vtt.write('WEBVTT\n')
 
@@ -251,7 +300,7 @@ class TanakaUtils:
                                     'tempo_final': convert_to_time(s.end, False),
                                     'tempo_inicial_segundos': int(s.start),
                                     'speaker': f"Orador {p.speaker}",
-                                    'cor_speaker': cores_avatar[p.speaker]
+                                    'cor_speaker': CORES_AVATAR[p.speaker]
                                 }
                                 transcricao_new = models.Transcricao(**dict_transcricao)
                                 transcricao_new.save()

@@ -11,7 +11,8 @@ process = []
 def iniciar_transcricao(media_transcricao):
     django.db.close_old_connections()
     tanaka_utils = TanakaUtils(media_transcricao_id=media_transcricao.id)
-    tanaka_utils.transcribe_atrain()
+    # tanaka_utils.transcribe_atrain()
+    tanaka_utils.preparar_audio()
 
 
 
