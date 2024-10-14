@@ -252,10 +252,10 @@ class TanakaUtils:
 
             if device == 'CPU':
                 subprocess.run(['ffmpeg','-y','-i', self.file_path, '-c:v', 'libvpx', '-s', '640x360', path_media_video])
-                self.media_transcricao.arquivo.name = f'arquivo_transcricao/{filename_path}.webm'
             else:
                 subprocess.run(['ffmpeg','-y','-vsync','0','-hwaccel','cuda','-i', self.file_path, '-vf','scale=640:360', '-c:v', 'h264_nvenc', '-b:v','250k', path_media_video])
-                self.media_transcricao.arquivo.name = f'arquivo_transcricao/{filename_path}.webm'
+            
+            self.media_transcricao.arquivo.name = f'arquivo_transcricao/{filename_path}.{ext_output_file}'
 
             # subprocess.run(['ffmpeg','-y','-i', self.file_path, '-c:v', 'libvpx-vp9', '-crf', '51', '-b:v', '250K', '-c:a', 'libvorbis',  path_media_video])
             
