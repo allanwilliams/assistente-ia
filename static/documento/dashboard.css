@@ -224,3 +224,156 @@ body  {
 #table-documentos-medias .bg-info {
     background-color: #00c0ef !important;
 }
+
+
+#table-documentos-medias .main-progress-bar {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: start;
+    flex-direction: row;
+}
+
+#table-documentos-medias ul {
+    display: flex;
+    padding: 0;
+    margin: 0 0 5px 0;
+}
+
+#table-documentos-medias ul li {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;       
+}
+
+#table-documentos-medias ul li .icons {
+    font-size: 15px;
+    color: #1b761b;
+    margin: 0 31px;
+}
+
+#table-documentos-medias ul li .label {
+    font-family: sans-serif;
+    letter-spacing: 1px;
+    font-size: 14px;
+    font-weight: bold;
+    color: #1b761b;
+}
+
+#table-documentos-medias ul li .step {
+    height: 25px;
+    width: 25px;
+    border-radius: 50%;
+    background-color: #aeaeae;
+    margin: 0 15px;
+    display: grid;
+    place-items: center;
+    color: ghostwhite;
+    position: relative;
+    cursor: pointer;
+}
+
+#table-documentos-medias .step::after {
+    content: "";
+    position: absolute;
+    width: 30px;
+    height: 3px;
+    background-color: #aeaeae;
+    right: 25px;
+}
+
+#table-documentos-medias .first::after {
+    width: 0;
+    height: 0;
+}
+
+#table-documentos-medias ul li .step .awesome {
+    display: none;
+}
+
+#table-documentos-medias ul li .step p {
+    font-size: 14px;
+}
+
+#table-documentos-medias ul li .active {
+    background-color: #1b761b;
+}
+
+
+#table-documentos-medias li .active::after {
+    background-color: #1b761b;
+    
+}
+
+#table-documentos-medias ul li .active.error .fa-close{
+    display: block;
+}
+
+#table-documentos-medias ul li .active.running {
+    background-color: #00c0ef;
+}
+
+#table-documentos-medias ul li .active.running::after {
+    background-color: #00c0ef;
+}
+
+
+
+#table-documentos-medias ul li .fa-close, 
+#table-documentos-medias ul li .fa-gear, 
+#table-documentos-medias ul li .fa-hourglass-half {
+    display: none;
+}
+
+#table-documentos-medias ul li .active.error{
+    background-color: #b40c0c;
+}
+
+#table-documentos-medias ul li .active.error .fa-check,
+#table-documentos-medias ul li .active.running .fa-check{
+    display: none;
+}
+
+#table-documentos-medias ul li .active.running .fa-hourglass-half,
+#table-documentos-medias ul li .active.running .fa-gear {
+    display: block;
+}
+
+#table-documentos-medias ul li .active.error::after{
+    background-color: #b40c0c;
+}
+
+#table-documentos-medias ul li .active p {
+    display: none;
+}
+
+#table-documentos-medias ul li p {
+    margin: 0;
+    color: #fff;
+}
+
+#table-documentos-medias ul li .active .awesome {
+    display: flex;
+}
+
+#table-documentos-medias #documento-link {
+    display: none;
+    border: 2px solid #fff;
+    color: #fff;
+    border-radius: 5px;
+    padding: 3px 19px;
+    font-weight: bold;
+    margin-left: 11px;
+}
+
+#table-documentos-medias  .btn-remove-chat {
+    display: none;
+    border: 2px solid red;
+    color: red;
+    border-radius: 5px;
+    padding: 3px 19px;
+    font-weight: bold;
+    margin-left: 11px;
+}

@@ -97,3 +97,9 @@ function isValidSizes(maxFileSize, file) {
 
     return true
 }
+
+function setUrlParams(param, value) {
+    const urlParams = new URLSearchParams(location.search);
+    urlParams.set(param, value);
+    window.history.replaceState({}, '', `${location.pathname}?${urlParams}`);
+}

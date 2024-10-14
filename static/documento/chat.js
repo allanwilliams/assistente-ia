@@ -15,6 +15,7 @@ const questionBox = document.querySelector('#questionBox')
 const loader = $("#preloader")
 const chatHeaderActions = $("#chat-header-actions")
 let chatAtual = null
+let listChats = []
 
 body.addEventListener('click', function(event) {
     if(event.target.classList.contains('btn-page') && chatAtual) {
@@ -101,27 +102,21 @@ $(document).ready(() => {
     });
     
     if(userId.val()) {
-        getUserChats(userId.val(), 'chat')
-        .then((data) => data.json())
-        .then((data) => fillListChats(data.results))
-        .then(() => {
-            const url = window.location.search
-            const urlParams = new URLSearchParams(url);
-            const documento = urlParams.get('documento')
-            getChat(documento)
-        })
+        getChats(null)
     }
 })
 
 
-function fillListChats(chats) {
+
+function fillListChats(next) {
     let list = ''
-    const STATUS_OCR_CONCLUIDO = 4
-    const STATUS_OCR_DISPENSADO = 8
-    chats = chats.filter(c => [STATUS_OCR_CONCLUIDO, STATUS_OCR_DISPENSADO].includes(c.status))
-    chats.forEach((c) => {
+    listChats.forEach((c) => {
        list += `<div class="choice-link-chat btn" data-id="${c.id}">${c.titulo}</div>`
     })
+
+    if(next) {
+        list += `<div class="action-more" ><buttom onclick="getChats('${next}')" class="btn btn-more">Ver mais</buttom></div>`
+    }
 
     listChatsEl.html(list)
 }
@@ -147,18 +142,34 @@ function fillChat(data) {
     if(!visualizado) {
         updateVisualizado(id)
     }
+
+    setUrlParams('documento', id)
 }
 
 function loadDocumento(titulo, url, id) {
-    const newUrl = url.includes('http://martinha') || url.includes('http://tanaka') ? url.replace('http://','https://') : url
-    pdfContainer.html(`
-        <div class="pdf-header">
-            <h3>${titulo}</h3> 
-        </div>
-        <embed src='${newUrl}' width="100%" height="100%">
-    `)
+    if (url){
+        const newUrl = url.includes('http://martinha') || url.includes('http://tanaka') ? url.replace('http://','https://') : url
+        pdfContainer.html(`
+            <div class="pdf-header">
+                <h3>${titulo}</h3> 
+            </div>
+            <embed src='${newUrl}' width="100%" height="100%">
+        `)
+    }else {
+        pdfContainer.html(`
+            <div class="pdf-header">
+                <h3>${titulo}</h3> 
+            </div>
+            <div class="media-not-found"> 
+                <span class="fa-stack fa-2x" style="position: relative; height: 4em;width: 4em;">
+                    <i class="fas fa-file-pdf fa-stack-1x"></i>
+                    <i class="fas fa-slash fa-stack-1x" style="position: absolute; top: 0; left: -0.2em; width: 100%; height: 100%;"></i>
+                </span>
+                <p> Arquivo PDF removido </p>
+            </div>
+        `)
+    }
 }
-
 
 function insertConversation(mensagens) {
     listMessagesEl.empty()
@@ -174,7 +185,7 @@ function insertConversation(mensagens) {
                         <li><i class="btn-send-fake fa-solid fa-paper-plane" data-id="msg-default-3"></i> <span id="msg-default-3">Resuma detalhadamente a sentença  indicando os principais argumentos e a decisão final</span></li>
                         <li><i class="btn-send-fake fa-solid fa-paper-plane" data-id="msg-default-4"></i> <span id="msg-default-4">Resuma detalhadamente o recurso indicando os principais argumentos e pedidos</span></li>
                         <li><i class="btn-send-fake fa-solid fa-paper-plane" data-id="msg-default-5"></i> <span id="msg-default-5">Resuma detalhadamente o acórdão indicando os principais argumentos e a decisão final</span></li>
-                        <li><i class="btn-send-fake fa-solid fa-paper-plane" data-id="msg-default-6"></i> <span id="msg-default-6">Resuma detalhadamente o todos processo indicando as principais informações da petição inicial - contestação - sentença - recurso - acórdão -  indicando a página de cada de forma que seja possível acessar facilmente</span></li>
+                        <li><i class="btn-send-fake fa-solid fa-paper-plane" data-id="msg-default-6"></i> <span id="msg-default-6">Resuma detalhadamente todo o processo indicando as principais informações da petição inicial - contestação - sentença - recurso - acórdão -  indicando a página de cada de forma que seja possível acessar facilmente</span></li>
                     </ul>
                 </div>
             </div>
@@ -282,6 +293,39 @@ function getChat(chatId) {
         
     }
 }
+
+function getChats(nextUrl) {
+    const url = (nextUrl) ? nextUrl : `/documento/api/chat/?criado_por=${userId.val()}&ativo=true&status__in=4,8`;
+
+    $.ajax({
+        type: 'GET',
+        url: url,
+        success: (data) => { 
+            const { results, next } = data
+            listChats = (nextUrl) ? listChats.concat(results) : results;
+
+            fillListChats(next)
+
+            const url = window.location.search
+            const urlParams = new URLSearchParams(url);
+            let documento = urlParams.get('documento')
+
+            const hasDocInList = listChats.some((e) => e.id == documento)
+            
+            if(!hasDocInList) documento = null
+
+            getChat(documento)
+        },
+        error: () => {
+            Swal.fire({
+                icon: "error",
+                title: 'Falha em obter os documentos',
+                confirmButtonColor:'#00c0ef'
+            });
+        }
+    })
+}
+
 
 function deleteChat(chatId) {
     if(chatId) {
