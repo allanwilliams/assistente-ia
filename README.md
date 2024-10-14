@@ -141,3 +141,15 @@ class Exemplo(BaseModel):
 ```
 
 obs: Os campos criptografados deverão ser do tipo ChatField e ter um max_length que permita gravar a hash gerada
+
+## Integração com aTrain
+
+caso apresente algum erro na detecção do atrain comentar a linha de validação do browser no core do flash
+```
+    #DEFAULT_BROWSER = webbrowser.get().name
+```
+
+também pode ser necessário incluir o chrome
+```
+sudo apt-get install google-chrome-stable
+```

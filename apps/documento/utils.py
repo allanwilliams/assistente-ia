@@ -158,6 +158,7 @@ class TanakaUtils:
             
             for step in transcribe.transcribe(processed_file, model, language, speaker_detection, num_speakers, device, compute_type):
                 response = f"data: {step['task']}\n\n"
+                print(response)
             
             transcricao = step["result"]
             if transcricao:
