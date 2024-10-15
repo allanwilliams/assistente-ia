@@ -144,7 +144,7 @@ obs: Os campos criptografados deverão ser do tipo ChatField e ter um max_length
 
 ## Integração com aTrain
 
-caso apresente algum erro na detecção do atrain comentar a linha de validação do browser no core do flash
+caso apresente algum erro na detecção do atrain comentar a linha de validação do browser no core do flask
 ```
     #DEFAULT_BROWSER = webbrowser.get().name
 ```

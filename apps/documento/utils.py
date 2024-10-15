@@ -179,7 +179,7 @@ class TanakaUtils:
                         texto_total += f'{start} - {end}</br>'
                         texto_total += f'{text}</br>'
 
-                        speaker_id = int(t.get('speaker').split('_')[1])
+                        speaker_id = int(t.get('speaker').split('_')[1]) if t.get('speaker') else 0
                         dict_transcricao = {
                             'media_transcricao': self.media_transcricao,
                             'texto': text,
