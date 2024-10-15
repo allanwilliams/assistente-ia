@@ -148,7 +148,7 @@ class TanakaUtils:
         duration = audio.get_audio_duration(processed_file)
         self.media_transcricao.duracao = duration
         self.media_transcricao.save()
-        
+
         try: 
             self.atualizar_status_transcricao(STATUS_FAZENDO_TRANSCRICAO)
 
@@ -157,7 +157,7 @@ class TanakaUtils:
             speaker_detection = 'true'
             num_speakers = 'auto-detect'
             device = 'GPU' if torch.cuda.is_available() else "CPU"
-            compute_type = 'int8'
+            compute_type = 'float16'
 
             print(processed_file)
             

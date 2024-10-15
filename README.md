@@ -144,18 +144,52 @@ obs: Os campos criptografados deverão ser do tipo ChatField e ter um max_length
 
 ## Integração com aTrain
 
-caso apresente algum erro na detecção do atrain comentar a linha de validação do browser no core do flask
+# instalação aTrain
 ```
-    #DEFAULT_BROWSER = webbrowser.get().name
-```
-
-também pode ser necessário incluir o chrome (caso apresente erro ao realizar migrations ou execução dos commands)
-```
-sudo apt-get install google-chrome-stable
+    pip install aTrain@git+https://github.com/JuergenFleiss/aTrain.git --extra-index-url https://download.pytorch.org/whl/cu118
 ```
 
-também pode ser necessário incluir o path do cudnn ( se for apresentando um erro durante a transcrição usando o modelo do whisper)
-```
-export LD_LIBRARY_PATH=`python3 -c 'import os; import nvidia.cublas.lib; import nvidia.cudnn.lib; import torch; print(os.path.dirname(nvidia.cublas.lib.__file__) + ":" + os.path.dirname(nvidia.cudnn.lib.__file__) + ":" + os.path.dirname(torch.__file__) +"/lib")'`
+# Instalacao do do CUDNN
+    ```
+    wget https://developer.download.nvidia.com/compute/cudnn/9.5.0/local_installers/cudnn-local-repo-ubuntu2204-9.5.0_1.0-1_amd64.deb
+    sudo dpkg -i cudnn-local-repo-ubuntu2204-9.5.0_1.0-1_amd64.deb
+    sudo cp /var/cudnn-local-repo-ubuntu2204-9.5.0/cudnn-*-keyring.gpg /usr/share/keyrings/
+    sudo apt-get -y install cudnn
+    sudo apt-get -y install cudnn-cuda-12
+    sudo apt install libcudnn8
+    sudo apt install libcudnn9
+    sudo apt install libcudnn9-cuda-12
+    sudo apt install libcudnn9-cuda-11
+    pip install nvidia-cudnn
 
-```
+    ```
+    também pode ser necessário incluir o path do cudnn ( se for apresentando um erro durante a transcrição usando o modelo do whisper)
+    ```
+    export LD_LIBRARY_PATH=`python3 -c 'import os; import nvidia.cublas.lib; import nvidia.cudnn.lib; import torch; print(os.path.dirname(nvidia.cublas.lib.__file__) + ":" + os.path.dirname(nvidia.cudnn.lib.__file__) + ":" + os.path.dirname(torch.__file__) +"/lib")'`
+
+    ```
+
+# fix para rodar atrain em ambiente sem gui
+    caso apresente algum erro na detecção do atrain comentar a linha de validação do browser no core do flask (venv/lib/python3.10/site-packages/flaskwebgui.py)
+    ```
+        #DEFAULT_BROWSER = webbrowser.get().name
+    ```
+
+    também pode ser necessário incluir o chrome (caso apresente erro ao realizar migrations ou execução dos commands)
+    ```
+    sudo apt-get install google-chrome-stable
+    ```
+
+# configurações para impedir crash da placa
+    habilitar persistent mode
+    ```
+    sudo nvidia-smi -pm 1
+    ```
+    configurar clock placa grafica
+    ```
+    sudo nvidia-smi -lgc 1200,1200
+    ```
+    Impedir modo de suspensão. Crie ou edite o arquivo /etc/modprobe.d/nvidia.conf e adicione a seguinte linha
+    ```
+    options nvidia NVreg_RegistryDwords="PowerMizerEnable=0x1; PerfLevelSrc=0x2222"
+    ```
