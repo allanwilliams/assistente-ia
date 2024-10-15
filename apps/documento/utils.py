@@ -145,6 +145,10 @@ class TanakaUtils:
 
     def preparar_transcricao_defensoria(self):
         processed_file = audio.prepare_audio(f'{self.media_transcricao.id}',self.media_transcricao.arquivo.path,ROOT_MEDIA)
+        duration = audio.get_audio_duration(processed_file)
+        self.media_transcricao.duracao = duration
+        self.media_transcricao.save()
+        
         try: 
             self.atualizar_status_transcricao(STATUS_FAZENDO_TRANSCRICAO)
 
