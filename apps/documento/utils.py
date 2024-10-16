@@ -149,39 +149,39 @@ class TanakaUtils:
         self.media_transcricao.duracao = duration
         self.media_transcricao.save()
 
-        # models_atrain = {
-        #     "large-v2" : {
-        #         "repo_id" : "arminhaberl/faster-whisper-large-v2",
-        #         "revision" : "f7cc452200bff83d699477d7a947fa0ee1c4b09c"
-        #     },
-        #     "large-v3" : {
-        #         "repo_id" : "Systran/faster-whisper-large-v3",
-        #         "revision" : "edaa852ec7e145841d8ffdb056a99866b5f0a478"
-        #     },
-        #     "diarize" : {
-        #         "repo_id" : "arminhaberl/diarize",
-        #         "revision" : "70180675a7e49a2d26bd3eaff33b969250cad8dc"
-        #     }
-        # }
+        models_atrain = {
+            "large-v2" : {
+                "repo_id" : "arminhaberl/faster-whisper-large-v2",
+                "revision" : "f7cc452200bff83d699477d7a947fa0ee1c4b09c"
+            },
+            "large-v3" : {
+                "repo_id" : "Systran/faster-whisper-large-v3",
+                "revision" : "edaa852ec7e145841d8ffdb056a99866b5f0a478"
+            },
+            "diarize" : {
+                "repo_id" : "arminhaberl/diarize",
+                "revision" : "70180675a7e49a2d26bd3eaff33b969250cad8dc"
+            }
+        }
 
-        # def _load_model_config_file():
-        #     return models_atrain
+        def _load_model_config_file():
+            return models_atrain
         
-        # load_resources.load_model_config_file = _load_model_config_file
+        load_resources.load_model_config_file = _load_model_config_file
 
         try: 
             self.atualizar_status_transcricao(STATUS_FAZENDO_TRANSCRICAO)
 
-            model = 'large-v2'
+            model = 'large-v3'
             language = 'pt'
             speaker_detection = 'true'
             num_speakers = 'auto-detect'
             device = 'GPU' if torch.cuda.is_available() else "CPU"
             # melhor texto
-            # compute_type = 'int8' #8 bits (consome 2gb aprox)
+            compute_type = 'int8' #8 bits (consome 2gb aprox)
 
             # maior segregação de frases
-            compute_type = 'float16' #16 bit (consome 4gb aprox)
+            # compute_type = 'float16' #16 bit (consome 4gb aprox)
 
             print(processed_file)
             
