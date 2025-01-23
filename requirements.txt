@@ -10,7 +10,7 @@ asgiref==3.4.1
 asteroid-filterbanks==0.4.0
 astroid==2.8.0
 async-timeout==4.0.3
-aTrain @ git+https://github.com/JuergenFleiss/aTrain.git@cd45d51892c05e2b97cb9e7d02538c0e9dfaf039
+#aTrain @ git+https://github.com/JuergenFleiss/aTrain.git@cd45d51892c05e2b97cb9e7d02538c0e9dfaf039
 attrs==24.2.0
 audioread==3.0.1
 av==11.0.0
