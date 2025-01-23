@@ -35,9 +35,13 @@ from apps.documento.choices import (
 from hashlib import md5
 import shutil
 import ocrmypdf
-from aTrain  import audio, handle_upload, transcribe, output_files, load_resources
+# from aTrain  import audio, handle_upload, transcribe, output_files, load_resources
+
+from aTrain_core import load_resources
 import torch
 from constance import config
+
+from faster_whisper.audio import decode_audio
 
 # ROOT_MEDIA = f'{ROOT_DIR}/media'
 ROOT_MEDIA = MEDIA_ROOT
@@ -144,8 +148,11 @@ class TanakaUtils:
         self.file_path = '{}/{}'.format(ROOT_MEDIA, self.media_transcricao.arquivo)
 
     def preparar_transcricao_defensoria(self):
-        processed_file = audio.prepare_audio(f'{self.media_transcricao.id}',self.media_transcricao.arquivo.path,ROOT_MEDIA)
-        duration = audio.get_audio_duration(processed_file)
+        # processed_file = audio.prepare_audio(f'{self.media_transcricao.id}',self.media_transcricao.arquivo.path,ROOT_MEDIA)
+        processed_file = decode_audio(audio_file, sampling_rate=16000)
+        # duration = audio.get_audio_duration(processed_file)
+        duration = int(len(processed_file) / SAMPLING_RATE)
+        
         self.media_transcricao.duracao = duration
         self.media_transcricao.save()
 
@@ -172,16 +179,16 @@ class TanakaUtils:
         try: 
             self.atualizar_status_transcricao(STATUS_FAZENDO_TRANSCRICAO)
 
-            model = 'large-v3'
+            model = 'large-v2'
             language = 'pt'
             speaker_detection = 'true'
             num_speakers = 'auto-detect'
             device = 'GPU' if torch.cuda.is_available() else "CPU"
             # melhor texto
-            # compute_type = 'int8' #8 bits (consome 2gb aprox)
+            compute_type = 'int8' #8 bits (consome 2gb aprox)
 
             # maior segregação de frases
-            compute_type = 'float16' #16 bit (consome 4gb aprox)
+            # compute_type = 'float16' #16 bit (consome 4gb aprox)
 
             print(processed_file)
             
