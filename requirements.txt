@@ -212,7 +212,7 @@ tomlkit==0.11.4
 #torch==2.0.0+cu118
 torch-audiomentations==0.11.1
 torch_pitch_shift==1.2.5
-torchaudio==2.0.1+cu118
+#torchaudio==2.0.1+cu118
 torchmetrics==1.4.3
 tqdm==4.66.2
 transformers==4.35.2
