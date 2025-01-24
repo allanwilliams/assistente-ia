@@ -181,10 +181,6 @@ class TanakaUtils:
                 "repo_id" : "Systran/faster-whisper-large-v3",
                 "revision" : "edaa852ec7e145841d8ffdb056a99866b5f0a478"
             },
-            "diarize" : {
-                "repo_id" : "arminhaberl/diarize",
-                "revision" : "70180675a7e49a2d26bd3eaff33b969250cad8dc"
-            },
             "large-v3-turbo": {
                 "repo_id": "aTrain-core/faster-whisper-large-v3-turbo",
                 "revision": "df99141c9f5db0615d025664cff8949373a69593",
