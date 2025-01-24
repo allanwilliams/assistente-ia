@@ -211,6 +211,7 @@ class TanakaUtils:
         return transcript
 
     def perform_whisper_transcription_override(
+        self,
         model_path,
         device,
         compute_type,
