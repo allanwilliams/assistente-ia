@@ -218,7 +218,7 @@ class TanakaUtils:
         language,
         file_id,
         model,
-        GUI: EventSender,
+        GUI,
         initial_prompt=None,
     ):
         import torch
