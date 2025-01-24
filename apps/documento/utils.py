@@ -188,6 +188,7 @@ class TanakaUtils:
             "large-v3-turbo": {
                 "repo_id": "aTrain-core/faster-whisper-large-v3-turbo",
                 "revision": "df99141c9f5db0615d025664cff8949373a69593",
+                "model_hash": "aba90805f182ff57d1f686595500d299"
             },
         }
 
@@ -195,7 +196,7 @@ class TanakaUtils:
             return models_atrain
         
         load_resources.load_model_config_file = _load_model_config_file
-
+        print('[MODELS]:',load_resources.load_model_config_file())
         try: 
             print('vou iniciar a transcricao usando aTrain')
             self.atualizar_status_transcricao(STATUS_FAZENDO_TRANSCRICAO)
