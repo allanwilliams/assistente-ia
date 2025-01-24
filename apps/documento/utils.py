@@ -37,7 +37,7 @@ import shutil
 import ocrmypdf
 # from aTrain  import audio, handle_upload, transcribe, output_files, load_resources
 
-from aTrain_core import transcribe
+# from aTrain_core import load_resources, transcribe
 import torch
 from constance import config
 
@@ -148,6 +148,7 @@ class TanakaUtils:
         self.file_path = '{}/{}'.format(ROOT_MEDIA, self.media_transcricao.arquivo)
 
     def preparar_transcricao_defensoria(self):
+        from aTrain_core import load_resources, transcribe
         # processed_file = audio.prepare_audio(f'{self.media_transcricao.id}',self.media_transcricao.arquivo.path,ROOT_MEDIA)
         processed_file = decode_audio(audio_file, sampling_rate=16000)
         # duration = audio.get_audio_duration(processed_file)
@@ -174,7 +175,7 @@ class TanakaUtils:
         def _load_model_config_file():
             return models_atrain
         
-        # load_model_config_file = _load_model_config_file
+        load_resources.load_model_config_file = _load_model_config_file
 
         try: 
             self.atualizar_status_transcricao(STATUS_FAZENDO_TRANSCRICAO)
