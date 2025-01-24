@@ -244,8 +244,7 @@ class TanakaUtils:
             max_new_tokens=max_new_tokens,
             no_speech_threshold=0.6,
             condition_on_previous_text=condition_on_previous_text,
-            initial_prompt=initial_prompt,
-            batch
+            initial_prompt=initial_prompt
         )
 
         transcription_segments = transcription_with_progress_bar(
