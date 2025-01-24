@@ -184,7 +184,7 @@ class TanakaUtils:
 
         model_path = load_resources.get_model(model, required_models_dir=required_models_dir)
         
-        transcript = transcribe._perform_whisper_transcription(
+        transcript = self.perform_whisper_transcription_override(
             model_path,
             device,
             compute_type,
@@ -208,6 +208,58 @@ class TanakaUtils:
                 transcript,
             )
             return transcript_with_speaker
+        return transcript
+
+    def perform_whisper_transcription_override(
+        model_path,
+        device,
+        compute_type,
+        audio_array,
+        language,
+        file_id,
+        model,
+        GUI: EventSender,
+        initial_prompt=None,
+    ):
+        import torch
+        from faster_whisper import WhisperModel, BatchedInferencePipeline
+
+        model = WhisperModel(model_path, device, compute_type=compute_type)
+        transcription_model = BatchedInferencePipeline(model=model)
+        models_config_path = str(files("aTrain_core.models").joinpath("models.json"))
+        f = open(models_config_path, "r")
+        models = json.load(f)
+
+        model_type = models[model]["type"]
+        max_new_tokens = None if model_type == "distil" else 128
+        condition_on_previous_text = False if model_type == "distil" else True
+
+
+        transcription_segments, info = transcription_model.transcribe(
+            audio=audio_array,
+            vad_filter=True,
+            beam_size=5,
+            word_timestamps=True,
+            language=language,
+            max_new_tokens=max_new_tokens,
+            no_speech_threshold=0.6,
+            condition_on_previous_text=condition_on_previous_text,
+            initial_prompt=initial_prompt,
+            batch
+        )
+
+        transcription_segments = transcription_with_progress_bar(
+            transcription_segments, info, GUI
+        )
+
+        transcript = {
+            "segments": [named_tuple_to_dict(segment) for segment in transcription_segments]
+        }  # wenn man die beiden umdreht also progress bar zuerst damit er schön läuft, dann ist das segments dict leer, sprich es gibt keine transkription
+        write_logfile("Transcription successful", file_id)
+
+        del transcription_model
+        gc.collect()
+        torch.cuda.empty_cache()
         return transcript
 
     def preparar_transcricao_defensoria(self):
