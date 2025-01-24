@@ -50,6 +50,16 @@ ROOT_PDF = f'{MEDIA_ROOT}/documento_chat'
 CORES_AVATAR = ['#179B14', '#BC1414', '#FA8C0B', '#000000', '#0DA78B', '#0D6FA7', '#510BAA', '#C20FC6', '#F2E03E', '#FF6384', '#4BC0C0', '#8D99AE']
 
 
+def prepare_audio (file_id,file_path,file_directory):
+    ffmpeg_path = 'ffmpeg'
+    output_file = file_id + ".wav"
+    output_path =  os.path.join(file_directory,output_file)
+    stream = ffmpeg.input(file_path)
+    stream = ffmpeg.output(stream, output_path)
+    
+    ffmpeg.run(stream,quiet=True, cmd=ffmpeg_path)
+    return output_path
+
 def create_questions(*args, **kwargs):
     from .models import Chat, Mensagem 
     chat = kwargs['chat']
@@ -149,10 +159,12 @@ class TanakaUtils:
 
     def preparar_transcricao_defensoria(self):
         from aTrain_core import load_resources, transcribe
-        # processed_file = audio.prepare_audio(f'{self.media_transcricao.id}',self.media_transcricao.arquivo.path,ROOT_MEDIA)
-        processed_file = decode_audio(audio_file, sampling_rate=16000)
+        processed_file = prepare_audio(f'{self.media_transcricao.id}',self.media_transcricao.arquivo.path,ROOT_MEDIA)
+        # processed_file = decode_audio(audio_file, sampling_rate=16000)
         # duration = audio.get_audio_duration(processed_file)
-        duration = int(len(processed_file) / SAMPLING_RATE)
+        # duration = int(len(processed_file) / SAMPLING_RATE)
+        print('processed_file:',prepare_audio)
+        duration = 0
         
         self.media_transcricao.duracao = duration
         self.media_transcricao.save()
@@ -178,6 +190,7 @@ class TanakaUtils:
         load_resources.load_model_config_file = _load_model_config_file
 
         try: 
+            print('vou iniciar a transcricao usando aTrain')
             self.atualizar_status_transcricao(STATUS_FAZENDO_TRANSCRICAO)
 
             model = 'large-v2'
