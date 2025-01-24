@@ -189,7 +189,7 @@ class TanakaUtils:
             "diarize": {
                 "repo_id": "aTrain-core/diarize",
                 "revision": "af59b6c3c3261a53bbfb1d78d36a10fcd8de3084",
-                "model_hash": "d921676e09b0258493a6be6c6c196516"
+                "model_hash": "c766bd0c6e2bd8523da2a61b2eff0b9f"
             },
         }
 
