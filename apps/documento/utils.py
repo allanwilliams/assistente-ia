@@ -184,13 +184,17 @@ class TanakaUtils:
             "diarize" : {
                 "repo_id" : "arminhaberl/diarize",
                 "revision" : "70180675a7e49a2d26bd3eaff33b969250cad8dc"
-            }
+            },
+            "large-v3-turbo": {
+                "repo_id": "aTrain-core/faster-whisper-large-v3-turbo",
+                "revision": "df99141c9f5db0615d025664cff8949373a69593",
+            },
         }
 
         def _load_model_config_file():
             return models_atrain
         
-        # load_resources.load_model_config_file = _load_model_config_file
+        load_resources.load_model_config_file = _load_model_config_file
 
         try: 
             print('vou iniciar a transcricao usando aTrain')
@@ -258,7 +262,7 @@ class TanakaUtils:
             # os.remove(processed_file)
 
         except Exception as e:
-            print(e)
+            print("[EXECPTION:]"e)
             # os.remove(processed_file)
             self.atualizar_status_transcricao(STATUS_FALHA_TRANSCRICAO)
 
