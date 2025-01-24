@@ -208,8 +208,8 @@ class TanakaUtils:
             # compute_type = 'float16' #16 bit (consome 4gb aprox)
 
             print(processed_file)
-            
-            for step in transcribe.transcribe(processed_file, model, language, speaker_detection, num_speakers, device, compute_type):
+            timestamp = datetime.now().strftime("%Y-%m-%d %H-%M-%S")
+            for step in transcribe.transcribe(processed_file, 1, model, language, speaker_detection, num_speakers, device, compute_type, timestamp,self.media_transcricao.arquivo.path):
                 response = f"data: {step['task']}\n\n"
                 print(response)
             
