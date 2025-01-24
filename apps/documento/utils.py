@@ -255,11 +255,11 @@ class TanakaUtils:
                 vtt.close()
                 self.atualizar_status_transcricao(STATUS_CONCLUIDO)
 
-            os.remove(processed_file)
+            # os.remove(processed_file)
 
         except Exception as e:
             print(e)
-            os.remove(processed_file)
+            # os.remove(processed_file)
             self.atualizar_status_transcricao(STATUS_FALHA_TRANSCRICAO)
 
     def preparar_audio(self):
