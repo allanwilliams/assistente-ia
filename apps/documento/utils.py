@@ -163,12 +163,12 @@ class TanakaUtils:
         from aTrain_core import load_resources, transcribe
         print('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
         # processed_file = prepare_audio(f'{self.media_transcricao.id}',self.media_transcricao.arquivo.path,ROOT_MEDIA)
-        SAMPLING_RATE = 16000
-        processed_file = decode_audio(self.media_transcricao.arquivo.path, sampling_rate=SAMPLING_RATE)
-        print(processed_file)
+        # SAMPLING_RATE = 16000
+        # processed_file = decode_audio(self.media_transcricao.arquivo.path, sampling_rate=SAMPLING_RATE)
+        # print(processed_file)
         # duration = audio.get_audio_duration(processed_file)
-        duration = int(len(processed_file) / SAMPLING_RATE)
-        
+        # duration = int(len(processed_file) / SAMPLING_RATE)
+        duration = 0
         self.media_transcricao.duracao = duration
         self.media_transcricao.save()
 
@@ -207,9 +207,9 @@ class TanakaUtils:
             # maior segregação de frases
             # compute_type = 'float16' #16 bit (consome 4gb aprox)
 
-            print(processed_file)
+            # print(processed_file)
             timestamp = datetime.now().strftime("%Y-%m-%d %H-%M-%S")
-            for step in transcribe.transcribe(audio_file=processed_file, file_id='1', model=model, language=language, speaker_detection=speaker_detection, num_speakers=num_speakers, device=device, compute_type=compute_type, timestamp=timestamp,original_audio_filename=self.media_transcricao.arquivo.path):
+            for step in transcribe.transcribe(audio_file=self.media_transcricao.arquivo.path, file_id='1', model=model, language=language, speaker_detection=speaker_detection, num_speakers=num_speakers, device=device, compute_type=compute_type, timestamp=timestamp,original_audio_filename=self.media_transcricao.arquivo.path):
                 response = f"data: {step['task']}\n\n"
                 print(response)
             
