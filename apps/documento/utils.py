@@ -215,11 +215,12 @@ class TanakaUtils:
 
             # print(processed_file)
             timestamp = datetime.now().strftime("%Y-%m-%d %H-%M-%S")
-            for step in transcribe.transcribe(audio_file=self.media_transcricao.arquivo.path, file_id='1', model=model, language=language, speaker_detection=speaker_detection, num_speakers=num_speakers, device=device, compute_type=compute_type, timestamp=timestamp,original_audio_filename=self.media_transcricao.arquivo.path):
-                response = f"data: {step['task']}\n\n"
-                print(response)
+            transcricao = transcribe.transcribe(audio_file=self.media_transcricao.arquivo.path, file_id='1', model=model, language=language, speaker_detection=speaker_detection, num_speakers=num_speakers, device=device, compute_type=compute_type, timestamp=timestamp,original_audio_filename=self.media_transcricao.arquivo.path):
+            # for step in transcribe.transcribe(audio_file=self.media_transcricao.arquivo.path, file_id='1', model=model, language=language, speaker_detection=speaker_detection, num_speakers=num_speakers, device=device, compute_type=compute_type, timestamp=timestamp,original_audio_filename=self.media_transcricao.arquivo.path):
+            #     response = f"data: {step['task']}\n\n"
+            #     print(response)
             
-            transcricao = step["result"]
+            # transcricao = step["result"]
             if transcricao:
                 texto_total = ""
                 path_media_legenda = f'{ROOT_LEGENDA}/{self.filename_audio}.vtt'
