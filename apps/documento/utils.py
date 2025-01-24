@@ -193,7 +193,7 @@ class TanakaUtils:
             file_id,
             model,
             GUI,
-            initial_prompt,
+            initial_prompt
         )
 
         if speaker_detection:
