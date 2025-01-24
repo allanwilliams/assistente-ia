@@ -262,7 +262,7 @@ class TanakaUtils:
             # os.remove(processed_file)
 
         except Exception as e:
-            print("[EXECPTION:]"e)
+            print("[EXECPTION:]",e)
             # os.remove(processed_file)
             self.atualizar_status_transcricao(STATUS_FALHA_TRANSCRICAO)
 
