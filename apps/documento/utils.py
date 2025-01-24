@@ -58,6 +58,7 @@ def prepare_audio (file_id,file_path,file_directory):
     stream = ffmpeg.output(stream, output_path)
     
     ffmpeg.run(stream,quiet=True, cmd=ffmpeg_path)
+    print(output_path)
     return output_path
 
 def create_questions(*args, **kwargs):
@@ -158,7 +159,9 @@ class TanakaUtils:
         self.file_path = '{}/{}'.format(ROOT_MEDIA, self.media_transcricao.arquivo)
 
     def preparar_transcricao_defensoria(self):
+        print('#########################################################')
         from aTrain_core import load_resources, transcribe
+        print('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
         processed_file = prepare_audio(f'{self.media_transcricao.id}',self.media_transcricao.arquivo.path,ROOT_MEDIA)
         # processed_file = decode_audio(audio_file, sampling_rate=16000)
         # duration = audio.get_audio_duration(processed_file)
