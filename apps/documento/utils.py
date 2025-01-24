@@ -190,13 +190,13 @@ class TanakaUtils:
         def _load_model_config_file():
             return models_atrain
         
-        load_resources.load_model_config_file = _load_model_config_file
+        # load_resources.load_model_config_file = _load_model_config_file
 
         try: 
             print('vou iniciar a transcricao usando aTrain')
             self.atualizar_status_transcricao(STATUS_FAZENDO_TRANSCRICAO)
 
-            model = 'large-v2'
+            model = 'large-v3-turbo'
             language = 'pt'
             speaker_detection = 'true'
             num_speakers = 'auto-detect'
