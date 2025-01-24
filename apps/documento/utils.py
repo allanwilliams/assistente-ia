@@ -209,7 +209,7 @@ class TanakaUtils:
 
             print(processed_file)
             timestamp = datetime.now().strftime("%Y-%m-%d %H-%M-%S")
-            for step in transcribe.transcribe(processed_file, 1, model, language, speaker_detection, num_speakers, device, compute_type, timestamp,self.media_transcricao.arquivo.path):
+            for step in transcribe.transcribe(audio_file=processed_file, file_id=1, model=model, language=language, speaker_detection=speaker_detection, num_speakers=num_speakers, device=device, compute_type=compute_type, timestamp=timestamp,original_audio_filename=self.media_transcricao.arquivo.path):
                 response = f"data: {step['task']}\n\n"
                 print(response)
             
