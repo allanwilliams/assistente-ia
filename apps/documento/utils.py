@@ -168,8 +168,8 @@ class TanakaUtils:
         # duration = int(len(processed_file) / SAMPLING_RATE)
         processed_file = None
         self.extrair_audio()
-            if os.path.exists(self.path_media_audio):
-                processed_file = self.path_media_audio
+        if os.path.exists(self.path_media_audio):
+            processed_file = self.path_media_audio
         # print('processed_file:',prepare_audio)
         duration = 0
         
