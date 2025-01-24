@@ -321,8 +321,8 @@ class TanakaUtils:
             
             self.media_transcricao.save()
             self.filename_audio = str(self.media_transcricao.arquivo.name).split('/')[1].split('.')[-2]
-            self.file_path = '{}/{}'.format(ROOT_MEDIA, self.media_transcricao.arquivo)
             os.remove(self.file_path)
+            self.file_path = '{}/{}'.format(ROOT_MEDIA, self.media_transcricao.arquivo)
 
 
     def extrair_audio(self):
