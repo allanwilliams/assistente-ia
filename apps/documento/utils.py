@@ -163,7 +163,9 @@ class TanakaUtils:
         from aTrain_core import load_resources, transcribe
         print('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
         # processed_file = prepare_audio(f'{self.media_transcricao.id}',self.media_transcricao.arquivo.path,ROOT_MEDIA)
-        processed_file = decode_audio(self.media_transcricao.arquivo.path, sampling_rate=16000)
+        SAMPLING_RATE = 16000
+        processed_file = decode_audio(self.media_transcricao.arquivo.path, sampling_rate=SAMPLING_RATE)
+        print(processed_file)
         # duration = audio.get_audio_duration(processed_file)
         duration = int(len(processed_file) / SAMPLING_RATE)
         
