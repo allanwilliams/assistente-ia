@@ -190,6 +190,11 @@ class TanakaUtils:
                 "revision": "df99141c9f5db0615d025664cff8949373a69593",
                 "model_hash": "aba90805f182ff57d1f686595500d299"
             },
+            "diarize": {
+                "repo_id": "aTrain-core/diarize",
+                "revision": "af59b6c3c3261a53bbfb1d78d36a10fcd8de3084",
+                "model_hash": "d921676e09b0258493a6be6c6c196516"
+            },
         }
 
         def _load_model_config_file():
