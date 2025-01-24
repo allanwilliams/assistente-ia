@@ -37,7 +37,7 @@ import shutil
 import ocrmypdf
 # from aTrain  import audio, handle_upload, transcribe, output_files, load_resources
 
-from aTrain_core.load_resources import load_model_config_file
+from aTrain_core import transcribe
 import torch
 from constance import config
 
@@ -174,7 +174,7 @@ class TanakaUtils:
         def _load_model_config_file():
             return models_atrain
         
-        load_model_config_file = _load_model_config_file
+        # load_model_config_file = _load_model_config_file
 
         try: 
             self.atualizar_status_transcricao(STATUS_FAZENDO_TRANSCRICAO)
