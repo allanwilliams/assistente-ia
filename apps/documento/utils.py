@@ -197,7 +197,7 @@ class TanakaUtils:
         )
 
         if speaker_detection:
-            transcript_with_speaker = _perform_pyannote_speaker_diarization(
+            transcript_with_speaker = transcribe._perform_pyannote_speaker_diarization(
                 audio_duration,
                 required_models_dir,
                 file_id,
