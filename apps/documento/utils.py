@@ -224,6 +224,7 @@ class TanakaUtils:
     ):
         import torch
         from faster_whisper import WhisperModel, BatchedInferencePipeline
+        from importlib.resources import files
 
         model = WhisperModel(model_path, device, compute_type=compute_type)
         transcription_model = BatchedInferencePipeline(model=model)
