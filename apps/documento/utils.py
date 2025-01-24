@@ -162,11 +162,15 @@ class TanakaUtils:
         print('#########################################################')
         from aTrain_core import load_resources, transcribe
         print('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
-        processed_file = prepare_audio(f'{self.media_transcricao.id}',self.media_transcricao.arquivo.path,ROOT_MEDIA)
+        # processed_file = prepare_audio(f'{self.media_transcricao.id}',self.media_transcricao.arquivo.path,ROOT_MEDIA)
         # processed_file = decode_audio(audio_file, sampling_rate=16000)
         # duration = audio.get_audio_duration(processed_file)
         # duration = int(len(processed_file) / SAMPLING_RATE)
-        print('processed_file:',prepare_audio)
+        processed_file = None
+        self.extrair_audio()
+            if os.path.exists(self.path_media_audio):
+                processed_file = self.path_media_audio
+        # print('processed_file:',prepare_audio)
         duration = 0
         
         self.media_transcricao.duracao = duration
