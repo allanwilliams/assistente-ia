@@ -170,6 +170,7 @@ class TanakaUtils:
         timestamp,
         original_audio_filename,
         initial_prompt=None):
+        from aTrain_core import load_resources, transcribe
         from aTrain_core.GUI_integration import EventSender
         from aTrain_core.globals import MODELS_DIR
         GUI = EventSender()
