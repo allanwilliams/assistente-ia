@@ -260,7 +260,7 @@ class TanakaUtils:
             num_speakers = 'auto-detect'
             device = 'GPU' if torch.cuda.is_available() else "CPU"
             # melhor texto
-            compute_type = 'FP16' #8 bits (consome 2gb aprox)
+            compute_type = 'float32' #8 bits (consome 2gb aprox)
 
             # maior segregação de frases
             # compute_type = 'float16' #16 bit (consome 4gb aprox)
