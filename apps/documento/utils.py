@@ -158,6 +158,57 @@ class TanakaUtils:
         self.path_media_audio = f'{ROOT_MEDIA}/{self.filename_audio}.mp3'
         self.file_path = '{}/{}'.format(ROOT_MEDIA, self.media_transcricao.arquivo)
 
+    def atrain_transcribe_override(self,
+        audio_file,
+        file_id,
+        model,
+        language,
+        speaker_detection,
+        num_speakers,
+        device,
+        compute_type,
+        timestamp,
+        original_audio_filename,
+        initial_prompt=None):
+        from aTrain_core.GUI_integration import EventSender
+        from aTrain_core.globals import MODELS_DIR
+        GUI = EventSender()
+        required_models_dir=MODELS_DIR
+        """Transcribes audio file with specified parameters."""
+        # import inside function for faster startup times in GUI app
+
+        audio_array, audio_duration, device, min_speakers, max_speakers, language = (
+            transcribe._prepare_metadata_creation(language, num_speakers, device, file_id, audio_file)
+        )
+
+        model_path = load_resources.get_model(model, required_models_dir=required_models_dir)
+        
+        transcript = transcribe._perform_whisper_transcription(
+            model_path,
+            device,
+            compute_type,
+            audio_array,
+            language,
+            file_id,
+            model,
+            GUI,
+            initial_prompt,
+        )
+
+        if speaker_detection:
+            transcript_with_speaker = _perform_pyannote_speaker_diarization(
+                audio_duration,
+                required_models_dir,
+                file_id,
+                GUI,
+                min_speakers,
+                max_speakers,
+                audio_array,
+                transcript,
+            )
+            return transcript_with_speaker
+        return transcript
+
     def preparar_transcricao_defensoria(self):
         print('#########################################################')
         from aTrain_core import load_resources, transcribe
@@ -215,7 +266,9 @@ class TanakaUtils:
 
             # print(processed_file)
             timestamp = datetime.now().strftime("%Y-%m-%d %H-%M-%S")
-            transcricao = transcribe.transcribe(audio_file=self.media_transcricao.arquivo.path, file_id='1', model=model, language=language, speaker_detection=speaker_detection, num_speakers=num_speakers, device=device, compute_type=compute_type, timestamp=timestamp,original_audio_filename=self.media_transcricao.arquivo.path)
+            # transcricao = transcribe.transcribe(audio_file=self.media_transcricao.arquivo.path, file_id='1', model=model, language=language, speaker_detection=speaker_detection, num_speakers=num_speakers, device=device, compute_type=compute_type, timestamp=timestamp,original_audio_filename=self.media_transcricao.arquivo.path)
+            transcricao = self.atrain_transcribe_override(audio_file=self.media_transcricao.arquivo.path, file_id='1', model=model, language=language, speaker_detection=speaker_detection, num_speakers=num_speakers, device=device, compute_type=compute_type, timestamp=timestamp,original_audio_filename=self.media_transcricao.arquivo.path)
+            print(transcricao)
             # for step in transcribe.transcribe(audio_file=self.media_transcricao.arquivo.path, file_id='1', model=model, language=language, speaker_detection=speaker_detection, num_speakers=num_speakers, device=device, compute_type=compute_type, timestamp=timestamp,original_audio_filename=self.media_transcricao.arquivo.path):
             #     response = f"data: {step['task']}\n\n"
             #     print(response)
