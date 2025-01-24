@@ -281,6 +281,7 @@ class TanakaUtils:
                     self.atualizar_status_transcricao(STATUS_FALHA_PROCESSAMENTO)
         
         except Exception as e:
+            print('!!!!!!!!!!!!!!!!!!!!!',e)
             self.atualizar_status_transcricao(STATUS_FALHA_PROCESSAMENTO)
 
 
